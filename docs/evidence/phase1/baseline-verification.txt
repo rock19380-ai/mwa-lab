@@ -1,0 +1,9 @@
+MWA Lab Phase 1 baseline verification
+date=2026-09-26
+branch=phase1-mwa-protocol-boundary
+parent=b4e7631a7e20bd4d032bb5478582684c998801ab
+phase0_tag=phase0-android-baseline-2026-09-26
+phase0_tag_target=b4e7631a7e20bd4d032bb5478582684c998801ab
+origin_main=b4e7631a7e20bd4d032bb5478582684c998801ab
+phase0_gate=PASS
+working_tree_before_mutation=clean

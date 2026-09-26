@@ -1,0 +1,8 @@
+MWA Lab Phase 1 official dependency/API pin
+date=2026-09-26
+coordinate=com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7
+authority_repo=https://github.com/solana-mobile/mobile-wallet-adapter
+spec=Mobile Wallet Adapter 2.x
+integration_model=Android wallet Activity + official walletlib local Scenario + Scenario callbacks
+phase1_signing=DEFERRED
+mainnet=UNSUPPORTED_BY_PROJECT_POLICY
