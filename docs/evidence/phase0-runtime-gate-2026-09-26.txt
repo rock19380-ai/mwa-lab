@@ -1,0 +1,18 @@
+MWA Lab Phase 0 Runtime Gate
+Date: 2026-09-26
+
+Source commit: 124f4dc43cc3efc14780f058f3e4ea9b24f6a7ed
+GitHub Actions run: 36221142655
+GitHub Actions conclusion: success
+
+AVD: MWA_Lab_API_36
+Android API: 36
+Android release: 16
+Emulator model: sdk_gphone64_x86_64
+
+Package: dev.mwalab
+APK SHA-256: da6cf1448f12e0a28982ea9184ac3459800437eef3e8b9e42e94de11c4c93253
+
+Install: PASS
+Launch: PASS
+Boot complete: PASS
