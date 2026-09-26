@@ -134,3 +134,28 @@ Evidence:
 - `docs/evidence/phase1/batch-c-api-inventory-summary.txt`
 
 <!-- END PHASE1_WALLETLIB_207_AAR_INVENTORY -->
+
+## Batch C association/session boundary
+
+Batch C uses the pinned `walletlib:2.0.7` API exactly:
+
+- incoming `solana-wallet://` intent
+- `AssociationUri.parse(Uri)`
+- local association only (`LocalAssociationUri`)
+- `AssociationUri.createScenario(...)`
+- `Scenario.start()`
+- `Scenario.close()`
+- `LocalScenario.Callbacks`
+
+The Android test client is pinned to `clientlib:2.0.7` and exists only in the
+`androidTest` configuration; clientlib is not a production/runtime dependency of
+MWA Lab.
+
+### Mandatory MWA 2.0 signing boundary
+
+MWA 2.0 defines `solana:signMessages` and `solana:signAndSendTransaction` as
+mandatory wallet features. Phase 1 does not perform signing or network submission.
+The corresponding callbacks are therefore present but fail closed with the library's
+protocol-defined decline result. This is a Lab protocol-boundary behavior, not a
+successful signing implementation, and Phase 1 must not be described as a production
+signing wallet.

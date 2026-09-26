@@ -1,0 +1,33 @@
+MWA Lab Phase 1 Batch C — MWA 2.0 mandatory feature boundary
+date=2026-09-26
+
+Pinned walletlib:
+com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7
+
+Pinned clientlib used for instrumentation only:
+com.solanamobile:mobile-wallet-adapter-clientlib:2.0.7
+
+MWA 2.0 mandatory features:
+- solana:signMessages
+- solana:signAndSendTransaction
+
+Phase 1 scope:
+- association/session transport is implemented
+- authorize success remains deferred to Phase 1.7
+- signing success remains deferred
+- mandatory signing callbacks exist and return protocol-defined policy denial
+- no message or transaction is signed
+- no transaction is submitted
+- this Phase 1 endpoint MUST NOT be represented as a production signing wallet
+
+Capability note:
+walletlib 2.0.7 owns get_capabilities internally.
+Optional feature list is empty.
+The deprecated supports_sign_and_send_transactions compatibility field is true in
+walletlib 2.0.7 because MWA 2.0 treats sign-and-send as mandatory.
+
+Security:
+- raw association URI is never recorded
+- association token/public key is never recorded
+- auth tokens are never recorded
+- payloads/signatures are never recorded

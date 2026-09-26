@@ -1,0 +1,20 @@
+MWA Lab Phase 1 Batch C runtime verification
+date=2026-09-26
+parent=de06f713c1f684d87cf7d62c460b6cf2d6a07d97
+walletlib=com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7
+clientlib_test_only=com.solanamobile:mobile-wallet-adapter-clientlib:2.0.7
+
+manifest_solana_wallet_discovery=PASS
+real_local_websocket_association=PASS
+encrypted_mwa_session_establishment=PASS
+scenario_ready_callback=PASS
+serving_clients_callback=PASS
+authorize_request_reached_mwa_session_host=PASS
+devnet_authorize_policy_decline_pending_phase1_7=PASS
+client_close=PASS
+serving_complete_callback=PASS
+raw_association_uri_recorded=NO
+auth_token_recorded=NO
+payload_or_signature_recorded=NO
+signing_performed=NO
+transaction_submission_performed=NO

@@ -33,6 +33,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 solana-mobile-walletlib = { group = "com.solanamobile", name = "mobile-wallet-adapter-walletlib", version.ref = "mwaWalletlib" }
+solana-mobile-clientlib = { module = "com.solanamobile:mobile-wallet-adapter-clientlib", version.ref = "mwaWalletlib" }
 
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 
