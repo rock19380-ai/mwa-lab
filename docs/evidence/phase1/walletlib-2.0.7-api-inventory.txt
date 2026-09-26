@@ -1,0 +1,181 @@
+===== com.solana.mobilewalletadapter.walletlib.association.AssociationUri =====
+class_access=public class
+super=java.lang.Object
+interfaces=<none>
+-- public/protected fields --
+FIELD public final uri Landroid/net/Uri;
+FIELD public final associationPublicKey [B
+FIELD public final associationProtocolVersions Ljava/util/List;
+-- public/protected methods --
+METHOD protected <init> (Landroid/net/Uri;)V
+METHOD public abstract createScenario (Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario$Callbacks;)Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario;
+METHOD public static parse (Landroid/net/Uri;)Lcom/solana/mobilewalletadapter/walletlib/association/AssociationUri;
+
+===== com.solana.mobilewalletadapter.walletlib.association.LocalAssociationUri =====
+class_access=public class
+super=com.solana.mobilewalletadapter.walletlib.association.AssociationUri
+interfaces=<none>
+-- public/protected fields --
+FIELD public final port I
+-- public/protected methods --
+METHOD public <init> (Landroid/net/Uri;)V
+METHOD public createScenario (Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario$Callbacks;)Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalWebSocketServerScenario;
+METHOD public createScenario (Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario$Callbacks;)Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario;
+
+===== com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig =====
+class_access=public class
+super=java.lang.Object
+interfaces=<none>
+-- public/protected fields --
+FIELD public static final DEFAULT_MAX_OUTSTANDING_TOKENS_PER_IDENTITY I
+FIELD public static final DEFAULT_AUTHORIZATION_VALIDITY_MS J
+FIELD public static final DEFAULT_REAUTHORIZATION_VALIDITY_MS J
+FIELD public static final DEFAULT_REAUTHORIZATION_NOP_DURATION_MS J
+FIELD public final name Ljava/lang/String;
+FIELD public final maxOutstandingTokensPerIdentity I
+FIELD public final authorizationValidityMs J
+FIELD public final reauthorizationValidityMs J
+FIELD public final reauthorizationNopDurationMs J
+-- public/protected methods --
+METHOD public <init> (Ljava/lang/String;)V
+METHOD public <init> (Ljava/lang/String;IJJJ)V
+
+===== com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig =====
+class_access=public class
+super=java.lang.Object
+interfaces=<none>
+-- public/protected fields --
+FIELD public static final LEGACY_TRANSACTION_VERSION Ljava/lang/String;
+FIELD public final supportsSignAndSendTransactions Z
+FIELD public final noConnectionWarningTimeoutMs J
+FIELD public final maxTransactionsPerSigningRequest I
+FIELD public final maxMessagesPerSigningRequest I
+FIELD public final supportedTransactionVersions [Ljava/lang/Object;
+FIELD public final optionalFeatures [Ljava/lang/String;
+-- public/protected methods --
+METHOD public <init> (ZII[Ljava/lang/Object;J)V
+METHOD public <init> (II[Ljava/lang/Object;J[Ljava/lang/String;)V
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.Scenario =====
+class_access=public interface
+super=java.lang.Object
+interfaces=<none>
+-- public/protected fields --
+-- public/protected methods --
+METHOD public abstract getAssociationPublicKey ()[B
+METHOD public abstract getAssociationProtocolVersions ()Ljava/util/List;
+METHOD public abstract createMessageReceiver ()Lcom/solana/mobilewalletadapter/common/protocol/MessageReceiver;
+METHOD public abstract start ()V
+METHOD public abstract close ()V
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks =====
+class_access=public interface
+super=java.lang.Object
+interfaces=<none>
+-- public/protected fields --
+-- public/protected methods --
+METHOD public abstract onScenarioReady ()V
+METHOD public abstract onScenarioServingClients ()V
+METHOD public abstract onScenarioServingComplete ()V
+METHOD public abstract onScenarioComplete ()V
+METHOD public abstract onScenarioError ()V
+METHOD public abstract onScenarioTeardownComplete ()V
+METHOD public abstract onAuthorizeRequest (Lcom/solana/mobilewalletadapter/walletlib/scenario/AuthorizeRequest;)V
+METHOD public abstract onReauthorizeRequest (Lcom/solana/mobilewalletadapter/walletlib/scenario/ReauthorizeRequest;)V
+METHOD public abstract onSignTransactionsRequest (Lcom/solana/mobilewalletadapter/walletlib/scenario/SignTransactionsRequest;)V
+METHOD public abstract onSignMessagesRequest (Lcom/solana/mobilewalletadapter/walletlib/scenario/SignMessagesRequest;)V
+METHOD public abstract onSignAndSendTransactionsRequest (Lcom/solana/mobilewalletadapter/walletlib/scenario/SignAndSendTransactionsRequest;)V
+METHOD public abstract onDeauthorizedEvent (Lcom/solana/mobilewalletadapter/walletlib/scenario/DeauthorizedEvent;)V
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario =====
+class_access=public class
+super=com.solana.mobilewalletadapter.walletlib.scenario.BaseScenario
+interfaces=<none>
+-- public/protected fields --
+-- public/protected methods --
+METHOD protected <init> (Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalScenario$Callbacks;[B)V
+METHOD public start ()V
+METHOD public createMessageReceiver ()Lcom/solana/mobilewalletadapter/common/protocol/MessageReceiver;
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario$Callbacks =====
+class_access=public interface
+super=java.lang.Object
+interfaces=com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks
+-- public/protected fields --
+-- public/protected methods --
+METHOD public abstract onLowPowerAndNoConnection ()V
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.LocalWebSocketServerScenario =====
+class_access=public class
+super=com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario
+interfaces=<none>
+-- public/protected fields --
+FIELD public final port I
+-- public/protected methods --
+METHOD public <init> (Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalScenario$Callbacks;[BI)V
+METHOD public <init> (Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalScenario$Callbacks;[BLjava/util/List;I)V
+METHOD public start ()V
+METHOD public close ()V
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest =====
+class_access=public class
+super=com.solana.mobilewalletadapter.walletlib.scenario.BaseScenarioRequest
+interfaces=<none>
+-- public/protected fields --
+FIELD protected final mIdentityName Ljava/lang/String;
+FIELD protected final mIdentityUri Landroid/net/Uri;
+FIELD protected final mIconUri Landroid/net/Uri;
+FIELD protected final mChain Ljava/lang/String;
+FIELD protected final mFeatures [Ljava/lang/String;
+FIELD protected final mAddresses [Ljava/lang/String;
+FIELD protected final mSignInPayload Lcom/solana/mobilewalletadapter/common/signin/SignInWithSolana$Payload;
+-- public/protected methods --
+METHOD public getIdentityName ()Ljava/lang/String;
+METHOD public getIdentityUri ()Landroid/net/Uri;
+METHOD public getIconRelativeUri ()Landroid/net/Uri;
+METHOD public getCluster ()Ljava/lang/String;
+METHOD public getChain ()Ljava/lang/String;
+METHOD public getFeatures ()[Ljava/lang/String;
+METHOD public getAddresses ()[Ljava/lang/String;
+METHOD public getSignInPayload ()Lcom/solana/mobilewalletadapter/common/signin/SignInWithSolana$Payload;
+METHOD public completeWithAuthorize ([BLjava/lang/String;Landroid/net/Uri;[B)V
+METHOD public completeWithAuthorize (Lcom/solana/mobilewalletadapter/walletlib/scenario/AuthorizedAccount;Landroid/net/Uri;[BLcom/solana/mobilewalletadapter/walletlib/scenario/SignInResult;)V
+METHOD public completeWithAuthorize ([Lcom/solana/mobilewalletadapter/walletlib/scenario/AuthorizedAccount;Landroid/net/Uri;[BLcom/solana/mobilewalletadapter/walletlib/scenario/SignInResult;)V
+METHOD public completeWithDecline ()V
+METHOD public completeWithClusterNotSupported ()V
+METHOD public completeWithInternalError (Ljava/lang/Exception;)V
+METHOD public cancel ()V
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount =====
+class_access=public class
+super=java.lang.Object
+interfaces=<none>
+-- public/protected fields --
+FIELD public final publicKey [B
+FIELD public final displayAddress Ljava/lang/String;
+FIELD public final displayAddressFormat Ljava/lang/String;
+FIELD public final accountLabel Ljava/lang/String;
+FIELD public final accountIcon Landroid/net/Uri;
+FIELD public final chains [Ljava/lang/String;
+FIELD public final features [Ljava/lang/String;
+FIELD public final icon Landroid/net/Uri;
+-- public/protected methods --
+METHOD public <init> ([BLjava/lang/String;Landroid/net/Uri;[Ljava/lang/String;[Ljava/lang/String;)V
+METHOD public <init> ([BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/net/Uri;[Ljava/lang/String;[Ljava/lang/String;)V
+METHOD public toString ()Ljava/lang/String;
+
+===== com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent =====
+class_access=public class
+super=com.solana.mobilewalletadapter.walletlib.scenario.BaseVerifiableIdentityRequest
+interfaces=<none>
+-- public/protected fields --
+-- public/protected methods --
+METHOD public complete ()V
+METHOD public getAuthorizationScope ()[B
+METHOD public getChain ()Ljava/lang/String;
+METHOD public getCluster ()Ljava/lang/String;
+METHOD public getIconRelativeUri ()Landroid/net/Uri;
+METHOD public getIdentityUri ()Landroid/net/Uri;
+METHOD public getIdentityName ()Ljava/lang/String;
+METHOD public completeWithInternalError (Ljava/lang/Exception;)V
+METHOD public cancel ()V

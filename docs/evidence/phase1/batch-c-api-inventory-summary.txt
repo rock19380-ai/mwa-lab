@@ -1,0 +1,21 @@
+MWA Lab Phase 1 pre-Batch-C API inventory summary
+date=2026-09-26
+batch_b_commit=ec4e7d8f9c2398542041c1f937c854223e2e1685
+
+walletlib_coordinate=com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7
+walletlib_aar_sha256=e5c639964c5740e187cacf31776f0e46b9a2433e26b50fc027ab8ffb481b177c
+official_release_ref=v2.0.7
+
+association_parse=AssociationUri.parse(Uri)
+association_scenario_factory=AssociationUri.createScenario(...)
+session_start=Scenario.start()
+session_close=Scenario.close()
+authorize_callback=Scenario.Callbacks.onAuthorizeRequest(AuthorizeRequest)
+deauthorize_callback=Scenario.Callbacks.onDeauthorizedEvent(DeauthorizedEvent)
+unsupported_authorize_chain_completion=AuthorizeRequest.completeWithClusterNotSupported()
+get_capabilities_callback=ABSENT
+get_capabilities_authority=MobileWalletAdapterConfig
+
+upstream_async_api_commit=e145e53503b2b4727800c5732c4b6464be9d716e
+upstream_async_api_date=2025-07-18
+upstream_async_api_not_in_pinned_artifact=true

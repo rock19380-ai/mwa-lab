@@ -84,3 +84,53 @@ from backup and device transfer.
 No wallet association callbacks, authorization result APIs, or capability result APIs
 are claimed implemented by Batch B. Those remain gated on direct inspection of the
 resolved walletlib 2.0.7 classes before Batch C/D.
+
+<!-- BEGIN PHASE1_WALLETLIB_207_AAR_INVENTORY -->
+
+## Published walletlib 2.0.7 API authority — corrected 2026-09-26
+
+Phase 1 is pinned to:
+
+`com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7`
+
+The exact resolved AAR SHA-256 is recorded in
+`docs/evidence/phase1/walletlib-2.0.7-aar.sha256`.
+
+The resolved AAR bytecode and the official `v2.0.7` source agree on the lifecycle:
+
+- `Scenario.start()` starts the pinned 2.0.7 scenario.
+- `Scenario.close()` closes it.
+- `Scenario.startAsync()` is **not present** in the pinned 2.0.7 artifact.
+- `AssociationUri.parse(Uri)` parses incoming association URIs.
+- `AssociationUri.createScenario(...)` creates the wallet-side scenario.
+- authorization arrives through
+  `Scenario.Callbacks.onAuthorizeRequest(AuthorizeRequest)`.
+- deauthorization arrives through
+  `Scenario.Callbacks.onDeauthorizedEvent(DeauthorizedEvent)`.
+- unsupported authorization chains can be completed with
+  `AuthorizeRequest.completeWithClusterNotSupported()`.
+- no separate wallet-side `get_capabilities` callback exists;
+  walletlib derives capability responses from `MobileWalletAdapterConfig`.
+
+### Upstream API drift
+
+Upstream commit
+`e145e53503b2b4727800c5732c4b6464be9d716e` (2025-07-18)
+deprecated `Scenario.start()` and introduced `Scenario.startAsync()`.
+
+That API is newer than the pinned `2.0.7` artifact and **must not be used by
+Phase 1 while the dependency remains pinned to 2.0.7**.
+
+This distinction is intentional: the pinned published artifact is the compile/runtime
+authority; current upstream `main` is reference material only when its API matches the
+pinned artifact.
+
+Evidence:
+
+- `docs/evidence/phase1/walletlib-2.0.7-api-authority.txt`
+- `docs/evidence/phase1/walletlib-2.0.7-class-list.txt`
+- `docs/evidence/phase1/walletlib-2.0.7-api-inventory.txt`
+- `docs/evidence/phase1/walletlib-2.0.7-api-members.tsv`
+- `docs/evidence/phase1/batch-c-api-inventory-summary.txt`
+
+<!-- END PHASE1_WALLETLIB_207_AAR_INVENTORY -->

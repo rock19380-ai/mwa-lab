@@ -1,0 +1,99 @@
+declaring_class	kind	access	name	descriptor
+com.solana.mobilewalletadapter.walletlib.association.AssociationUri	field	public final	uri	Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.association.AssociationUri	field	public final	associationPublicKey	[B
+com.solana.mobilewalletadapter.walletlib.association.AssociationUri	field	public final	associationProtocolVersions	Ljava/util/List;
+com.solana.mobilewalletadapter.walletlib.association.AssociationUri	method	protected	<init>	(Landroid/net/Uri;)V
+com.solana.mobilewalletadapter.walletlib.association.AssociationUri	method	public abstract	createScenario	(Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario$Callbacks;)Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario;
+com.solana.mobilewalletadapter.walletlib.association.AssociationUri	method	public static	parse	(Landroid/net/Uri;)Lcom/solana/mobilewalletadapter/walletlib/association/AssociationUri;
+com.solana.mobilewalletadapter.walletlib.association.LocalAssociationUri	field	public final	port	I
+com.solana.mobilewalletadapter.walletlib.association.LocalAssociationUri	method	public	<init>	(Landroid/net/Uri;)V
+com.solana.mobilewalletadapter.walletlib.association.LocalAssociationUri	method	public	createScenario	(Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario$Callbacks;)Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalWebSocketServerScenario;
+com.solana.mobilewalletadapter.walletlib.association.LocalAssociationUri	method	public	createScenario	(Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario$Callbacks;)Lcom/solana/mobilewalletadapter/walletlib/scenario/Scenario;
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public static final	DEFAULT_MAX_OUTSTANDING_TOKENS_PER_IDENTITY	I
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public static final	DEFAULT_AUTHORIZATION_VALIDITY_MS	J
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public static final	DEFAULT_REAUTHORIZATION_VALIDITY_MS	J
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public static final	DEFAULT_REAUTHORIZATION_NOP_DURATION_MS	J
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public final	name	Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public final	maxOutstandingTokensPerIdentity	I
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public final	authorizationValidityMs	J
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public final	reauthorizationValidityMs	J
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	field	public final	reauthorizationNopDurationMs	J
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	method	public	<init>	(Ljava/lang/String;)V
+com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig	method	public	<init>	(Ljava/lang/String;IJJJ)V
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	field	public static final	LEGACY_TRANSACTION_VERSION	Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	field	public final	supportsSignAndSendTransactions	Z
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	field	public final	noConnectionWarningTimeoutMs	J
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	field	public final	maxTransactionsPerSigningRequest	I
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	field	public final	maxMessagesPerSigningRequest	I
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	field	public final	supportedTransactionVersions	[Ljava/lang/Object;
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	field	public final	optionalFeatures	[Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	method	public	<init>	(ZII[Ljava/lang/Object;J)V
+com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig	method	public	<init>	(II[Ljava/lang/Object;J[Ljava/lang/String;)V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario	method	public abstract	getAssociationPublicKey	()[B
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario	method	public abstract	getAssociationProtocolVersions	()Ljava/util/List;
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario	method	public abstract	createMessageReceiver	()Lcom/solana/mobilewalletadapter/common/protocol/MessageReceiver;
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario	method	public abstract	start	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario	method	public abstract	close	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onScenarioReady	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onScenarioServingClients	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onScenarioServingComplete	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onScenarioComplete	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onScenarioError	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onScenarioTeardownComplete	()V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onAuthorizeRequest	(Lcom/solana/mobilewalletadapter/walletlib/scenario/AuthorizeRequest;)V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onReauthorizeRequest	(Lcom/solana/mobilewalletadapter/walletlib/scenario/ReauthorizeRequest;)V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onSignTransactionsRequest	(Lcom/solana/mobilewalletadapter/walletlib/scenario/SignTransactionsRequest;)V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onSignMessagesRequest	(Lcom/solana/mobilewalletadapter/walletlib/scenario/SignMessagesRequest;)V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onSignAndSendTransactionsRequest	(Lcom/solana/mobilewalletadapter/walletlib/scenario/SignAndSendTransactionsRequest;)V
+com.solana.mobilewalletadapter.walletlib.scenario.Scenario$Callbacks	method	public abstract	onDeauthorizedEvent	(Lcom/solana/mobilewalletadapter/walletlib/scenario/DeauthorizedEvent;)V
+com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario	method	protected	<init>	(Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalScenario$Callbacks;[B)V
+com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario	method	public	start	()V
+com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario	method	public	createMessageReceiver	()Lcom/solana/mobilewalletadapter/common/protocol/MessageReceiver;
+com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario$Callbacks	method	public abstract	onLowPowerAndNoConnection	()V
+com.solana.mobilewalletadapter.walletlib.scenario.LocalWebSocketServerScenario	field	public final	port	I
+com.solana.mobilewalletadapter.walletlib.scenario.LocalWebSocketServerScenario	method	public	<init>	(Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalScenario$Callbacks;[BI)V
+com.solana.mobilewalletadapter.walletlib.scenario.LocalWebSocketServerScenario	method	public	<init>	(Landroid/content/Context;Lcom/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterConfig;Lcom/solana/mobilewalletadapter/walletlib/authorization/AuthIssuerConfig;Lcom/solana/mobilewalletadapter/walletlib/scenario/LocalScenario$Callbacks;[BLjava/util/List;I)V
+com.solana.mobilewalletadapter.walletlib.scenario.LocalWebSocketServerScenario	method	public	start	()V
+com.solana.mobilewalletadapter.walletlib.scenario.LocalWebSocketServerScenario	method	public	close	()V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	field	protected final	mIdentityName	Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	field	protected final	mIdentityUri	Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	field	protected final	mIconUri	Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	field	protected final	mChain	Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	field	protected final	mFeatures	[Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	field	protected final	mAddresses	[Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	field	protected final	mSignInPayload	Lcom/solana/mobilewalletadapter/common/signin/SignInWithSolana$Payload;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getIdentityName	()Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getIdentityUri	()Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getIconRelativeUri	()Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getCluster	()Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getChain	()Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getFeatures	()[Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getAddresses	()[Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	getSignInPayload	()Lcom/solana/mobilewalletadapter/common/signin/SignInWithSolana$Payload;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	completeWithAuthorize	([BLjava/lang/String;Landroid/net/Uri;[B)V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	completeWithAuthorize	(Lcom/solana/mobilewalletadapter/walletlib/scenario/AuthorizedAccount;Landroid/net/Uri;[BLcom/solana/mobilewalletadapter/walletlib/scenario/SignInResult;)V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	completeWithAuthorize	([Lcom/solana/mobilewalletadapter/walletlib/scenario/AuthorizedAccount;Landroid/net/Uri;[BLcom/solana/mobilewalletadapter/walletlib/scenario/SignInResult;)V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	completeWithDecline	()V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	completeWithClusterNotSupported	()V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	completeWithInternalError	(Ljava/lang/Exception;)V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest	method	public	cancel	()V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	publicKey	[B
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	displayAddress	Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	displayAddressFormat	Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	accountLabel	Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	accountIcon	Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	chains	[Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	features	[Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	field	public final	icon	Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	method	public	<init>	([BLjava/lang/String;Landroid/net/Uri;[Ljava/lang/String;[Ljava/lang/String;)V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	method	public	<init>	([BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/net/Uri;[Ljava/lang/String;[Ljava/lang/String;)V
+com.solana.mobilewalletadapter.walletlib.scenario.AuthorizedAccount	method	public	toString	()Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	complete	()V
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	getAuthorizationScope	()[B
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	getChain	()Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	getCluster	()Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	getIconRelativeUri	()Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	getIdentityUri	()Landroid/net/Uri;
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	getIdentityName	()Ljava/lang/String;
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	completeWithInternalError	(Ljava/lang/Exception;)V
+com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent	method	public	cancel	()V

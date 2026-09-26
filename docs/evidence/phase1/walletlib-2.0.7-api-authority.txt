@@ -1,0 +1,32 @@
+MWA Lab Phase 1 pinned walletlib API authority
+date=2026-09-26
+
+coordinate=com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7
+resolved_aar_sha256=e5c639964c5740e187cacf31776f0e46b9a2433e26b50fc027ab8ffb481b177c
+official_release_ref=v2.0.7
+
+PINNED 2.0.7 LIFECYCLE:
+scenario_start=Scenario.start()
+scenario_start_async=ABSENT
+scenario_close=Scenario.close()
+
+ASSOCIATION:
+parse=AssociationUri.parse(Uri)
+scenario_factory=AssociationUri.createScenario(...)
+
+CALLBACKS:
+authorize=Scenario.Callbacks.onAuthorizeRequest(AuthorizeRequest)
+deauthorize=Scenario.Callbacks.onDeauthorizedEvent(DeauthorizedEvent)
+get_capabilities_callback=ABSENT
+
+CAPABILITY AUTHORITY:
+MobileWalletAdapterConfig.maxTransactionsPerSigningRequest
+MobileWalletAdapterConfig.maxMessagesPerSigningRequest
+MobileWalletAdapterConfig.supportedTransactionVersions
+MobileWalletAdapterConfig.optionalFeatures
+
+UPSTREAM API DRIFT:
+commit=e145e53503b2b4727800c5732c4b6464be9d716e
+date=2025-07-18
+change=deprecate Scenario.start and introduce Scenario.startAsync
+phase1_rule=DO NOT USE startAsync while dependency remains pinned to 2.0.7
