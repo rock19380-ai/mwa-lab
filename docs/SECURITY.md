@@ -1,72 +1,118 @@
 # Security and Diagnostic Invariants
 
-## S1 — Devnet-only execution boundary
+## S1 — Devnet-only authorization boundary
 
-Mainnet signing/submission must not be available.
+Phase 1 authorization accepts only `solana:devnet` when all other validation
+passes.
 
-Unsupported production chains must fail closed.
+Mainnet, testnet, unknown, malformed, and missing-chain requests fail closed.
 
-## S2 — No production secrets
+There is no UI/settings path that enables mainnet.
 
-Do not support mnemonic import, production private-key import, Seed Vault
-extraction, or production-wallet migration.
+## S2 — Protected Lab identity
 
-## S3 — Secrets never enter diagnostics
+MWA Lab uses one persistent Ed25519 **test identity**.
 
-Never persist or export:
+Private seed material is encrypted at rest using an Android Keystore-backed AES
+key. Identity preferences are excluded from backup/device transfer.
 
-- private keys;
-- seeds;
-- raw authorization tokens;
-- encryption keys;
-- sensitive wallet credential material.
+The UI exposes only the public Lab address.
 
-## S4 — Sanitized logging
+MWA Lab does not support:
 
-Prefer structured metadata such as:
+- mnemonic import;
+- production private-key import;
+- Seed Vault extraction;
+- production-wallet migration.
 
-- SHA-256 payload fingerprint;
-- payload length;
-- transaction/message version;
-- verified public metadata.
+## S3 — Authorization-token authority
 
-Raw transaction/message payloads are not exported by default.
+MWA Lab does not mint auth tokens.
+
+Pinned walletlib 2.0.7 owns:
+
+- authorization-record persistence;
+- HMAC-protected token issuance;
+- token validation;
+- token revocation.
+
+MWA Lab does not log, display, export, or persist raw auth-token content for
+diagnostics.
+
+## S4 — Sanitized evidence
+
+Phase 1 evidence prefers:
+
+- protocol method;
+- public chain identifier;
+- public account metadata;
+- request counts;
+- outcome/error enum;
+- timing/duration;
+- safe result summaries.
+
+Never diagnostic-export or log:
+
+- private key;
+- seed/mnemonic;
+- raw auth token;
+- Keystore/encryption secret;
+- association token/public key;
+- transaction/message payload;
+- signature bytes.
+
+`MwaSessionHost` passes structured protocol summaries through
+`DiagnosticSanitizer` before they enter `ProtocolEvidenceStore`.
 
 ## S5 — Explicit lab identity
 
-Signing and approval surfaces must clearly communicate:
+Primary wallet UI communicates:
 
-MWA LAB TEST ENDPOINT<br>
-SOLANA DEVNET<br>
+```text
+MWA LAB TEST ENDPOINT
+SOLANA DEVNET
 NO REAL FUNDS
+```
 
-## S6 — User-visible signing
+The separate client communicates:
 
-Normal mode must not silently sign.
+```text
+MWA Lab Demo Client
+FOR TESTING ONLY
+```
+
+## S6 — Phase 1 signing behavior
+
+Successful signing is not implemented in Phase 1.
+
+MWA 2.0 mandatory signing callbacks are present because the pinned protocol
+requires them, but Phase 1 returns protocol-defined decline results.
+
+No message/transaction is signed and no transaction is submitted.
 
 ## S7 — Fail closed
 
-Malformed input must produce a defined failure.
-
-Parse failure must never become approval.
+Malformed, missing-chain, unsupported-chain, unavailable-identity, unsupported
+optional-feature, and unsupported sign-in authorization conditions do not become
+successful authorization.
 
 ## S8 — Diagnostic truthfulness
 
 Unknown data remains unknown.
 
-Never invent program names, amounts, token symbols, instruction semantics,
-wallet capabilities, or causes of failure.
+Do not invent:
+
+- wallet compatibility;
+- program names;
+- amounts;
+- token symbols;
+- instruction semantics;
+- protocol causes;
+- signing success.
 
 ## S9 — Failure-source integrity
 
-Failures must be classified explicitly:
+Structured protocol evidence classifies failure source explicitly.
 
-- NONE
-- INJECTED
-- OBSERVED_PROTOCOL
-- SIMULATION
-- RPC_NETWORK
-- LOCAL_PARSER
-- UNKNOWN
-
-Synthetic and naturally observed failures must never be conflated.
+Synthetic/injected failure behavior belongs to later phases and must not be
+represented as naturally observed protocol failure.

@@ -1,0 +1,11 @@
+MWA Lab Phase 1 final clean-install evidence
+date=2026-09-26
+device=emulator-5554
+
+Failure [DELETE_FAILED_INTERNAL_ERROR]
+Failure [DELETE_FAILED_INTERNAL_ERROR]
+--- install primary wallet ---
+Performing Streamed Install
+Success
+--- verify primary package ---
+package:/data/app/~~0vUCUCeR6Ij4-AAD2e_YIg==/dev.mwalab-Him7ydiR6ElDRI-5-vUnwA==/base.apk

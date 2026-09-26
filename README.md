@@ -4,8 +4,8 @@
 
 Trace protocol sessions.<br>
 Reproduce wallet failure paths.<br>
-Inspect transactions.<br>
-Export safe diagnostic reports.
+Inspect protocol behavior.<br>
+Build toward safe diagnostic reports.
 
 > ⚠️ DEVNET-ONLY LAB TOOL — NEVER USE REAL FUNDS.
 
@@ -14,47 +14,91 @@ Export safe diagnostic reports.
 **Devnet** tells you which Solana network a transaction is being tested on.
 
 **Mobile Wallet Adapter (MWA)** defines how an Android dApp and wallet endpoint
-authorize, negotiate capabilities, sign, submit, fail, and return protocol results.
+discover each other, establish a session, authorize, negotiate capabilities,
+request signing behavior, fail, and return protocol results.
 
-MWA Lab is built to make failures at that protocol boundary visible,
-reproducible, and fixable.
+MWA Lab is built to make that protocol boundary visible and reproducible.
 
 MWA Lab is not a production wallet and is not a replacement for Phantom,
 Solflare, Seed Vault Wallet, or other production wallets.
 
-Use MWA Lab for deterministic MWA protocol QA, then validate the final dApp
-against real production wallets before release.
+## Phase 1 verified boundary
 
-## Status
+Phase 1 proves the wallet-side protocol boundary against pinned
+`mobile-wallet-adapter-walletlib:2.0.7`.
 
-CLOCK IN hackathon implementation in progress.
+Verified on Android emulator/device evidence:
 
-Current baseline:
+- real `solana-wallet://` discovery/association;
+- wallet-side session establishment and teardown;
+- persistent protected Devnet Lab identity;
+- first Devnet authorization;
+- mainnet and missing-chain authorization rejection;
+- walletlib-managed authorization state;
+- `get_capabilities`;
+- deauthorization;
+- rejected reuse of revoked authorization state;
+- typed sanitized protocol evidence;
+- deterministic cross-package demo client.
 
-- Kotlin
-- Jetpack Compose
-- Android
-- Devnet-only scope
-- single `:app` Gradle module
-- MWA integration not yet claimed complete
+The deterministic test client lives in `:demo-client` and is explicitly labeled:
 
-## Safety
+```text
+MWA Lab Demo Client
+FOR TESTING ONLY
+```
 
-MWA Lab must never:
+It repeats the canonical Phase 1 sequence:
 
-- enable mainnet signing;
-- import production wallet secrets;
-- expose private keys or seeds;
-- include raw authorization tokens in diagnostics;
-- present injected failures as organically observed wallet failures.
+```text
+CONNECT
+→ AUTHORIZE
+→ GET_CAPABILITIES
+→ DEAUTHORIZE
+→ CLOSE
+```
+
+## Deliberately not implemented in Phase 1
+
+Phase 1 does **not** perform successful message signing, transaction signing,
+transaction submission, Devnet RPC submission, production-wallet secret import,
+or mainnet behavior.
+
+Pinned MWA 2.0 defines some signing methods as mandatory protocol surface.
+MWA Lab implements those callbacks fail-closed in Phase 1; successful signing
+behavior belongs to Phase 2.
 
 ## Build
+
+Deterministic CI gates:
 
 ```bash
 ./gradlew lint
 ./gradlew test
 ./gradlew assembleDebug
+./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
+./scripts/phase1_static.sh
 ```
+
+Device-level association proof is intentionally separate from GitHub Actions and
+is recorded under `docs/evidence/phase1/`.
+
+## Modules
+
+```text
+:app          MWA Lab wallet-side protocol endpoint
+:demo-client  deterministic cross-package Phase 1 test client
+```
+
+## Safety
+
+MWA Lab must never:
+
+- enable mainnet signing/submission;
+- import production wallet secrets;
+- expose private keys or seeds;
+- include raw authorization tokens in diagnostics;
+- present synthetic failures as organically observed wallet failures.
 
 ## Project documentation
 

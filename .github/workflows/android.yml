@@ -2,7 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+      - phase1-mwa-protocol-boundary
   pull_request:
 
 permissions:
@@ -29,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle executable
-        run: chmod +x ./gradlew
+        run: chmod +x ./gradlew ./scripts/phase1_static.sh
 
       - name: Lint
         run: ./gradlew lint
@@ -37,8 +39,17 @@ jobs:
       - name: Unit tests
         run: ./gradlew test
 
-      - name: Assemble debug APK
+      - name: Assemble debug APKs
         run: ./gradlew assembleDebug
 
-      - name: Verify debug APK exists
+      - name: Assemble AndroidTest APKs
+        run: ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
+
+      - name: Verify primary debug APK exists
         run: test -f app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Verify demo-client debug APK exists
+        run: test -f demo-client/build/outputs/apk/debug/demo-client-debug.apk
+
+      - name: Phase 1 deterministic static gate
+        run: ./scripts/phase1_static.sh

@@ -190,3 +190,17 @@ to raw bytes before comparing them with the persistent Ed25519 public key.
 Base58 is display-only. The authorization policy uses BouncyCastle's standard
 Base64 codec so the same code path is testable on both Android and the plain JVM.
 
+
+## Phase 1.12 closeout
+
+Phase 1 freezes against `mobile-wallet-adapter-walletlib:2.0.7`.
+
+The final deterministic client is a separate Android application module and
+package. It uses pinned `clientlib:2.0.7` through the real Android association
+path and repeats connect → authorize → get_capabilities → deauthorize.
+
+Device acceptance additionally sends a missing-chain authorization request and
+verifies it fails closed.
+
+GitHub Actions remains deterministic/non-device. Device-level MWA proof is
+retained as separate evidence and is not inferred from CI.

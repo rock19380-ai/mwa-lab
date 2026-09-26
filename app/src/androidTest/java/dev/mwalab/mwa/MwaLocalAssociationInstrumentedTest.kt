@@ -102,6 +102,33 @@ class MwaLocalAssociationInstrumentedTest {
         assertNotNull("Mainnet authorization must fail closed", mainnetFailure)
         awaitEvent(MwaSessionEvent.AUTHORIZE_CHAIN_REJECTED)
 
+        val rejectionCountBeforeMissingChain =
+            MwaSessionEvidenceStore.snapshot().count {
+                it.event == MwaSessionEvent.AUTHORIZE_CHAIN_REJECTED
+            }
+
+        val missingChainFailure = runCatching {
+            client.authorize(
+                identityUri,
+                iconUri,
+                identityName,
+                null,
+                null,
+                null,
+                null,
+                null,
+            ).get(10, TimeUnit.SECONDS)
+        }.exceptionOrNull()
+
+        assertNotNull(
+            "Missing-chain authorization must fail closed",
+            missingChainFailure,
+        )
+        awaitEventCount(
+            MwaSessionEvent.AUTHORIZE_CHAIN_REJECTED,
+            rejectionCountBeforeMissingChain + 1,
+        )
+
         val authorization = client.authorize(
             identityUri,
             iconUri,
@@ -198,16 +225,26 @@ class MwaLocalAssociationInstrumentedTest {
     }
 
     private fun awaitEvent(expected: MwaSessionEvent) {
+        awaitEventCount(expected, 1)
+    }
+
+    private fun awaitEventCount(
+        expected: MwaSessionEvent,
+        minimumCount: Int,
+    ) {
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10)
         while (System.nanoTime() < deadline) {
-            if (MwaSessionEvidenceStore.snapshot().any { it.event == expected }) {
+            val count = MwaSessionEvidenceStore.snapshot().count {
+                it.event == expected
+            }
+            if (count >= minimumCount) {
                 return
             }
             Thread.sleep(50)
         }
 
         throw AssertionError(
-            "Timed out waiting for $expected; observed=" +
+            "Timed out waiting for $expected count >= $minimumCount; observed=" +
                 MwaSessionEvidenceStore.snapshot().joinToString { it.event.name },
         )
     }

@@ -1,0 +1,34 @@
+MWA Lab Phase 1 final local/device acceptance
+date=2026-09-26
+batch_e_commit=bdec451df38f2936a2900e4dfcd5a4cdd6b33a73
+device=emulator-5554
+
+phase0_history_preserved=PASS
+walletlib_2_0_7_authority=PASS
+clean_install=PASS
+primary_app_launch=PASS
+
+real_cross_package_association=PASS
+canonical_demo_repeated=PASS
+first_devnet_authorize=PASS
+returned_account_persistent_lab_identity=PASS
+get_capabilities=PASS
+deauthorize=PASS
+revoked_state_rejected=PASS
+mainnet_authorize_rejected=PASS
+missing_chain_authorize_rejected=PASS
+session_close=PASS
+
+identity_persistence_regression=PASS
+identity_reset_regression=PASS
+typed_protocol_evidence=PASS
+diagnostic_sanitization=PASS
+raw_auth_token_diagnostics=ABSENT
+private_key_seed_diagnostics=ABSENT
+
+successful_message_signing=NOT_IMPLEMENTED_PHASE1
+successful_transaction_signing=NOT_IMPLEMENTED_PHASE1
+transaction_submission=NOT_IMPLEMENTED_PHASE1
+mainnet=DISABLED
+
+LOCAL/DEVICE PHASE 1 ACCEPTANCE: PASS

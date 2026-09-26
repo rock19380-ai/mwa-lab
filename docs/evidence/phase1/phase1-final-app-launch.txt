@@ -1,0 +1,7 @@
+Starting: Intent { cmp=dev.mwalab/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: dev.mwalab/.MainActivity
+TotalTime: 2862
+WaitTime: 2870
+Complete

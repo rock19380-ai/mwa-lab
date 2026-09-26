@@ -1,0 +1,24 @@
+MWA Lab Phase 1 final sanitizer/security scan
+date=2026-09-26
+batch_e_commit=bdec451df38f2936a2900e4dfcd5a4cdd6b33a73
+
+Checks:
+- no secret-bearing ad-hoc app/demo logging
+- no high-entropy raw auth-token/private/seed assignment in source/evidence
+- primary UI contains Devnet/Lab/no-real-funds warnings
+- demo client is FOR TESTING ONLY
+- mainnet authorization policy rejects production
+- missing-chain policy rejects
+- successful signing/submission remains absent
+
+secret_bearing_ad_hoc_logging=ABSENT
+high_entropy_auth_token_value=ABSENT
+high_entropy_private_seed_value=ABSENT
+mainnet_policy=REJECT
+missing_malformed_chain_policy=REJECT
+primary_lab_warning=PRESENT
+demo_client_test_only_warning=PRESENT
+signing_performed_by_phase1=NO
+transaction_submission_performed_by_phase1=NO
+
+FINAL SECURITY SCAN: PASS
