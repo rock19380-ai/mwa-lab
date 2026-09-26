@@ -1,0 +1,8 @@
+MWA Lab Phase 1 Batch E sanitizer/security scan
+date=2026-09-26
+
+ad_hoc_secret_logging_scan=PASS
+raw_auth_token_value_scan=PASS
+private_material_value_scan=PASS
+demo_client_auth_token_display=ABSENT
+structured_evidence_sanitizer=DiagnosticSanitizer.sanitizeFields

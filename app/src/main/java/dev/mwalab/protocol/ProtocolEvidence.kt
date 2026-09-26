@@ -1,5 +1,7 @@
 package dev.mwalab.protocol
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 data class ProtocolEvidence(
     val method: ProtocolMethod,
     val startedAtEpochMillis: Long,
@@ -16,4 +18,24 @@ data class ProtocolEvidence(
 
 fun interface ProtocolEvidenceSink {
     fun record(event: ProtocolEvidence)
+}
+
+/**
+ * Minimal process-local Phase 1 evidence seam.
+ *
+ * This is intentionally not the Phase 3 recorder: no Room history, no export
+ * bundle, no timeline model, and no raw authorization/secret material.
+ */
+object ProtocolEvidenceStore : ProtocolEvidenceSink {
+    private val events = CopyOnWriteArrayList<ProtocolEvidence>()
+
+    override fun record(event: ProtocolEvidence) {
+        events += event
+    }
+
+    fun snapshot(): List<ProtocolEvidence> = events.toList()
+
+    fun resetForTest() {
+        events.clear()
+    }
 }

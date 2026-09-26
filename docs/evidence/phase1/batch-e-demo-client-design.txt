@@ -1,0 +1,29 @@
+MWA Lab Phase 1 Batch E deterministic demo-client design
+date=2026-09-26
+batch_d_commit=3c3874e646c5690db625badf2b2b1ac673a68167
+
+module=:demo-client
+application_id=dev.mwalab.democlient
+wallet_application_id=dev.mwalab
+identity=MWA Lab Demo Client — FOR TESTING ONLY
+
+reason_for_separate_module:
+- proves a real cross-package Android dApp-to-wallet path
+- keeps clientlib out of the primary wallet runtime dependency surface
+- permits real implicit solana-wallet discovery before deterministic package targeting
+- avoids adb-crafted fake protocol requests
+
+canonical_sequence:
+CONNECT
+AUTHORIZE solana:devnet
+GET_CAPABILITIES
+DEAUTHORIZE
+CLOSE
+
+explicitly_not_in_demo:
+sign_messages
+transaction_signing
+sign_and_send
+RPC submission
+auth-token display
+private-key/seed display

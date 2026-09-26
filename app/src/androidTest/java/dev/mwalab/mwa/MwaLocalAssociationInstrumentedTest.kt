@@ -11,6 +11,9 @@ import com.solana.mobilewalletadapter.common.ProtocolContract
 import dev.mwalab.app.MwaLabComposition
 import dev.mwalab.mwa.evidence.MwaSessionEvent
 import dev.mwalab.mwa.evidence.MwaSessionEvidenceStore
+import dev.mwalab.protocol.ProtocolEvidenceStore
+import dev.mwalab.protocol.ProtocolMethod
+import dev.mwalab.protocol.ProtocolOutcome
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -27,6 +30,7 @@ class MwaLocalAssociationInstrumentedTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
         MwaSessionEvidenceStore.resetForTest()
+        ProtocolEvidenceStore.resetForTest()
 
         val expectedIdentity = runBlocking {
             MwaLabComposition.identityRepository(context).getOrCreate()
@@ -138,6 +142,40 @@ class MwaLocalAssociationInstrumentedTest {
         assertNotNull(
             "Revoked auth token must not be reusable",
             revokedReuseFailure,
+        )
+
+        val protocolEvidence = ProtocolEvidenceStore.snapshot()
+        assertTrue(
+            protocolEvidence.any {
+                it.method == ProtocolMethod.AUTHORIZE &&
+                    it.outcome == ProtocolOutcome.SUCCESS
+            },
+        )
+        assertTrue(
+            protocolEvidence.any {
+                it.method == ProtocolMethod.AUTHORIZE &&
+                    it.outcome == ProtocolOutcome.FAILURE
+            },
+        )
+        assertTrue(
+            protocolEvidence.any {
+                it.method == ProtocolMethod.DEAUTHORIZE &&
+                    it.outcome == ProtocolOutcome.SUCCESS
+            },
+        )
+        assertTrue(
+            "Structured evidence must not contain raw auth-token/private material",
+            protocolEvidence.none { event ->
+                (event.requestSummary + event.responseSummary)
+                    .values
+                    .any { value ->
+                        val normalized = value.lowercase()
+                        normalized.contains("auth_token") ||
+                            normalized.contains("private_key") ||
+                            normalized.contains("mnemonic") ||
+                            normalized.contains("seed")
+                    }
+            },
         )
 
         localAssociation.close().get(10, TimeUnit.SECONDS)

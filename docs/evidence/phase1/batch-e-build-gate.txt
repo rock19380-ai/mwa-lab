@@ -1,0 +1,295 @@
+MWA Lab Phase 1 Batch E build gate
+date=2026-09-26
+batch_d_commit=3c3874e646c5690db625badf2b2b1ac673a68167
+
+--- primary app unit tests ---
+Calculating task graph as no cached configuration is available for tasks: :app:test
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+> Task :app:test
+
+BUILD SUCCESSFUL in 13s
+24 actionable tasks: 7 executed, 17 up-to-date
+Configuration cache entry stored.
+
+--- demo-client assemble ---
+Calculating task graph as no cached configuration is available for tasks: :demo-client:assembleDebug
+> Task :demo-client:generateDebugAssets UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :demo-client:generateDebugResources
+> Task :demo-client:javaPreCompileDebug
+> Task :demo-client:mergeDebugAssets
+> Task :demo-client:mapDebugSourceSetPaths
+> Task :demo-client:desugarDebugFileDependencies
+> Task :demo-client:compressDebugAssets
+> Task :demo-client:createDebugCompatibleScreenManifests
+> Task :demo-client:extractDeepLinksDebug
+> Task :demo-client:packageDebugResources
+> Task :demo-client:mergeDebugJniLibFolders
+> Task :demo-client:validateSigningDebug
+> Task :demo-client:writeDebugAppMetadata
+> Task :demo-client:writeDebugSigningConfigVersions
+> Task :demo-client:mergeDebugNativeLibs
+
+> Task :demo-client:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :demo-client:processDebugNavigationResources
+> Task :demo-client:compileDebugNavigationResources
+> Task :demo-client:checkDebugAarMetadata
+> Task :demo-client:checkDebugDuplicateClasses
+> Task :demo-client:parseDebugLocalResources
+> Task :demo-client:mergeLibDexDebug
+> Task :demo-client:processDebugMainManifest
+> Task :demo-client:processDebugManifest
+> Task :demo-client:generateDebugRFile
+> Task :demo-client:processDebugManifestForPackage
+> Task :demo-client:generateDebugGlobalSynthetics
+> Task :demo-client:compileDebugKotlin
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugJavaRes
+> Task :demo-client:mergeDebugResources
+> Task :demo-client:mergeDebugJavaResource
+> Task :demo-client:processDebugResources
+> Task :demo-client:dexBuilderDebug
+> Task :demo-client:mergeProjectDexDebug
+> Task :demo-client:mergeExtDexDebug
+> Task :demo-client:packageDebug
+> Task :demo-client:assembleDebug
+> Task :demo-client:createDebugApkListingFileRedirect
+
+BUILD SUCCESSFUL in 28s
+36 actionable tasks: 36 executed
+Configuration cache entry stored.
+
+--- primary lint ---
+Calculating task graph as no cached configuration is available for tasks: :app:lint
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///home/abbaas/mwa-lab/app/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/abbaas/mwa-lab/app/build/reports/lint-results-debug.sarif
+
+> Task :app:lintDebug
+> Task :app:lint
+
+BUILD SUCCESSFUL in 17s
+27 actionable tasks: 8 executed, 19 up-to-date
+Configuration cache entry stored.
+
+--- demo-client lint ---
+Calculating task graph as no cached configuration is available for tasks: :demo-client:lint
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :demo-client:extractProguardFiles
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar
+> Task :demo-client:generateDebugAndroidTestLintModel
+> Task :demo-client:generateDebugUnitTestLintModel
+> Task :demo-client:generateDebugLintReportModel
+> Task :demo-client:lintAnalyzeDebugUnitTest
+> Task :demo-client:lintAnalyzeDebugAndroidTest
+> Task :demo-client:lintAnalyzeDebug
+
+> Task :demo-client:lintReportDebug
+Wrote HTML report to file:///home/abbaas/mwa-lab/demo-client/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/abbaas/mwa-lab/demo-client/build/reports/lint-results-debug.sarif
+
+> Task :demo-client:lintDebug
+> Task :demo-client:lint
+
+BUILD SUCCESSFUL in 6s
+27 actionable tasks: 10 executed, 17 up-to-date
+Configuration cache entry stored.
+
+--- primary APK ---
+Calculating task graph as no cached configuration is available for tasks: :app:assembleDebug
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:dexBuilderDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:packageDebug
+> Task :app:assembleDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+
+BUILD SUCCESSFUL in 1s
+36 actionable tasks: 4 executed, 32 up-to-date
+Configuration cache entry stored.
+
+--- demo-client AndroidTest APK ---
+Calculating task graph as no cached configuration is available for tasks: :demo-client:assembleDebugAndroidTest
+> Task :demo-client:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestNavigationResources
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestResources
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebugAndroidTest
+> Task :demo-client:desugarDebugAndroidTestFileDependencies
+> Task :demo-client:checkDebugAndroidTestAarMetadata
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:packageDebugAndroidTestResources
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:mapDebugAndroidTestSourceSetPaths
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:checkDebugAndroidTestDuplicateClasses
+> Task :demo-client:compileDebugAndroidTestNavigationResources
+> Task :demo-client:mergeDebugAndroidTestAssets
+> Task :demo-client:compressDebugAndroidTestAssets
+> Task :demo-client:mergeDebugAndroidTestJniLibFolders
+> Task :demo-client:mergeDebugJniLibFolders UP-TO-DATE
+> Task :demo-client:parseDebugAndroidTestLocalResources
+> Task :demo-client:mergeLibDexDebugAndroidTest
+> Task :demo-client:validateSigningDebugAndroidTest
+> Task :demo-client:mergeDebugAndroidTestResources
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :demo-client:writeDebugAndroidTestSigningConfigVersions
+> Task :demo-client:generateDebugAndroidTestRFile
+> Task :demo-client:mergeDebugNativeLibs UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :demo-client:mergeDebugAndroidTestManifest
+> Task :demo-client:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :demo-client:processDebugAndroidTestManifest
+> Task :demo-client:mergeExtDexDebugAndroidTest
+> Task :demo-client:processDebugAndroidTestResources
+> Task :demo-client:generateDebugAndroidTestGlobalSynthetics
+> Task :demo-client:compileDebugAndroidTestKotlin
+> Task :demo-client:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugAndroidTestJavaRes
+> Task :demo-client:mergeDebugAndroidTestJavaResource
+> Task :demo-client:dexBuilderDebugAndroidTest
+> Task :demo-client:mergeProjectDexDebugAndroidTest
+> Task :demo-client:packageDebugAndroidTest
+> Task :demo-client:assembleDebugAndroidTest
+> Task :demo-client:createDebugAndroidTestApkListingFileRedirect
+
+BUILD SUCCESSFUL in 2s
+50 actionable tasks: 30 executed, 20 up-to-date
+Configuration cache entry stored.

@@ -1,0 +1,32 @@
+MWA Lab Phase 1 Batch E structured evidence design
+date=2026-09-26
+batch_d_commit=3c3874e646c5690db625badf2b2b1ac673a68167
+
+primary typed evidence:
+app/src/main/java/dev/mwalab/protocol/ProtocolEvidence.kt
+
+server-recorded Phase 1 methods:
+AUTHORIZE
+DEAUTHORIZE
+
+client-observed Phase 1 capability method:
+GET_CAPABILITIES through deterministic demo-client result/evidence
+
+fields:
+method
+start time
+completion time
+duration
+outcome
+protocol error code where applicable
+failure source
+sanitized request summary
+sanitized response summary
+
+prohibited:
+raw auth token
+private key
+seed/mnemonic
+Keystore encryption secret
+association token/public key
+transaction payload/signature

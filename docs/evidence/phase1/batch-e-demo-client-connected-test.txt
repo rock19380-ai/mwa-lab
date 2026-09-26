@@ -1,0 +1,89 @@
+Calculating task graph as no cached configuration is available for tasks: :demo-client:connectedDebugAndroidTest
+> Task :demo-client:generateDebugAssets UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :demo-client:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :demo-client:packageDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :demo-client:checkDebugDuplicateClasses UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:mergeDebugJniLibFolders UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:mergeLibDexDebug UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:validateSigningDebug UP-TO-DATE
+> Task :demo-client:writeDebugAppMetadata UP-TO-DATE
+> Task :demo-client:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :demo-client:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :demo-client:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :demo-client:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:mergeDebugAssets UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :demo-client:compressDebugAssets UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:desugarDebugFileDependencies UP-TO-DATE
+> Task :demo-client:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :demo-client:mergeDebugNativeLibs UP-TO-DATE
+> Task :demo-client:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :demo-client:stripDebugDebugSymbols UP-TO-DATE
+> Task :demo-client:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :demo-client:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :demo-client:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugJavaRes UP-TO-DATE
+> Task :demo-client:mergeDebugJavaResource UP-TO-DATE
+> Task :demo-client:mergeExtDexDebug UP-TO-DATE
+> Task :demo-client:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :demo-client:dexBuilderDebug UP-TO-DATE
+> Task :demo-client:mergeProjectDexDebug UP-TO-DATE
+> Task :demo-client:packageDebug UP-TO-DATE
+> Task :demo-client:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :demo-client:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :demo-client:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:packageDebugAndroidTest UP-TO-DATE
+> Task :demo-client:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+
+> Task :demo-client:connectedDebugAndroidTest
+Running tests on devices: MWA_Lab_API_36(AVD) - 16
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::arrayBaseOffset has been called by com.google.protobuf.UnsafeUtil$MemoryAccessor (file:/home/abbaas/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/3.25.5/5ae5c9ec39930ae9b5a61b32b93288818ec05ec1/protobuf-java-3.25.5.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.protobuf.UnsafeUtil$MemoryAccessor
+WARNING: sun.misc.Unsafe::arrayBaseOffset will be removed in a future release
+
+BUILD SUCCESSFUL in 7s
+68 actionable tasks: 1 executed, 67 up-to-date
+Configuration cache entry stored.

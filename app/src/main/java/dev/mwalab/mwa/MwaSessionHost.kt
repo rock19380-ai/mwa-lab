@@ -2,10 +2,10 @@ package dev.mwalab.mwa
 
 import android.content.Context
 import android.net.Uri
+import com.solana.mobilewalletadapter.common.ProtocolContract
 import com.solana.mobilewalletadapter.walletlib.association.AssociationUri
 import com.solana.mobilewalletadapter.walletlib.association.LocalAssociationUri
 import com.solana.mobilewalletadapter.walletlib.authorization.AuthIssuerConfig
-import com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig
 import com.solana.mobilewalletadapter.walletlib.scenario.AuthorizeRequest
 import com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent
 import com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario
@@ -19,31 +19,30 @@ import dev.mwalab.identity.IdentityRepository
 import dev.mwalab.mwa.association.AssociationOpenResult
 import dev.mwalab.mwa.authorization.LabAuthorizationDecision
 import dev.mwalab.mwa.authorization.LabAuthorizationPolicy
+import dev.mwalab.mwa.capabilities.MwaCapabilityProfile
 import dev.mwalab.mwa.evidence.MwaSessionEvent
 import dev.mwalab.mwa.evidence.MwaSessionEvidence
 import dev.mwalab.mwa.evidence.MwaSessionEvidenceSink
 import dev.mwalab.mwa.evidence.MwaSessionEvidenceStore
+import dev.mwalab.protocol.ProtocolEvidence
+import dev.mwalab.protocol.ProtocolEvidenceSink
+import dev.mwalab.protocol.ProtocolEvidenceStore
+import dev.mwalab.protocol.ProtocolFailureSource
+import dev.mwalab.protocol.ProtocolMethod
+import dev.mwalab.protocol.ProtocolOutcome
+import dev.mwalab.security.DiagnosticSanitizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-/**
- * Owns exactly one wallet-side MWA scenario at a time.
- *
- * Phase 1 supports authorization only for the persistent MWA Lab Devnet test
- * identity. walletlib 2.0.7 remains authoritative for auth-token issue,
- * persistence, validation, reissue plumbing, and revocation.
- *
- * Full existing-auth-token/reauthorization behavior remains deferred to Phase 2.
- * Successful signing remains deferred; mandatory signing callbacks fail closed.
- */
 class MwaSessionHost(
     context: Context,
     identityRepository: IdentityRepository =
         MwaLabComposition.identityRepository(context.applicationContext),
     private val evidenceSink: MwaSessionEvidenceSink = MwaSessionEvidenceStore,
+    private val protocolEvidenceSink: ProtocolEvidenceSink = ProtocolEvidenceStore,
     private val onSessionFinished: () -> Unit = {},
 ) : AutoCloseable {
     private val appContext = context.applicationContext
@@ -52,14 +51,7 @@ class MwaSessionHost(
     private val authorizationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var scenario: Scenario? = null
 
-    private val walletConfig = MobileWalletAdapterConfig(
-        /* maxTransactionsPerSigningRequest = */ 0,
-        /* maxMessagesPerSigningRequest = */ 0,
-        arrayOf(MobileWalletAdapterConfig.LEGACY_TRANSACTION_VERSION),
-        /* noConnectionWarningTimeoutMs = */ LOW_POWER_NO_CONNECTION_TIMEOUT_MS,
-        /* supportedFeatures = */ emptyArray(),
-    )
-
+    private val walletConfig = MwaCapabilityProfile.createWalletConfig()
     private val authIssuerConfig = AuthIssuerConfig(AUTH_ISSUER_NAME)
 
     fun openAssociation(uri: Uri?): AssociationOpenResult {
@@ -183,6 +175,14 @@ class MwaSessionHost(
         }
 
         override fun onAuthorizeRequest(request: AuthorizeRequest) {
+            val startedAt = System.currentTimeMillis()
+            val requestSummary = mapOf(
+                "chain" to (request.chain ?: "<missing>"),
+                "requested_feature_count" to (request.features?.size ?: 0).toString(),
+                "requested_address_count" to (request.addresses?.size ?: 0).toString(),
+                "sign_in_requested" to (request.signInPayload != null).toString(),
+            )
+
             record(MwaSessionEvent.AUTHORIZE_REQUEST)
 
             authorizationScope.launch {
@@ -196,6 +196,15 @@ class MwaSessionHost(
                 } catch (_: Throwable) {
                     record(MwaSessionEvent.AUTHORIZE_IDENTITY_UNAVAILABLE)
                     request.completeWithDecline()
+                    recordProtocol(
+                        method = ProtocolMethod.AUTHORIZE,
+                        startedAt = startedAt,
+                        outcome = ProtocolOutcome.FAILURE,
+                        protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                        failureSource = ProtocolFailureSource.UNKNOWN,
+                        requestSummary = requestSummary,
+                        responseSummary = mapOf("result" to "identity_unavailable"),
+                    )
                     return@launch
                 }
 
@@ -208,34 +217,81 @@ class MwaSessionHost(
                             null,
                         )
                         record(MwaSessionEvent.AUTHORIZE_SUCCEEDED)
+                        recordProtocol(
+                            method = ProtocolMethod.AUTHORIZE,
+                            startedAt = startedAt,
+                            outcome = ProtocolOutcome.SUCCESS,
+                            requestSummary = requestSummary,
+                            responseSummary = mapOf(
+                                "result" to "authorized",
+                                "chain" to (request.chain ?: "<missing>"),
+                                "public_account" to
+                                    (decision.account.displayAddress ?: "<public-key-only>"),
+                                "authorization_state" to "walletlib_managed",
+                            ),
+                        )
                     }
 
                     LabAuthorizationDecision.UnsupportedChain -> {
                         record(MwaSessionEvent.AUTHORIZE_CHAIN_REJECTED)
                         request.completeWithClusterNotSupported()
+                        recordProtocol(
+                            method = ProtocolMethod.AUTHORIZE,
+                            startedAt = startedAt,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_CLUSTER_NOT_SUPPORTED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            requestSummary = requestSummary,
+                            responseSummary = mapOf("result" to "unsupported_chain"),
+                        )
                     }
 
                     LabAuthorizationDecision.UnsupportedOptionalFeatures -> {
                         record(MwaSessionEvent.AUTHORIZE_OPTIONAL_FEATURES_REJECTED)
                         request.completeWithDecline()
+                        recordProtocol(
+                            method = ProtocolMethod.AUTHORIZE,
+                            startedAt = startedAt,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            requestSummary = requestSummary,
+                            responseSummary = mapOf("result" to "unsupported_optional_features"),
+                        )
                     }
 
                     LabAuthorizationDecision.UnsupportedSignIn -> {
                         record(MwaSessionEvent.AUTHORIZE_SIGN_IN_REJECTED)
                         request.completeWithDecline()
+                        recordProtocol(
+                            method = ProtocolMethod.AUTHORIZE,
+                            startedAt = startedAt,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            requestSummary = requestSummary,
+                            responseSummary = mapOf("result" to "unsupported_sign_in"),
+                        )
                     }
 
                     LabAuthorizationDecision.RequestedAddressUnavailable -> {
                         record(MwaSessionEvent.AUTHORIZE_REQUESTED_ADDRESS_REJECTED)
                         request.completeWithDecline()
+                        recordProtocol(
+                            method = ProtocolMethod.AUTHORIZE,
+                            startedAt = startedAt,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            requestSummary = requestSummary,
+                            responseSummary = mapOf("result" to "requested_address_unavailable"),
+                        )
                     }
                 }
             }
         }
 
         override fun onReauthorizeRequest(request: ReauthorizeRequest) {
-            // Phase 2 owns full existing-auth-token / reauthorization UX.
-            // Declining here is fail-closed; walletlib revokes the record on decline.
             record(MwaSessionEvent.REAUTHORIZE_DECLINED_PHASE_2_DEFERRED)
             request.completeWithDecline()
         }
@@ -258,9 +314,20 @@ class MwaSessionHost(
         }
 
         override fun onDeauthorizedEvent(event: DeauthorizedEvent) {
-            // walletlib has already resolved and revoked the token before this callback.
+            val startedAt = System.currentTimeMillis()
             event.complete()
             record(MwaSessionEvent.DEAUTHORIZED_COMPLETED)
+            recordProtocol(
+                method = ProtocolMethod.DEAUTHORIZE,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.SUCCESS,
+                requestSummary = mapOf(
+                    "authorization_reference" to "walletlib_managed",
+                ),
+                responseSummary = mapOf(
+                    "result" to "revoked",
+                ),
+            )
         }
     }
 
@@ -273,9 +340,31 @@ class MwaSessionHost(
         )
     }
 
+    private fun recordProtocol(
+        method: ProtocolMethod,
+        startedAt: Long,
+        outcome: ProtocolOutcome,
+        protocolErrorCode: Int? = null,
+        failureSource: ProtocolFailureSource = ProtocolFailureSource.NONE,
+        requestSummary: Map<String, String> = emptyMap(),
+        responseSummary: Map<String, String> = emptyMap(),
+    ) {
+        protocolEvidenceSink.record(
+            ProtocolEvidence(
+                method = method,
+                startedAtEpochMillis = startedAt,
+                completedAtEpochMillis = System.currentTimeMillis(),
+                outcome = outcome,
+                protocolErrorCode = protocolErrorCode,
+                failureSource = failureSource,
+                requestSummary = DiagnosticSanitizer.sanitizeFields(requestSummary),
+                responseSummary = DiagnosticSanitizer.sanitizeFields(responseSummary),
+            ),
+        )
+    }
+
     companion object {
         private const val REQUIRED_SCHEME = "solana-wallet"
         private const val AUTH_ISSUER_NAME = "mwa-lab-phase1"
-        private const val LOW_POWER_NO_CONNECTION_TIMEOUT_MS = 10_000L
     }
 }

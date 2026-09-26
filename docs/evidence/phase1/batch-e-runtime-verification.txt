@@ -1,0 +1,23 @@
+MWA Lab Phase 1 Batch E runtime verification
+date=2026-09-26
+batch_d_commit=3c3874e646c5690db625badf2b2b1ac673a68167
+
+separate_demo_client_package=dev.mwalab.democlient
+wallet_package=dev.mwalab
+cross_package_real_mwa_path=PASS
+demo_client_identity_label=MWA Lab Demo Client — FOR TESTING ONLY
+canonical_sequence_run_1=PASS
+canonical_sequence_run_2=PASS
+persistent_account_same_across_runs=PASS
+authorize=PASS
+get_capabilities=PASS
+deauthorize=PASS
+
+server_typed_authorize_evidence=PASS
+server_typed_deauthorize_evidence=PASS
+diagnostic_sanitizer_applied=PASS
+raw_auth_token_in_evidence=ABSENT
+private_key_seed_in_evidence=ABSENT
+
+signing_performed=NO
+transaction_submission_performed=NO

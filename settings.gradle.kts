@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MWA Lab"
 include(":app")
+include(":demo-client")
