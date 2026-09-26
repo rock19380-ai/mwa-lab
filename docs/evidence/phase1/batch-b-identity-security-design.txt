@@ -1,0 +1,18 @@
+MWA Lab Phase 1 Batch B identity/security design
+date=2026-09-26
+phase0_parent=b4e7631a7e20bd4d032bb5478582684c998801ab
+batch_a_commit=8d65049c69dd8aef45459bcedc50e3a584505a09
+official_mwa_source_commit=9d09cb5cfdd478df6293c09d83eabc6e022b93f2
+official_reference_identity_algorithm=Ed25519
+official_reference_display_address=Base58
+mwa_lab_private_material_storage=Android Keystore protected AES-GCM ciphertext
+mwa_lab_private_material_ui=NEVER DISPLAYED
+mwa_lab_private_material_diagnostics=NEVER LOGGED
+identity_preferences_backup=EXCLUDED
+identity_device_transfer=EXCLUDED
+supported_execution_network=solana:devnet
+mainnet=REJECTED
+testnet=REJECTED
+unknown_network=REJECTED
+malformed_network=REJECTED
+protocol_error_for_unsupported_network=-7

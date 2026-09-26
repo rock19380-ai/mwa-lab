@@ -33,10 +33,18 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources {
+            excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+        }
+    }
 }
 
 dependencies {
     implementation(libs.solana.mobile.walletlib)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.multimult)
+    implementation(libs.bouncycastle)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

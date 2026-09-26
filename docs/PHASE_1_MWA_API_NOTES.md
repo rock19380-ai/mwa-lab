@@ -60,3 +60,27 @@ The next batch must inspect the actual resolved walletlib classes/signatures ins
 - exact auth-token issuance/storage helper APIs provided by walletlib 2.0.7.
 
 No Phase 1 implementation may invent these names or semantics when the resolved dependency can be inspected directly.
+
+## Batch B source verification — 2026-09-26
+
+Current official repository source was inspected at commit:
+
+`9d09cb5cfdd478df6293c09d83eabc6e022b93f2`
+
+Verified details relevant to this batch:
+
+- `ProtocolContract.CHAIN_SOLANA_DEVNET` is `solana:devnet`.
+- Legacy `ProtocolContract.CLUSTER_DEVNET` is `devnet`.
+- Production identifiers include `solana:mainnet` and `mainnet-beta`.
+- The Android common contract exposes unsupported-cluster/network protocol error `-7` as `ERROR_CLUSTER_NOT_SUPPORTED`.
+- The official Android fake-wallet reference generates Ed25519 keypairs with BouncyCastle.
+- The official reference renders Solana public keys with Base58.
+
+MWA Lab intentionally does **not** copy the fake-wallet's raw private-key persistence model.
+Its Phase 1 Lab Test Identity stores only AES-GCM ciphertext in SharedPreferences,
+with the AES key held by Android Keystore. The identity preference file is excluded
+from backup and device transfer.
+
+No wallet association callbacks, authorization result APIs, or capability result APIs
+are claimed implemented by Batch B. Those remain gated on direct inspection of the
+resolved walletlib 2.0.7 classes before Batch C/D.
