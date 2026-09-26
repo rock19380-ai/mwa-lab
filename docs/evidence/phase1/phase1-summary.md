@@ -67,3 +67,15 @@ and adds deterministic AndroidTest APK assembly plus the Phase 1 static gate.
 
 Real Android association/device proof remains separate evidence and must not be
 inferred solely from CI.
+
+## GitHub CI closeout
+
+The Phase 1.12 closeout commit passed deterministic GitHub Actions:
+
+- commit: `ef1ae392e9685629775f4e9105600f0a2c168bbd`
+- run id: `36237275332`
+- conclusion: `success`
+- run URL: `https://github.com/rock19380-ai/mwa-lab/actions/runs/36237275332`
+
+The final evidence commit remains tag-gated on its own exact-head CI success.
+

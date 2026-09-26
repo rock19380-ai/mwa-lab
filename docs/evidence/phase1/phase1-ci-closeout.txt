@@ -1,0 +1,22 @@
+MWA Lab Phase 1 GitHub CI closeout evidence
+date=2026-09-26
+
+repository=rock19380-ai/mwa-lab
+branch=phase1-mwa-protocol-boundary
+workflow=android.yml
+
+closeout_commit=ef1ae392e9685629775f4e9105600f0a2c168bbd
+closeout_ci_run_id=36237275332
+closeout_ci_head=ef1ae392e9685629775f4e9105600f0a2c168bbd
+closeout_ci_status=completed
+closeout_ci_conclusion=success
+closeout_ci_url=https://github.com/rock19380-ai/mwa-lab/actions/runs/36237275332
+
+closeout_exact_head_ci=PASS
+
+Freeze semantics:
+- this file records the first exact-head CI proof for the Phase 1.12 closeout
+- a final evidence-only commit will include this proof
+- that final commit must itself pass GitHub Actions before the Phase 1 tag is created
+- the final commit's CI run is recorded in the annotated Git tag because a commit tree
+  cannot contain the result of CI that runs only after that commit exists

@@ -2,7 +2,7 @@
 
 **Phase:** Phase 1 — MWA Protocol Boundary Spike  
 **Date:** 2026-09-26  
-**Status:** LOCAL/DEVICE ACCEPTANCE PASS — awaiting final GitHub CI freeze verification
+**Status:** FREEZE CANDIDATE — final tag gated on exact-head GitHub CI
 
 ## Baseline
 
@@ -80,15 +80,21 @@ PASS:
 - sanitizer/security scan;
 - deterministic build/static gates.
 
-## Remaining freeze step
+## Closeout CI
 
-The only remaining Phase 1 closeout action is:
+The first Phase 1.12 closeout commit passed GitHub Actions for its exact SHA.
 
-1. review/commit this Phase 1.12 closeout;
-2. push the exact closeout head;
-3. require GitHub Actions success for that exact SHA;
-4. record CI evidence;
-5. verify the final exact head again;
-6. create/push the frozen Phase 1 tag.
+- Closeout commit: `ef1ae392e9685629775f4e9105600f0a2c168bbd`
+- GitHub Actions run: `36237275332`
+- Result: `success`
+- Run URL: `https://github.com/rock19380-ai/mwa-lab/actions/runs/36237275332`
 
-Phase 2 must not begin until that freeze completes.
+## Final freeze rule
+
+The next commit is evidence-only and records this closeout CI proof.
+
+That evidence commit is the intended frozen Phase 1 tree. It must itself pass
+GitHub Actions for its exact SHA before the annotated Phase 1 tag is created.
+
+The final exact-head CI run is recorded in the annotated tag metadata rather than
+inside the commit tree, because CI can only run after the commit already exists.
