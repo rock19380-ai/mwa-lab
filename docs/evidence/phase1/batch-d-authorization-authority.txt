@@ -1,0 +1,38 @@
+MWA Lab Phase 1 Batch D authorization authority
+date=2026-09-26
+
+NETWORK:
+- solana:devnet authorize may succeed
+- mainnet/testnet/unknown/malformed authorization fails closed
+
+ACCOUNT:
+- one persistent MWA Lab Ed25519 test identity
+- public display address is Base58
+- protocol requested-address matching uses the base64-encoded raw public key
+- private material is never returned by IdentityRepository
+
+AUTH TOKEN AUTHORITY:
+- app does not mint auth tokens
+- walletlib 2.0.7 AuthRepository issues the token
+- walletlib persists authorization records
+- walletlib authenticates tokens with HMAC-protected identity records
+- walletlib Android Keystore protects its repository secret
+- app does not log/persist/copy auth-token contents
+
+DEAUTHORIZE:
+- walletlib resolves and revokes the auth record before onDeauthorizedEvent
+- MWA Lab completes the deauthorized event
+- revoked-token reuse must fail
+
+REAUTHORIZE:
+- full existing-auth-token behavior remains Phase 2
+- a still-valid token that reaches onReauthorizeRequest is declined fail-closed in Phase 1
+- revoked/invalid tokens are rejected by walletlib before callback dispatch
+
+CAPABILITIES:
+- get_capabilities is served internally by walletlib 2.0.7
+- maxTransactionsPerSigningRequest=0 (walletlib semantics: no configured limit)
+- maxMessagesPerSigningRequest=0 (walletlib semantics: no configured limit)
+- supportedTransactionVersions=["legacy"]
+- optionalFeatures=[]
+- successful signing remains unimplemented in Phase 1

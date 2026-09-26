@@ -1,0 +1,20 @@
+MWA Lab Phase 1 Batch D runtime verification
+date=2026-09-26
+head=ac04768c676f84b5e303e54dfbab0803f5e51b20
+
+protocol_address_encoding_standard_base64=PASS
+get_capabilities_real_wire=PASS
+capabilities_optional_features_empty=PASS
+capabilities_supported_transaction_versions_legacy=PASS
+
+mainnet_authorize_rejected=PASS
+devnet_authorize_succeeded=PASS
+authorized_account_matches_persistent_lab_identity=PASS
+walletlib_auth_token_issued=PASS
+deauthorize_succeeded=PASS
+revoked_auth_token_reuse_rejected=PASS
+
+identity_persistence_regression=PASS
+signing_performed=NO
+transaction_submission_performed=NO
+auth_token_logged_by_mwa_lab=NO

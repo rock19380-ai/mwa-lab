@@ -159,3 +159,34 @@ The corresponding callbacks are therefore present but fail closed with the libra
 protocol-defined decline result. This is a Lab protocol-boundary behavior, not a
 successful signing implementation, and Phase 1 must not be described as a production
 signing wallet.
+
+## Batch D authorization/deauthorization boundary
+
+Phase 1 authorization uses the persistent MWA Lab Devnet Ed25519 identity.
+
+The application does **not** generate or parse auth tokens. With walletlib 2.0.7,
+`AuthorizeRequest.completeWithAuthorize(...)` feeds the approved account and
+authorization scope into walletlib. Walletlib then owns authorization-record
+persistence, HMAC-protected token issuance, token validation, and revocation.
+
+The Phase 1 authorization policy is intentionally narrow:
+
+- only `solana:devnet` may authorize;
+- optional requested features are rejected;
+- Sign In With Solana payloads are rejected because that feature is not advertised;
+- requested account addresses are matched against the Base64 protocol encoding of
+  the persistent Lab public key, not the Base58 display address;
+- full existing-auth-token reauthorization behavior remains deferred to Phase 2.
+
+Deauthorization is protocol-authoritative: walletlib resolves and revokes a valid
+auth token before `onDeauthorizedEvent`, and MWA Lab completes that event. Device
+acceptance must prove that the revoked token cannot subsequently authorize.
+
+## Batch D protocol-address encoding
+
+Pinned MWA 2.0.7 client/server code uses standard Base64 without line wrapping for
+protocol account-address bytes. MWA Lab therefore decodes requested `addresses`
+to raw bytes before comparing them with the persistent Ed25519 public key.
+Base58 is display-only. The authorization policy uses BouncyCastle's standard
+Base64 codec so the same code path is testable on both Android and the plain JVM.
+

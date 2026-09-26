@@ -1,0 +1,14 @@
+MWA Lab Phase 1 Batch D protocol-address encoding
+date=2026-09-26
+
+Pinned MWA authority:
+- clientlib 2.0.7 JsonPack.packByteArraysToBase64PayloadsArray uses standard Android Base64.NO_WRAP
+- walletlib 2.0.7 receives authorize `addresses` as String[] protocol values
+- walletlib 2.0.7 authorization response encodes account public keys with Base64.NO_WRAP
+
+MWA Lab implementation:
+- protocol requested-address strings are decoded as standard Base64
+- decoded bytes are compared directly with the persistent Lab Ed25519 public key
+- Base58 remains display-address format only
+- BouncyCastle Base64 is used in the policy because it works on both Android and plain JVM unit tests
+- no Base64-decoded value is logged or persisted by MWA Lab

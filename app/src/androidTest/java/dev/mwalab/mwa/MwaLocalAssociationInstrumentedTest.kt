@@ -8,8 +8,12 @@ import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationIntentC
 import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationScenario
 import com.solana.mobilewalletadapter.clientlib.scenario.Scenario
 import com.solana.mobilewalletadapter.common.ProtocolContract
+import dev.mwalab.app.MwaLabComposition
 import dev.mwalab.mwa.evidence.MwaSessionEvent
 import dev.mwalab.mwa.evidence.MwaSessionEvidenceStore
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -19,10 +23,14 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 class MwaLocalAssociationInstrumentedTest {
     @Test
-    fun realLocalAssociationIsDiscoverableEstablishesDispatchesAndCloses() {
+    fun phase1AuthorizeCapabilitiesDeauthorizeAndRevocationFlow() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
         MwaSessionEvidenceStore.resetForTest()
+
+        val expectedIdentity = runBlocking {
+            MwaLabComposition.identityRepository(context).getOrCreate()
+        }
 
         val localAssociation =
             LocalAssociationScenario(Scenario.DEFAULT_CLIENT_TIMEOUT_MS)
@@ -59,40 +67,94 @@ class MwaLocalAssociationInstrumentedTest {
         awaitEvent(MwaSessionEvent.SCENARIO_READY)
         awaitEvent(MwaSessionEvent.SERVING_CLIENTS)
 
-        // Batch C proves that a real protocol request reaches MwaSessionHost.
-        // Authorization success itself is Phase 1.7, so this Devnet request is
-        // deliberately declined with the normal protocol authorization error.
+        val capabilities = client.getCapabilities()
+            .get(10, TimeUnit.SECONDS)
+
+        assertEquals(0, capabilities.maxTransactionsPerSigningRequest)
+        assertEquals(0, capabilities.maxMessagesPerSigningRequest)
+        assertArrayEquals(
+            arrayOf<Any>("legacy"),
+            capabilities.supportedTransactionVersions,
+        )
+        assertTrue(capabilities.supportedOptionalFeatures.isEmpty())
+
+        val identityUri = Uri.parse("https://phase1-client.invalid")
+        val iconUri = Uri.parse("icon.png")
+        val identityName = "MWA Lab Phase 1 deterministic client"
+
+        val mainnetFailure = runCatching {
+            client.authorize(
+                identityUri,
+                iconUri,
+                identityName,
+                ProtocolContract.CHAIN_SOLANA_MAINNET,
+                null,
+                null,
+                null,
+                null,
+            ).get(10, TimeUnit.SECONDS)
+        }.exceptionOrNull()
+
+        assertNotNull("Mainnet authorization must fail closed", mainnetFailure)
+        awaitEvent(MwaSessionEvent.AUTHORIZE_CHAIN_REJECTED)
+
         val authorization = client.authorize(
-            Uri.parse("https://phase1-client.invalid"),
-            Uri.parse("icon.png"),
-            "MWA Lab Phase 1 deterministic client",
+            identityUri,
+            iconUri,
+            identityName,
             ProtocolContract.CHAIN_SOLANA_DEVNET,
             null,
             null,
             null,
             null,
-        )
+        ).get(10, TimeUnit.SECONDS)
 
-        val authorizationFailure = runCatching {
-            authorization.get(10, TimeUnit.SECONDS)
+        assertTrue(authorization.authToken.isNotEmpty())
+        assertEquals(1, authorization.accounts.size)
+        assertArrayEquals(
+            expectedIdentity.publicKeyBytes(),
+            authorization.accounts.single().publicKey,
+        )
+        awaitEvent(MwaSessionEvent.AUTHORIZE_SUCCEEDED)
+
+        val authToken = authorization.authToken
+
+        client.deauthorize(authToken).get(10, TimeUnit.SECONDS)
+        awaitEvent(MwaSessionEvent.DEAUTHORIZED_COMPLETED)
+
+        val revokedReuseFailure = runCatching {
+            client.authorize(
+                identityUri,
+                iconUri,
+                identityName,
+                ProtocolContract.CHAIN_SOLANA_DEVNET,
+                authToken,
+                null,
+                arrayOf(expectedIdentity.publicKeyBytes()),
+                null,
+            ).get(10, TimeUnit.SECONDS)
         }.exceptionOrNull()
 
         assertNotNull(
-            "Batch C authorization must be policy-declined until Phase 1.7",
-            authorizationFailure,
+            "Revoked auth token must not be reusable",
+            revokedReuseFailure,
         )
-
-        awaitEvent(MwaSessionEvent.AUTHORIZE_REQUEST)
-        awaitEvent(MwaSessionEvent.AUTHORIZE_DECLINED_PENDING_PHASE_1_7)
 
         localAssociation.close().get(10, TimeUnit.SECONDS)
         awaitEvent(MwaSessionEvent.SERVING_COMPLETE)
 
+        val events = MwaSessionEvidenceStore.snapshot()
         assertTrue(
-            "Association token/public key must never be copied into evidence details",
-            MwaSessionEvidenceStore.snapshot().none { event ->
-                event.detail?.contains("association_token", ignoreCase = true) == true ||
-                    event.detail?.contains("auth_token", ignoreCase = true) == true
+            "Session evidence must never contain token/payload/private material",
+            events.none { event ->
+                val detail = event.detail.orEmpty().lowercase()
+                detail.contains("auth_token") ||
+                    detail.contains("association_token") ||
+                    detail.contains("private") ||
+                    detail.contains("seed") ||
+                    detail.contains("mnemonic") ||
+                    detail.contains("payload") ||
+                    detail.contains("signature")
             },
         )
     }
