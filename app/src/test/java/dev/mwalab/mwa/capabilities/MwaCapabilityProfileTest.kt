@@ -9,8 +9,8 @@ class MwaCapabilityProfileTest {
     fun snapshotMatchesPinnedPhase1Profile() {
         val snapshot = MwaCapabilityProfile.snapshot()
 
-        assertEquals(0, snapshot.maxTransactionsPerSigningRequest)
-        assertEquals(0, snapshot.maxMessagesPerSigningRequest)
+        assertEquals(10, snapshot.maxTransactionsPerSigningRequest)
+        assertEquals(10, snapshot.maxMessagesPerSigningRequest)
         assertEquals(listOf("legacy"), snapshot.supportedTransactionVersions)
         assertTrue(snapshot.optionalFeatures.isEmpty())
     }

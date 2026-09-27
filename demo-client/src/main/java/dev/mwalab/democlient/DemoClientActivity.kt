@@ -23,20 +23,35 @@ class DemoClientActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val phase2Scenario = Phase2AcceptanceScenario.fromWireName(
+            intent?.getStringExtra(EXTRA_PHASE2_SCENARIO),
+        )
+
         setContent {
             MaterialTheme {
-                var state by remember {
+                var state by remember(phase2Scenario) {
                     mutableStateOf<DemoUiState>(DemoUiState.Running)
                 }
 
-                LaunchedEffect(Unit) {
+                LaunchedEffect(phase2Scenario) {
                     state = withContext(Dispatchers.IO) {
-                        runCatching {
-                            DemoClientRunner(applicationContext).runCanonical()
-                        }.fold(
-                            onSuccess = { DemoUiState.Complete(it) },
-                            onFailure = { DemoUiState.Failed },
-                        )
+                        if (phase2Scenario == null) {
+                            runCatching {
+                                DemoClientRunner(applicationContext).runCanonical()
+                            }.fold(
+                                onSuccess = { DemoUiState.CanonicalComplete(it) },
+                                onFailure = { DemoUiState.Failed("PHASE1_CANONICAL") },
+                            )
+                        } else {
+                            runCatching {
+                                Phase2AcceptanceRunner(applicationContext).run(phase2Scenario)
+                            }.fold(
+                                onSuccess = { DemoUiState.Phase2Complete(it) },
+                                onFailure = {
+                                    DemoUiState.Failed("PHASE2 ${phase2Scenario.wireName}")
+                                },
+                            )
+                        }
                     }
                 }
 
@@ -54,12 +69,19 @@ class DemoClientActivity : ComponentActivity() {
                         text = "FOR TESTING ONLY",
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Text("Canonical Phase 1 sequence")
+
+                    if (phase2Scenario == null) {
+                        Text("Canonical Phase 1 sequence")
+                    } else {
+                        Text("Phase 2 device acceptance: ${phase2Scenario.wireName}")
+                    }
 
                     when (val current = state) {
                         DemoUiState.Running -> Text("Running…")
-                        DemoUiState.Failed -> Text("Result: FAIL")
-                        is DemoUiState.Complete -> {
+                        is DemoUiState.Failed -> {
+                            Text("${current.label}: FAIL")
+                        }
+                        is DemoUiState.CanonicalComplete -> {
                             Text("Result: PASS")
                             Text("Account: ${current.result.accountBase58}")
                             current.result.steps.forEach { step ->
@@ -79,15 +101,25 @@ class DemoClientActivity : ComponentActivity() {
                                     current.result.optionalFeatures.joinToString(),
                             )
                         }
+                        is DemoUiState.Phase2Complete -> {
+                            val result = current.result
+                            Text("PHASE2 ${result.scenario.wireName}: PASS")
+                            Text("Evidence: ${result.summary}")
+                        }
                     }
                 }
             }
         }
     }
+
+    companion object {
+        const val EXTRA_PHASE2_SCENARIO = "mwa_phase2_scenario"
+    }
 }
 
 private sealed interface DemoUiState {
     data object Running : DemoUiState
-    data object Failed : DemoUiState
-    data class Complete(val result: DemoRunResult) : DemoUiState
+    data class Failed(val label: String) : DemoUiState
+    data class CanonicalComplete(val result: DemoRunResult) : DemoUiState
+    data class Phase2Complete(val result: Phase2AcceptanceResult) : DemoUiState
 }

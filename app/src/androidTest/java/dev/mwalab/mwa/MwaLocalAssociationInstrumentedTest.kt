@@ -74,8 +74,8 @@ class MwaLocalAssociationInstrumentedTest {
         val capabilities = client.getCapabilities()
             .get(10, TimeUnit.SECONDS)
 
-        assertEquals(0, capabilities.maxTransactionsPerSigningRequest)
-        assertEquals(0, capabilities.maxMessagesPerSigningRequest)
+        assertEquals(10, capabilities.maxTransactionsPerSigningRequest)
+        assertEquals(10, capabilities.maxMessagesPerSigningRequest)
         assertArrayEquals(
             arrayOf<Any>("legacy"),
             capabilities.supportedTransactionVersions,

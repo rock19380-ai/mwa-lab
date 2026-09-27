@@ -71,5 +71,8 @@ class LabAuthorizationPolicy(
     companion object {
         private val AUTHORIZATION_SCOPE =
             "mwa-lab:phase1:devnet:v1".encodeToByteArray()
+
+        fun isCurrentAuthorizationScope(scope: ByteArray): Boolean =
+            scope.contentEquals(AUTHORIZATION_SCOPE)
     }
 }

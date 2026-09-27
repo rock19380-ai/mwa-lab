@@ -12,13 +12,12 @@ data class MwaCapabilitySnapshot(
 /**
  * Single authority for the capability values fed to pinned walletlib 2.0.7.
  *
- * In walletlib semantics a value of 0 for the two request maxima means no
- * configured limit; it does not mean that successful signing is implemented
- * by MWA Lab. Phase 1 signing callbacks remain fail-closed.
+ * Phase 2 publishes explicit bounded request limits and enforces the same
+ * constants in signing handlers.
  */
 object MwaCapabilityProfile {
-    const val MAX_TRANSACTIONS_PER_SIGNING_REQUEST = 0
-    const val MAX_MESSAGES_PER_SIGNING_REQUEST = 0
+    const val MAX_TRANSACTIONS_PER_SIGNING_REQUEST = 10
+    const val MAX_MESSAGES_PER_SIGNING_REQUEST = 10
     const val LOW_POWER_NO_CONNECTION_TIMEOUT_MS = 10_000L
 
     fun createWalletConfig(): MobileWalletAdapterConfig =

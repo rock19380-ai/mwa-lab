@@ -1,0 +1,13 @@
+MWA Lab Phase 2 Batch A security contract
+
+- Raw private seed is not exposed by IdentityRepository.
+- AndroidKeystoreIdentityRepository also implements LabSigningService.
+- Decrypted seed bytes exist only inside the protected identity/signing implementation.
+- Public key integrity is re-derived before every signature operation.
+- Temporary seed bytes are zeroed in finally.
+- UI receives only sanitized fingerprints, lengths, method, dApp identity and chain.
+- MwaSessionHost receives signature bytes, never raw private seed bytes.
+- sign_messages rejects payloads that parse as Solana transaction messages.
+- signing requires explicit approval in normal mode.
+- session teardown cancels pending approval.
+- network policy remains Devnet-only.

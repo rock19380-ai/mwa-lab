@@ -1,0 +1,447 @@
+=== MWA LAB PHASE 2 — BATCH A SESSION-GENERATION REPAIR + ACCEPTANCE ===
+repo=/home/abbaas/mwa-lab
+patch=/home/abbaas/Downloads/MWA_LAB_PHASE2_BATCH_A_REPAIR_SESSION_GENERATION.patch
+branch=phase2-core-request-signing
+head=76aeab50c7202bd372d6986bd8ca266aff61f086
+
+=== DEVICE PRECONDITIONS ===
+device=emulator-5554
+android_release=16
+android_sdk=36
+device_model=sdk_gphone64_x86_64
+
+=== APPLY SESSION-GENERATION REPAIR ===
+repair_patch=applied
+git_diff_check=PASS
+
+=== FULL LOCAL BUILD / TEST GATE ===
+Calculating task graph as configuration cache cannot be reused because file 'gradle/libs.versions.toml' has changed.
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :demo-client:generateDebugAssets UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:mapDebugSourceSetPaths
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :app:extractDeepLinksDebug
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :app:extractProguardFiles
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :demo-client:extractProguardFiles
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :demo-client:processDebugJavaRes UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:packageDebugResources
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:processDebugNavigationResources
+> Task :app:checkDebugAarMetadata
+> Task :app:compileDebugNavigationResources
+> Task :app:parseDebugLocalResources
+> Task :app:generateDebugRFile
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:checkDebugDuplicateClasses
+> Task :demo-client:generateDebugAndroidTestLintModel
+> Task :demo-client:generateDebugUnitTestLintModel
+> Task :demo-client:generateDebugLintReportModel
+> Task :demo-client:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :demo-client:compileDebugUnitTestKotlin NO-SOURCE
+> Task :app:compressDebugAssets
+> Task :demo-client:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugUnitTestJavaRes NO-SOURCE
+> Task :demo-client:testDebugUnitTest NO-SOURCE
+> Task :demo-client:test UP-TO-DATE
+> Task :app:mergeLibDexDebug
+> Task :app:desugarDebugFileDependencies
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :demo-client:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :demo-client:mergeDebugAssets UP-TO-DATE
+> Task :demo-client:compressDebugAssets UP-TO-DATE
+> Task :demo-client:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :demo-client:mergeDebugJavaResource UP-TO-DATE
+> Task :demo-client:checkDebugDuplicateClasses UP-TO-DATE
+> Task :demo-client:desugarDebugFileDependencies UP-TO-DATE
+> Task :demo-client:mergeExtDexDebug UP-TO-DATE
+> Task :demo-client:mergeLibDexDebug UP-TO-DATE
+> Task :demo-client:dexBuilderDebug UP-TO-DATE
+> Task :demo-client:mergeProjectDexDebug UP-TO-DATE
+> Task :demo-client:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics
+> Task :demo-client:validateSigningDebug UP-TO-DATE
+> Task :demo-client:writeDebugAppMetadata UP-TO-DATE
+> Task :demo-client:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :demo-client:mergeDebugNativeLibs UP-TO-DATE
+> Task :demo-client:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources
+> Task :demo-client:packageDebug UP-TO-DATE
+> Task :demo-client:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :demo-client:assembleDebug UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources
+> Task :app:javaPreCompileDebugAndroidTest
+> Task :app:packageDebugAndroidTestResources
+> Task :app:parseDebugAndroidTestLocalResources
+> Task :app:mergeDebugAndroidTestAssets
+> Task :app:compressDebugAndroidTestAssets
+> Task :app:generateDebugAndroidTestRFile
+> Task :app:checkDebugAndroidTestDuplicateClasses
+> Task :app:desugarDebugAndroidTestFileDependencies
+> Task :app:generateDebugAndroidTestGlobalSynthetics
+> Task :app:mergeLibDexDebugAndroidTest
+> Task :app:checkDebugAndroidTestAarMetadata
+> Task :app:mapDebugAndroidTestSourceSetPaths
+> Task :app:compileDebugAndroidTestNavigationResources
+> Task :demo-client:lintAnalyzeDebugUnitTest
+> Task :app:mergeDebugAndroidTestManifest
+> Task :app:processDebugAndroidTestManifest
+> Task :app:mergeDebugAndroidTestJniLibFolders
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest
+> Task :app:writeDebugAndroidTestSigningConfigVersions
+> Task :demo-client:generateDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:packageDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :demo-client:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :demo-client:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :demo-client:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :demo-client:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :demo-client:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :demo-client:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :demo-client:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :demo-client:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :demo-client:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :demo-client:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :demo-client:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :demo-client:packageDebugAndroidTest UP-TO-DATE
+> Task :demo-client:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :demo-client:assembleDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugResources
+> Task :app:mergeDebugAndroidTestResources
+> Task :app:processDebugAndroidTestResources
+> Task :app:processDebugResources
+> Task :demo-client:lintAnalyzeDebugAndroidTest
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:generateDebugLintReportModel
+> Task :app:processDebugJavaRes
+> Task :app:mergeDebugJavaResource
+> Task :demo-client:lintAnalyzeDebug
+> Task :app:dexBuilderDebug
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:mergeExtDexDebug
+> Task :app:mergeExtDexDebugAndroidTest
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:lintAnalyzeDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:compileDebugAndroidTestKotlin
+> Task :app:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugAndroidTestJavaRes
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :app:mergeDebugAndroidTestJavaResource
+> Task :app:dexBuilderDebugAndroidTest
+> Task :app:mergeProjectDexDebugAndroidTest
+
+> Task :demo-client:lintReportDebug
+Wrote HTML report to file:///home/abbaas/mwa-lab/demo-client/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/abbaas/mwa-lab/demo-client/build/reports/lint-results-debug.sarif
+
+> Task :demo-client:lintDebug
+> Task :demo-client:lint
+> Task :app:testDebugUnitTest
+> Task :app:test
+> Task :app:packageDebugAndroidTest
+> Task :app:assembleDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect
+> Task :app:packageDebug
+> Task :app:assembleDebug
+> Task :app:createDebugApkListingFileRedirect
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///home/abbaas/mwa-lab/app/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/abbaas/mwa-lab/app/build/reports/lint-results-debug.sarif
+
+> Task :app:lintDebug
+> Task :app:lint
+
+BUILD SUCCESSFUL in 1m 20s
+159 actionable tasks: 90 executed, 69 up-to-date
+Configuration cache entry stored.
+
+=== STATIC REGRESSION GATES ===
+=== MWA LAB PHASE 1 STATIC / CI GATE ===
+PHASE 1 STATIC / CI GATE: PASS
+=== MWA LAB PHASE 2 STATIC / CI GATE — BATCH 2.0–2.5 ===
+=== MWA LAB PHASE 1 STATIC / CI GATE ===
+PHASE 1 STATIC / CI GATE: PASS
+PHASE 2 STATIC / CI GATE — BATCH 2.0–2.5: PASS
+
+=== APK CHECKSUMS ===
+e6d38cef253829693fa664a13cefa44b0892aeba1d281d2842e91fcb59b35dd9  app/build/outputs/apk/debug/app-debug.apk
+faf3af233736b908ee8fe0e8c2fe1e4e2365d022e66007e5055d5079efd6a94f  demo-client/build/outputs/apk/debug/demo-client-debug.apk
+032c2f96fef6f3df3f29de4e5256d50b8a12153c59511171a5d4560731f77cd1  app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+4e38132339da98cb2f5f899a9a726b892af716a3f539aa5cc305cae1fb68c89b  demo-client/build/outputs/apk/androidTest/debug/demo-client-debug-androidTest.apk
+
+=== INSTALL / REINSTALL APKs ===
+apk_install=PASS
+
+=== PRIMARY APP INSTRUMENTATION ===
+INSTRUMENTATION_STATUS: class=dev.mwalab.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=
+dev.mwalab.ExampleInstrumentedTest:
+INSTRUMENTATION_STATUS: test=useAppContext
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.mwalab.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=useAppContext
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.mwalab.identity.AndroidKeystoreIdentityRepositoryInstrumentedTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=
+dev.mwalab.identity.AndroidKeystoreIdentityRepositoryInstrumentedTest:
+INSTRUMENTATION_STATUS: test=identityPersistsAcrossRepositoryRestartAndResetChangesAuthority
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.mwalab.identity.AndroidKeystoreIdentityRepositoryInstrumentedTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=identityPersistsAcrossRepositoryRestartAndResetChangesAuthority
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.mwalab.identity.LabSigningServiceInstrumentedTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=
+dev.mwalab.identity.LabSigningServiceInstrumentedTest:
+INSTRUMENTATION_STATUS: test=protectedSignerSurvivesRestartBoundaryAndVerifies
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.mwalab.identity.LabSigningServiceInstrumentedTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=protectedSignerSurvivesRestartBoundaryAndVerifies
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.mwalab.mwa.MwaLocalAssociationInstrumentedTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=
+dev.mwalab.mwa.MwaLocalAssociationInstrumentedTest:
+INSTRUMENTATION_STATUS: test=phase1AuthorizeCapabilitiesDeauthorizeAndRevocationFlow
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.mwalab.mwa.MwaLocalAssociationInstrumentedTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=4
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=phase1AuthorizeCapabilitiesDeauthorizeAndRevocationFlow
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 2.336
+
+OK (4 tests)
+
+
+INSTRUMENTATION_CODE: -1
+host_command_rc=0
+
+=== TARGETED PHASE 1 CROSS-PACKAGE REPEATABILITY REGRESSION ===
+INSTRUMENTATION_STATUS: class=dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest:
+INSTRUMENTATION_STATUS: test=canonicalSequenceIsRealCrossPackageAndRepeatable
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=canonicalSequenceIsRealCrossPackageAndRepeatable
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 1.873
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1
+host_command_rc=0
+phase1_cross_package_repeatability=PASS
+
+=== REAL REAUTHORIZATION ACCEPTANCE ===
+scenario_started=REAUTHORIZE
+ui_text_found=PHASE2 REAUTHORIZE: PASS
+
+=== REAL SIGN_MESSAGE APPROVE ACCEPTANCE ===
+scenario_started=SIGN_MESSAGE_APPROVE
+ui_text_found=SIGNING APPROVAL
+ui_text_found=MWA LAB TEST ENDPOINT
+ui_text_found=SOLANA DEVNET
+ui_text_found=NO REAL FUNDS
+ui_tapped=APPROVE
+ui_text_found=PHASE2 SIGN_MESSAGE_APPROVE: PASS
+
+=== REAL SIGN_MESSAGE REJECT ACCEPTANCE ===
+scenario_started=SIGN_MESSAGE_REJECT
+ui_text_found=SIGNING APPROVAL
+ui_text_found=MWA LAB TEST ENDPOINT
+ui_text_found=SOLANA DEVNET
+ui_text_found=NO REAL FUNDS
+ui_tapped=REJECT
+ui_text_found=PHASE2 SIGN_MESSAGE_REJECT: PASS
+
+=== FINAL DETERMINISTIC GATES ===
+=== MWA LAB PHASE 1 STATIC / CI GATE ===
+PHASE 1 STATIC / CI GATE: PASS
+=== MWA LAB PHASE 2 STATIC / CI GATE — BATCH 2.0–2.5 ===
+=== MWA LAB PHASE 1 STATIC / CI GATE ===
+PHASE 1 STATIC / CI GATE: PASS
+PHASE 2 STATIC / CI GATE — BATCH 2.0–2.5: PASS
+
+=== FINAL SOURCE STATE ===
+ .github/workflows/android.yml                      |   6 +-
+ .../mwa/MwaLocalAssociationInstrumentedTest.kt     |   4 +-
+ .../main/java/dev/mwalab/app/MwaLabComposition.kt  |  26 +-
+ .../identity/AndroidKeystoreIdentityRepository.kt  |  38 ++-
+ .../dev/mwalab/identity/Ed25519IdentityMaterial.kt |  11 +
+ .../dev/mwalab/mwa/MobileWalletAdapterActivity.kt  |  59 +++-
+ app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt | 362 ++++++++++++++++++++-
+ .../mwa/authorization/LabAuthorizationPolicy.kt    |   3 +
+ .../mwa/capabilities/MwaCapabilityProfile.kt       |   9 +-
+ .../dev/mwalab/mwa/evidence/MwaSessionEvidence.kt  |  10 +-
+ .../java/dev/mwalab/protocol/ProtocolEvidence.kt   |   5 +-
+ .../java/dev/mwalab/protocol/ProtocolMethod.kt     |   4 +
+ .../mwa/capabilities/MwaCapabilityProfileTest.kt   |   4 +-
+ demo-client/build.gradle.kts                       |   2 +
+ .../DemoClientCrossAppInstrumentedTest.kt          |   4 +-
+ .../dev/mwalab/democlient/DemoClientActivity.kt    |  58 +++-
+ gradle/libs.versions.toml                          |   2 +
+ 17 files changed, 551 insertions(+), 56 deletions(-)
+## phase2-core-request-signing
+ M .github/workflows/android.yml
+ M app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt
+ M app/src/main/java/dev/mwalab/app/MwaLabComposition.kt
+ M app/src/main/java/dev/mwalab/identity/AndroidKeystoreIdentityRepository.kt
+ M app/src/main/java/dev/mwalab/identity/Ed25519IdentityMaterial.kt
+ M app/src/main/java/dev/mwalab/mwa/MobileWalletAdapterActivity.kt
+ M app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt
+ M app/src/main/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicy.kt
+ M app/src/main/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfile.kt
+ M app/src/main/java/dev/mwalab/mwa/evidence/MwaSessionEvidence.kt
+ M app/src/main/java/dev/mwalab/protocol/ProtocolEvidence.kt
+ M app/src/main/java/dev/mwalab/protocol/ProtocolMethod.kt
+ M app/src/test/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfileTest.kt
+ M demo-client/build.gradle.kts
+ M demo-client/src/androidTest/java/dev/mwalab/democlient/DemoClientCrossAppInstrumentedTest.kt
+ M demo-client/src/main/java/dev/mwalab/democlient/DemoClientActivity.kt
+ M gradle/libs.versions.toml
+?? app/src/androidTest/java/dev/mwalab/identity/LabSigningServiceInstrumentedTest.kt
+?? app/src/main/java/dev/mwalab/approval/ApprovalCoordinator.kt
+?? app/src/main/java/dev/mwalab/signing/LabSigningService.kt
+?? app/src/main/java/dev/mwalab/transaction/SolanaTransactionMessageDetector.kt
+?? app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt
+?? app/src/test/java/dev/mwalab/identity/Ed25519SigningTest.kt
+?? app/src/test/java/dev/mwalab/transaction/SolanaTransactionMessageDetectorTest.kt
+?? demo-client/src/main/java/dev/mwalab/democlient/Phase2AcceptanceRunner.kt
+?? docs/evidence/phase2/phase2-batch-a-api-authority.txt
+?? docs/evidence/phase2/phase2-batch-a-cross-package-crash-diagnostic.txt
+?? docs/evidence/phase2/phase2-batch-a-cross-package-exit-info.txt
+?? docs/evidence/phase2/phase2-batch-a-cross-package-logcat.txt
+?? docs/evidence/phase2/phase2-batch-a-demo-androidtest-runtime-classpath.txt
+?? docs/evidence/phase2/phase2-batch-a-demo-runner-repair-acceptance.txt
+?? docs/evidence/phase2/phase2-batch-a-demo-runner-repair-logcat.txt
+?? docs/evidence/phase2/phase2-batch-a-device-acceptance.txt
+?? docs/evidence/phase2/phase2-batch-a-security-contract.txt
+?? docs/evidence/phase2/phase2-batch-a-session-generation-repair-acceptance.txt
+?? docs/evidence/phase2/phase2-batch-a-session-generation-repair-logcat.txt
+?? scripts/phase2_static.sh
+
+============================================================
+PHASE 2 BATCH A (2.0–2.5): DEVICE ACCEPTANCE PASS
+✓ stale prior-association callbacks cannot finish replacement session
+✓ finish callback rechecked on main queue
+✓ Phase 1 real cross-package repeatability
+✓ existing authorization reused across real sessions
+✓ actual MWA Lab APPROVE UI exercised
+✓ approved Ed25519 signed message verified
+✓ actual MWA Lab REJECT UI exercised
+✓ rejection mapped to ERROR_NOT_SIGNED
+✓ Phase 1 + Phase 2 static gates
+NOT COMMITTED / NOT TAGGED
+NEXT: BATCH A COMMIT/FREEZE, THEN PHASE 2.6–2.9
+evidence=docs/evidence/phase2/phase2-batch-a-session-generation-repair-acceptance.txt
+logcat_evidence=docs/evidence/phase2/phase2-batch-a-session-generation-repair-logcat.txt
+============================================================

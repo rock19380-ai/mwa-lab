@@ -46,6 +46,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.solana.mobile.clientlib)
     implementation(libs.multimult)
+    implementation(libs.bouncycastle)
 
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }

@@ -26,8 +26,8 @@ class DemoClientCrossAppInstrumentedTest {
         assertTrue(first.accountBase58.isNotBlank())
         assertEquals(first.accountBase58, second.accountBase58)
 
-        assertEquals(0, first.maxTransactionsPerSigningRequest)
-        assertEquals(0, first.maxMessagesPerSigningRequest)
+        assertEquals(10, first.maxTransactionsPerSigningRequest)
+        assertEquals(10, first.maxMessagesPerSigningRequest)
         assertEquals(listOf("legacy"), first.supportedTransactionVersions)
         assertTrue(first.optionalFeatures.isEmpty())
 

@@ -1,0 +1,399 @@
+=== MWA LAB PHASE 2 — BATCH A DEMO RUNNER REPAIR + ACCEPTANCE ===
+repo=/home/abbaas/mwa-lab
+patch=/home/abbaas/Downloads/MWA_LAB_PHASE2_BATCH_A_REPAIR_DEMO_RUNNER.patch
+branch=phase2-core-request-signing
+head=76aeab50c7202bd372d6986bd8ca266aff61f086
+
+=== DEVICE PRECONDITIONS ===
+device=emulator-5554
+android_release=16
+android_sdk=36
+device_model=sdk_gphone64_x86_64
+
+=== REPAIR PATCH ===
+repair_patch=applied
+git_diff_check=PASS
+
+=== DEMO-CLIENT TEST BUILD ===
+Calculating task graph as no cached configuration is available for tasks: :demo-client:test :demo-client:assembleDebug :demo-client:assembleDebugAndroidTest
+> Task :demo-client:generateDebugAssets UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:generateDebugResources
+> Task :demo-client:mapDebugSourceSetPaths
+> Task :demo-client:extractDeepLinksDebug
+> Task :demo-client:createDebugCompatibleScreenManifests
+> Task :demo-client:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :demo-client:javaPreCompileDebug
+> Task :demo-client:packageDebugResources
+> Task :demo-client:javaPreCompileDebugUnitTest
+> Task :demo-client:processDebugNavigationResources
+> Task :demo-client:checkDebugAarMetadata
+> Task :demo-client:mergeDebugAssets
+> Task :demo-client:compressDebugAssets
+> Task :demo-client:mergeDebugJniLibFolders
+> Task :demo-client:parseDebugLocalResources
+> Task :demo-client:generateDebugRFile
+> Task :demo-client:desugarDebugFileDependencies
+> Task :demo-client:validateSigningDebug
+> Task :demo-client:writeDebugAppMetadata
+> Task :demo-client:compileDebugNavigationResources
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :demo-client:generateDebugAndroidTestResources
+> Task :demo-client:packageDebugAndroidTestResources
+> Task :demo-client:processDebugAndroidTestNavigationResources
+> Task :demo-client:writeDebugSigningConfigVersions
+> Task :demo-client:javaPreCompileDebugAndroidTest
+> Task :demo-client:mergeDebugNativeLibs
+> Task :demo-client:parseDebugAndroidTestLocalResources
+> Task :demo-client:checkDebugDuplicateClasses
+> Task :demo-client:mergeDebugAndroidTestAssets
+> Task :demo-client:processDebugMainManifest
+> Task :demo-client:generateDebugAndroidTestRFile
+> Task :demo-client:compressDebugAndroidTestAssets
+
+> Task :demo-client:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :demo-client:processDebugManifest
+> Task :demo-client:mergeLibDexDebug
+> Task :demo-client:processDebugManifestForPackage
+> Task :demo-client:desugarDebugAndroidTestFileDependencies
+> Task :demo-client:mapDebugAndroidTestSourceSetPaths
+> Task :demo-client:checkDebugAndroidTestAarMetadata
+> Task :demo-client:compileDebugAndroidTestNavigationResources
+> Task :demo-client:mergeDebugAndroidTestManifest
+> Task :demo-client:checkDebugAndroidTestDuplicateClasses
+> Task :demo-client:processDebugAndroidTestManifest
+> Task :demo-client:mergeDebugAndroidTestResources
+> Task :demo-client:mergeLibDexDebugAndroidTest
+> Task :demo-client:mergeDebugResources
+> Task :demo-client:mergeDebugAndroidTestJniLibFolders
+> Task :demo-client:processDebugAndroidTestResources
+> Task :demo-client:validateSigningDebugAndroidTest
+> Task :demo-client:writeDebugAndroidTestSigningConfigVersions
+> Task :demo-client:generateDebugAndroidTestGlobalSynthetics
+> Task :demo-client:generateDebugGlobalSynthetics
+> Task :demo-client:compileDebugKotlin
+> Task :demo-client:mergeExtDexDebug
+> Task :demo-client:mergeExtDexDebugAndroidTest
+> Task :demo-client:processDebugResources
+> Task :demo-client:mergeDebugAndroidTestNativeLibs
+> Task :demo-client:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :demo-client:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugJavaRes
+> Task :demo-client:bundleDebugClassesToRuntimeJar
+> Task :demo-client:bundleDebugClassesToCompileJar
+> Task :demo-client:compileDebugUnitTestKotlin NO-SOURCE
+> Task :demo-client:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugUnitTestJavaRes NO-SOURCE
+> Task :demo-client:testDebugUnitTest NO-SOURCE
+> Task :demo-client:test UP-TO-DATE
+> Task :demo-client:dexBuilderDebug
+> Task :demo-client:mergeProjectDexDebug
+> Task :demo-client:compileDebugAndroidTestKotlin
+> Task :demo-client:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugAndroidTestJavaRes
+> Task :demo-client:mergeDebugAndroidTestJavaResource
+> Task :demo-client:dexBuilderDebugAndroidTest
+> Task :demo-client:mergeProjectDexDebugAndroidTest
+> Task :demo-client:mergeDebugJavaResource
+> Task :demo-client:packageDebugAndroidTest
+> Task :demo-client:assembleDebugAndroidTest
+> Task :demo-client:createDebugAndroidTestApkListingFileRedirect
+> Task :demo-client:packageDebug
+> Task :demo-client:assembleDebug
+> Task :demo-client:createDebugApkListingFileRedirect
+
+BUILD SUCCESSFUL in 2m 5s
+69 actionable tasks: 69 executed
+Configuration cache entry stored.
+
+=== RESOLVED ANDROIDTEST RUNTIME CLASSPATH ===
++--- androidx.test:runner:1.5.2
+resolved_runner=androidx.test:runner:1.5.2
+
+=== REINSTALL DEMO CLIENT + TEST APK ===
+demo_client_apk_reinstall=PASS
+
+=== VERIFY INSTRUMENTATION REGISTRATION ===
+instrumentation:dev.mwalab.democlient.test/androidx.test.runner.AndroidJUnitRunner (target=dev.mwalab.democlient)
+
+=== TARGETED PHASE 1 CROSS-PACKAGE RETRY ===
+INSTRUMENTATION_STATUS: class=dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest:
+INSTRUMENTATION_STATUS: test=canonicalSequenceIsRealCrossPackageAndRepeatable
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.util.concurrent.CancellationException
+	at com.solana.mobilewalletadapter.common.util.NotifyingCompletableFuture.get(NotifyingCompletableFuture.java:111)
+	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$JsonRpc20MethodResultFuture.get(MobileWalletAdapterClient.java:101)
+	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$DeauthorizeFuture.get(MobileWalletAdapterClient.java:512)
+	at dev.mwalab.democlient.DemoClientRunner.runCanonical(DemoClientRunner.kt:130)
+	at dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest.canonicalSequenceIsRealCrossPackageAndRepeatable(DemoClientCrossAppInstrumentedTest.kt:20)
+
+INSTRUMENTATION_STATUS: stream=
+Error in canonicalSequenceIsRealCrossPackageAndRepeatable(dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest):
+java.util.concurrent.CancellationException
+	at com.solana.mobilewalletadapter.common.util.NotifyingCompletableFuture.get(NotifyingCompletableFuture.java:111)
+	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$JsonRpc20MethodResultFuture.get(MobileWalletAdapterClient.java:101)
+	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$DeauthorizeFuture.get(MobileWalletAdapterClient.java:512)
+	at dev.mwalab.democlient.DemoClientRunner.runCanonical(DemoClientRunner.kt:130)
+	at dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest.canonicalSequenceIsRealCrossPackageAndRepeatable(DemoClientCrossAppInstrumentedTest.kt:20)
+
+INSTRUMENTATION_STATUS: test=canonicalSequenceIsRealCrossPackageAndRepeatable
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 1.954
+There was 1 failure:
+1) canonicalSequenceIsRealCrossPackageAndRepeatable(dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest)
+java.util.concurrent.CancellationException
+	at com.solana.mobilewalletadapter.common.util.NotifyingCompletableFuture.get(NotifyingCompletableFuture.java:111)
+	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$JsonRpc20MethodResultFuture.get(MobileWalletAdapterClient.java:101)
+	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$DeauthorizeFuture.get(MobileWalletAdapterClient.java:512)
+	at dev.mwalab.democlient.DemoClientRunner.runCanonical(DemoClientRunner.kt:130)
+	at dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest.canonicalSequenceIsRealCrossPackageAndRepeatable(DemoClientCrossAppInstrumentedTest.kt:20)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
+host_command_rc=0
+
+=== TARGETED RETRY FAILED ===
+logcat_evidence=docs/evidence/phase2/phase2-batch-a-demo-runner-repair-logcat.txt
+09-27 10:31:11.850  4842  4842 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-27 10:31:11.858  4842  4842 I AndroidRuntime: Using default boot image
+09-27 10:31:11.858  4842  4842 I AndroidRuntime: Leaving lock profiling enabled
+09-27 10:31:12.079  4842  4842 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+09-27 10:31:12.096  4842  4842 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+09-27 10:31:13.246  4858  4871 V LocalAssociationScenario: Creating local association scenario for ws://127.0.0.1:61061/solana-wallet
+09-27 10:31:13.255   804  2048 I ActivityTaskManager: START u0 {act=android.intent.action.VIEW cat=[android.intent.category.BROWSABLE] dat=solana-wallet:/... flg=0x10000000 xflg=0x4 pkg=dev.mwalab cmp=dev.mwalab/.mwa.MobileWalletAdapterActivity} with LAUNCH_SINGLE_TASK from uid 10218 (BAL_ALLOW_PERMISSION) result code=0
+09-27 10:31:13.258  1100  1181 V WindowManagerShell: Transition requested (#22): android.os.BinderProxy@ca487b5 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=9 effectiveUid=10216 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.VIEW cat=[android.intent.category.BROWSABLE] dat=solana-wallet:/... flg=0x10000000 pkg=dev.mwalab cmp=dev.mwalab/.mwa.MobileWalletAdapterActivity } baseActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} topActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} origActivity=null realActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} numActivities=1 lastActiveTime=1802966 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@e651e4a} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 142 - 0, 0) topActivityInfo=ActivityInfo{784a1bb dev.mwalab.mwa.MobileWalletAdapterActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=Rect(278, 711 - 803, 1791) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2424) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 22 }
+09-27 10:31:13.271   804   851 I ActivityManager: Start proc 4874:dev.mwalab/u0a216 for next-top-activity {dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity}
+09-27 10:31:13.336   804   841 V WindowManager: Sent Transition (#22) createdAt=09-27 10:31:13.251 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=9 effectiveUid=10216 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.VIEW cat=[android.intent.category.BROWSABLE] dat=solana-wallet:/... flg=0x10000000 pkg=dev.mwalab cmp=dev.mwalab/.mwa.MobileWalletAdapterActivity } baseActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} topActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} origActivity=null realActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} numActivities=1 lastActiveTime=1802966 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{385ff0c Task{93f3c2d #9 type=standard A=10216:dev.mwalab.mwa_host_task}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 142 - 0, 0) topActivityInfo=ActivityInfo{30b7055 dev.mwalab.mwa.MobileWalletAdapterActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=Rect(278, 711 - 803, 1791) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2424) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 22 }
+09-27 10:31:13.407  4858  4873 V MobileWalletAdapterWebSocket: MobileWalletAdapterWebSocket-ctor
+09-27 10:31:13.407  4858  4873 V MobileWalletAdapterWebSocket: connect
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: WebSockets error
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: com.neovisionaries.ws.client.WebSocketException: Failed to connect to '127.0.0.1:61061': failed to connect to /127.0.0.1 (port 61061) from /127.0.0.1 (port 57080) after 200ms: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.connectSocket(SocketConnector.java:126)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.doConnect(SocketConnector.java:238)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.connect(SocketConnector.java:189)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.WebSocket.connect(WebSocket.java:2351)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.ConnectThread.runMain(ConnectThread.java:32)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.WebSocketThread.run(WebSocketThread.java:45)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: Caused by: java.net.ConnectException: failed to connect to /127.0.0.1 (port 61061) from /127.0.0.1 (port 57080) after 200ms: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.isConnected(IoBridge.java:347)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.connectErrno(IoBridge.java:237)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.connect(IoBridge.java:179)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:142)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at java.net.Socket.connect(Socket.java:646)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketInitiator$SocketRacer.run(SocketInitiator.java:126)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: Caused by: android.system.ErrnoException: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.isConnected(IoBridge.java:334)
+09-27 10:31:13.428  4858  4887 W MobileWalletAdapterWebSocket: 	... 9 more
+09-27 10:31:13.428  4858  4887 D LocalAssociationScenario: Connect attempt failed, retrying in 150 ms
+09-27 10:31:13.578  4858  4873 V MobileWalletAdapterWebSocket: MobileWalletAdapterWebSocket-ctor
+09-27 10:31:13.578  4858  4873 V MobileWalletAdapterWebSocket: connect
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: WebSockets error
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: com.neovisionaries.ws.client.WebSocketException: Failed to connect to '127.0.0.1:61061': failed to connect to /127.0.0.1 (port 61061) from /127.0.0.1 (port 57082) after 200ms: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.connectSocket(SocketConnector.java:126)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.doConnect(SocketConnector.java:238)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.connect(SocketConnector.java:189)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.WebSocket.connect(WebSocket.java:2351)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.ConnectThread.runMain(ConnectThread.java:32)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.WebSocketThread.run(WebSocketThread.java:45)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: Caused by: java.net.ConnectException: failed to connect to /127.0.0.1 (port 61061) from /127.0.0.1 (port 57082) after 200ms: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.isConnected(IoBridge.java:347)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.connectErrno(IoBridge.java:237)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.connect(IoBridge.java:179)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:142)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at java.net.Socket.connect(Socket.java:646)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketInitiator$SocketRacer.run(SocketInitiator.java:126)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: Caused by: android.system.ErrnoException: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.isConnected(IoBridge.java:334)
+09-27 10:31:13.582  4858  4889 W MobileWalletAdapterWebSocket: 	... 9 more
+09-27 10:31:13.582  4858  4889 D LocalAssociationScenario: Connect attempt failed, retrying in 200 ms
+09-27 10:31:13.782  4858  4873 V MobileWalletAdapterWebSocket: MobileWalletAdapterWebSocket-ctor
+09-27 10:31:13.782  4858  4873 V MobileWalletAdapterWebSocket: connect
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: WebSockets error
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: com.neovisionaries.ws.client.WebSocketException: Failed to connect to '127.0.0.1:61061': failed to connect to /127.0.0.1 (port 61061) from /127.0.0.1 (port 57088) after 200ms: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.connectSocket(SocketConnector.java:126)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.doConnect(SocketConnector.java:238)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketConnector.connect(SocketConnector.java:189)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.WebSocket.connect(WebSocket.java:2351)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.ConnectThread.runMain(ConnectThread.java:32)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.WebSocketThread.run(WebSocketThread.java:45)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: Caused by: java.net.ConnectException: failed to connect to /127.0.0.1 (port 61061) from /127.0.0.1 (port 57088) after 200ms: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.isConnected(IoBridge.java:347)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.connectErrno(IoBridge.java:237)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.connect(IoBridge.java:179)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:142)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at java.net.Socket.connect(Socket.java:646)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at com.neovisionaries.ws.client.SocketInitiator$SocketRacer.run(SocketInitiator.java:126)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: Caused by: android.system.ErrnoException: isConnected failed: ECONNREFUSED (Connection refused)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	at libcore.io.IoBridge.isConnected(IoBridge.java:334)
+09-27 10:31:13.785  4858  4891 W MobileWalletAdapterWebSocket: 	... 9 more
+09-27 10:31:13.785  4858  4891 D LocalAssociationScenario: Connect attempt failed, retrying in 500 ms
+09-27 10:31:14.124   804  2048 D CoreBackPreview: Window{630bdd4 u0 dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@8337a72, mPriority=-1, mIsAnimationCallback=false, mOverrideBehavior=0}
+09-27 10:31:14.285  4858  4873 V MobileWalletAdapterWebSocket: MobileWalletAdapterWebSocket-ctor
+09-27 10:31:14.285  4858  4873 V MobileWalletAdapterWebSocket: connect
+09-27 10:31:14.323  4858  4905 V MobileWalletAdapterWebSocket: onConnected
+09-27 10:31:14.323  4858  4905 V LocalAssociationScenario: WebSocket connection established, waiting for session establishment
+09-27 10:31:14.323  4858  4905 V MobileWalletAdapterSessionCommon: receiverConnected
+09-27 10:31:14.323  4858  4905 V MobileWalletAdapterSessionCommon: generateSessionECDHKeyPair
+09-27 10:31:14.325  4858  4905 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.327  4874  4899 V MobileWalletAdapterSessionCommon: receiverConnected
+09-27 10:31:14.328  4874  4899 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=129
+09-27 10:31:14.328  4874  4899 V MobileWalletAdapterSession: handleSessionEstablishmentMessage
+09-27 10:31:14.330  4874  4899 V MobileWalletAdapterSession: Received public key 105639004567879724724345917165993255290695913839993010985480331956589383644979/93902394077487118103089241667644806042540863921885629859940831724476402993682
+09-27 10:31:14.330  4874  4899 V MobileWalletAdapterSessionCommon: generateSessionECDHKeyPair
+09-27 10:31:14.331  4874  4899 V MobileWalletAdapterSessionCommon: generateSessionECDHSecret
+09-27 10:31:14.332  4874  4899 I MobileWalletAdapterSessionCommon: Encrypted session established
+09-27 10:31:14.333  4874  4899 D LocalScenario: MobileWalletAdapter session established
+09-27 10:31:14.338  4858  4905 V MobileWalletAdapterWebSocket: onBinaryMessage
+09-27 10:31:14.338  4858  4905 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=106
+09-27 10:31:14.339  4858  4905 V MobileWalletAdapterSession: handleSessionEstablishmentMessage
+09-27 10:31:14.339  4858  4905 V MobileWalletAdapterSession: Received public key 67049724321899253442956879775456507849218623250665661159269071592596035308554/36919172810561177548492670452545316712458001474629232166109471924971577972263
+09-27 10:31:14.339  4858  4905 V MobileWalletAdapterSessionCommon: generateSessionECDHSecret
+09-27 10:31:14.340  4858  4905 I MobileWalletAdapterSessionCommon: Encrypted session established
+09-27 10:31:14.341  4858  4905 V MobileWalletAdapterSession: Received session properties: version = 1
+09-27 10:31:14.341  4858  4905 D LocalAssociationScenario: Session established, scenario ready for use
+09-27 10:31:14.343  4858  4871 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.343  4858  4871 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.345  4874  4899 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=238
+09-27 10:31:14.345  4874  4899 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.438  4874  4896 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.444  4858  4905 V MobileWalletAdapterWebSocket: onBinaryMessage
+09-27 10:31:14.444  4858  4905 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=14712
+09-27 10:31:14.444  4858  4905 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.470  4858  4871 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.471  4858  4871 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.473  4874  4899 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=96
+09-27 10:31:14.473  4874  4899 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.474  4874  4899 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.475  4858  4905 V MobileWalletAdapterWebSocket: onBinaryMessage
+09-27 10:31:14.475  4858  4905 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=269
+09-27 10:31:14.475  4858  4905 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.476  4858  4871 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.476  4858  4871 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.478  4874  4899 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=222
+09-27 10:31:14.478  4874  4899 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.497  4874  4896 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.498  4858  4905 V MobileWalletAdapterWebSocket: onBinaryMessage
+09-27 10:31:14.498  4858  4905 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=68
+09-27 10:31:14.498  4858  4905 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.503  4858  4871 V MobileWalletAdapterWebSocket: close
+09-27 10:31:14.503  4858  4871 V MobileWalletAdapterWebSocket: closing
+09-27 10:31:14.507  4858  4905 V MobileWalletAdapterWebSocket: onDisconnected
+09-27 10:31:14.507  4874  4897 V MobileWalletAdapterSessionCommon: receiverDisconnected
+09-27 10:31:14.507  4858  4905 V MobileWalletAdapterSessionCommon: receiverDisconnected
+09-27 10:31:14.507  4874  4897 I MobileWalletAdapterSessionCommon: mobile-wallet-adapter session closed
+09-27 10:31:14.507  4858  4905 I MobileWalletAdapterSessionCommon: mobile-wallet-adapter session closed
+09-27 10:31:14.507  4874  4897 D LocalScenario: MobileWalletAdapter session terminated
+09-27 10:31:14.507  4858  4905 D LocalAssociationScenario: Disconnected during normal operation
+09-27 10:31:14.508  4858  4871 V LocalAssociationScenario: Creating local association scenario for ws://127.0.0.1:61587/solana-wallet
+09-27 10:31:14.519   804  2046 I ActivityTaskManager: START u0 {act=android.intent.action.VIEW cat=[android.intent.category.BROWSABLE] dat=solana-wallet:/... flg=0x10000000 xflg=0x4 pkg=dev.mwalab cmp=dev.mwalab/.mwa.MobileWalletAdapterActivity} with LAUNCH_SINGLE_TASK from uid 10218 (BAL_ALLOW_PERMISSION) result code=3
+09-27 10:31:14.521  1100  1181 D WindowManagerShell: onActivityRestartAttempt: topActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity}, wasVisible=true
+09-27 10:31:14.539  1100  1181 V WindowManagerShell: Transition requested (#24): android.os.BinderProxy@a06c8e4 TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=9 effectiveUid=10216 displayId=0 isRunning=false baseIntent=Intent { act=android.intent.action.VIEW cat=[android.intent.category.BROWSABLE] dat=solana-wallet:/... flg=0x10000000 pkg=dev.mwalab cmp=dev.mwalab/.mwa.MobileWalletAdapterActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} numActivities=0 lastActiveTime=1803686 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@a71314d} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=true lastNonFullscreenBounds=Rect(278, 711 - 803, 1791) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 0, 0) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=undefined}} topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 24 }
+09-27 10:31:14.542   804   841 I ActivityTaskManager: Displayed dev.mwalab/.mwa.MobileWalletAdapterActivity for user 0: +1s288ms
+09-27 10:31:14.673  4858  4919 V MobileWalletAdapterWebSocket: MobileWalletAdapterWebSocket-ctor
+09-27 10:31:14.673  4858  4919 V MobileWalletAdapterWebSocket: connect
+09-27 10:31:14.701  4858  4928 V MobileWalletAdapterWebSocket: onConnected
+09-27 10:31:14.702  4858  4928 V LocalAssociationScenario: WebSocket connection established, waiting for session establishment
+09-27 10:31:14.702  4858  4928 V MobileWalletAdapterSessionCommon: receiverConnected
+09-27 10:31:14.702  4858  4928 V MobileWalletAdapterSessionCommon: generateSessionECDHKeyPair
+09-27 10:31:14.703  4874  4923 V MobileWalletAdapterSessionCommon: receiverConnected
+09-27 10:31:14.704  4858  4928 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.709  4874  4923 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=129
+09-27 10:31:14.709  4874  4923 V MobileWalletAdapterSession: handleSessionEstablishmentMessage
+09-27 10:31:14.710   804   841 V WindowManager: Sent Transition (#24) createdAt=09-27 10:31:14.538 via request=TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=9 effectiveUid=10216 displayId=0 isRunning=false baseIntent=Intent { act=android.intent.action.VIEW cat=[android.intent.category.BROWSABLE] dat=solana-wallet:/... flg=0x10000000 pkg=dev.mwalab cmp=dev.mwalab/.mwa.MobileWalletAdapterActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity} numActivities=0 lastActiveTime=1803686 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{385ff0c Task{93f3c2d #9 type=standard A=10216:dev.mwalab.mwa_host_task}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=true lastNonFullscreenBounds=Rect(278, 711 - 803, 1791) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 0, 0) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=undefined}} topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 24 }
+09-27 10:31:14.713  4874  4923 V MobileWalletAdapterSession: Received public key 94708818613890264274914233108042609138309782917702781684549753170603397847027/1736165656083720021359394552441279022938477803775011499760008594165957296038
+09-27 10:31:14.713  4874  4923 V MobileWalletAdapterSessionCommon: generateSessionECDHKeyPair
+09-27 10:31:14.724  4874  4923 V MobileWalletAdapterSessionCommon: generateSessionECDHSecret
+09-27 10:31:14.725  4874  4923 I MobileWalletAdapterSessionCommon: Encrypted session established
+09-27 10:31:14.725  4874  4923 D LocalScenario: MobileWalletAdapter session established
+09-27 10:31:14.727  4858  4928 V MobileWalletAdapterWebSocket: onBinaryMessage
+09-27 10:31:14.727  4858  4928 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=106
+09-27 10:31:14.727  4858  4928 V MobileWalletAdapterSession: handleSessionEstablishmentMessage
+09-27 10:31:14.727  4858  4928 V MobileWalletAdapterSession: Received public key 7304468352192904869498887674344711927154074000252535088452625014384289044637/41141500333466210470375914338437280606644559298502336835689062631586880923394
+09-27 10:31:14.728  4858  4928 V MobileWalletAdapterSessionCommon: generateSessionECDHSecret
+09-27 10:31:14.728  4858  4928 I MobileWalletAdapterSessionCommon: Encrypted session established
+09-27 10:31:14.729  4858  4928 V MobileWalletAdapterSession: Received session properties: version = 1
+09-27 10:31:14.729  4858  4928 D LocalAssociationScenario: Session established, scenario ready for use
+09-27 10:31:14.733  4858  4871 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.733  4858  4871 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.735  4874  4923 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=238
+09-27 10:31:14.735  4874  4923 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.883  4874  4920 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.905  4858  4928 V MobileWalletAdapterWebSocket: onBinaryMessage
+09-27 10:31:14.905  4858  4928 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=14713
+09-27 10:31:14.905  4858  4928 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.909  4858  4871 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.909  4858  4871 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.925  4874  4923 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=96
+09-27 10:31:14.925  4874  4923 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.960  4874  4923 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.973  4858  4928 V MobileWalletAdapterWebSocket: onBinaryMessage
+09-27 10:31:14.973  4858  4928 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=269
+09-27 10:31:14.973  4858  4928 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:14.975  4858  4871 V MobileWalletAdapterSessionCommon: send
+09-27 10:31:14.975  4858  4871 V MobileWalletAdapterWebSocket: send
+09-27 10:31:14.981  4874  4923 V MobileWalletAdapterSessionCommon: receiverMessageReceived: size=223
+09-27 10:31:14.982  4874  4923 V MobileWalletAdapterSessionCommon: handleEncryptedSessionMessage
+09-27 10:31:15.059  1480  1480 I EmojiCompatManager: java.lang.IllegalStateException: EmojiCompat is not initialized. Please call EmojiCompat.init() first
+09-27 10:31:15.065  4874  4874 D VRI[MobileWalletAdapterActivity]: visibilityChanged oldVisibility=true newVisibility=false
+09-27 10:31:15.104   804  2048 D CoreBackPreview: Window{630bdd4 u0 dev.mwalab/dev.mwalab.mwa.MobileWalletAdapterActivity}: Setting back callback null
+09-27 10:31:15.150  4874  4921 V MobileWalletAdapterSessionCommon: receiverDisconnected
+09-27 10:31:15.150  4874  4921 I MobileWalletAdapterSessionCommon: mobile-wallet-adapter session closed
+09-27 10:31:15.153  4858  4929 V MobileWalletAdapterWebSocket: onDisconnected
+09-27 10:31:15.153  4858  4929 V MobileWalletAdapterSessionCommon: receiverDisconnected
+09-27 10:31:15.153  4858  4929 I MobileWalletAdapterSessionCommon: mobile-wallet-adapter session closed
+09-27 10:31:15.153  4858  4929 D LocalAssociationScenario: Session terminated normally
+09-27 10:31:15.153  4858  4929 D LocalAssociationScenario: Disconnected during normal operation
+09-27 10:31:15.157  4874  4921 D LocalScenario: MobileWalletAdapter session terminated
+09-27 10:31:15.158  4858  4871 E TestRunner: ----- begin exception -----
+09-27 10:31:15.160  4858  4871 E TestRunner: java.util.concurrent.CancellationException
+09-27 10:31:15.160  4858  4871 E TestRunner: 	at com.solana.mobilewalletadapter.common.util.NotifyingCompletableFuture.get(NotifyingCompletableFuture.java:111)
+09-27 10:31:15.160  4858  4871 E TestRunner: 	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$JsonRpc20MethodResultFuture.get(MobileWalletAdapterClient.java:101)
+09-27 10:31:15.160  4858  4871 E TestRunner: 	at com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$DeauthorizeFuture.get(MobileWalletAdapterClient.java:512)
+09-27 10:31:15.160  4858  4871 E TestRunner: ----- end exception -----
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: Failed sending response for id=3
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: java.io.IOException: JSON-RPC 2.0 server is disconnected
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at com.solana.mobilewalletadapter.walletlib.protocol.JsonRpc20Server.respondWithResult(JsonRpc20Server.java:198)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at com.solana.mobilewalletadapter.walletlib.protocol.JsonRpc20Server.handleRpcResult(JsonRpc20Server.java:140)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterServer.onDeauthorizeComplete(MobileWalletAdapterServer.java:461)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterServer.lambda$handleDeauthorize$2$com-solana-mobilewalletadapter-walletlib-protocol-MobileWalletAdapterServer(MobileWalletAdapterServer.java:443)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterServer$$ExternalSyntheticLambda3.run(D8$$SyntheticClass:0)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at android.os.Handler.handleCallback(Handler.java:995)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at android.os.Handler.dispatchMessage(Handler.java:103)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at android.os.Looper.loopOnce(Looper.java:248)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at android.os.Looper.loop(Looper.java:338)
+09-27 10:31:15.175  4874  4920 E MobileWalletAdapterServer: 	at com.solana.mobilewalletadapter.walletlib.util.LooperThread.run(LooperThread.java:18)
+09-27 10:31:15.248  4842  4842 I AndroidRuntime: VM exiting with result code 0.
+
+NO COMMIT / NO TAG

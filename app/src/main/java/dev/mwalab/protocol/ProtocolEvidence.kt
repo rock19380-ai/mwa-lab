@@ -3,6 +3,9 @@ package dev.mwalab.protocol
 import java.util.concurrent.CopyOnWriteArrayList
 
 data class ProtocolEvidence(
+    val sessionId: String = "unknown",
+    val eventId: String = "unknown:0",
+    val sequence: Long = 0,
     val method: ProtocolMethod,
     val startedAtEpochMillis: Long,
     val completedAtEpochMillis: Long,
@@ -21,7 +24,7 @@ fun interface ProtocolEvidenceSink {
 }
 
 /**
- * Minimal process-local Phase 1 evidence seam.
+ * Process-local structured protocol-event seam. Phase 3 will persist it.
  *
  * This is intentionally not the Phase 3 recorder: no Room history, no export
  * bundle, no timeline model, and no raw authorization/secret material.

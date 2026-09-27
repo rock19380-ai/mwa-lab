@@ -1,0 +1,27 @@
+MWA Lab Phase 2 Batch A API authority
+prepared=2026-09-27
+scope=Phase 2.0 through 2.5
+
+Pinned artifact authority remains:
+com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7
+
+Verified from official v2.0.7 source:
+- ReauthorizeRequest.completeWithReauthorize()
+- ReauthorizeRequest.completeWithDecline()
+- SignMessagesRequest extends SignPayloadsRequest
+- SignMessagesRequest.getAddresses()
+- SignPayloadsRequest.getAuthorizedAccounts()
+- SignPayloadsRequest.getPayloads()
+- SignPayloadsRequest.completeWithSignedPayloads(byte[][])
+- SignPayloadsRequest.completeWithDecline()
+- SignPayloadsRequest.completeWithInvalidPayloads(boolean[])
+- SignPayloadsRequest.completeWithTooManyPayloads()
+- SignPayloadsRequest.completeWithAuthorizationNotValid()
+
+Compatibility constants intentionally preserved:
+- Auth issuer: mwa-lab-phase1
+- Authorization scope: mwa-lab:phase1:devnet:v1
+
+Batch A keeps sign_transactions and sign_and_send_transactions fail-closed.
+Those callbacks advance only after the bounded legacy transaction codec and
+Devnet RPC boundary are implemented in the next Phase 2 batch.

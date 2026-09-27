@@ -11,12 +11,13 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import dev.mwalab.signing.LabSigningService
 
 class AndroidKeystoreIdentityRepository(
     context: Context,
     private val preferencesName: String = DEFAULT_PREFERENCES_NAME,
     private val keyAlias: String = DEFAULT_KEY_ALIAS,
-) : IdentityRepository {
+) : IdentityRepository, LabSigningService {
     private val appContext = context.applicationContext
     private val lock = Any()
 
@@ -39,6 +40,41 @@ class AndroidKeystoreIdentityRepository(
                 throw IdentityStorageException("Unable to invalidate the existing Lab identity")
             }
             createAndStore()
+        }
+    }
+
+    override suspend fun publicIdentity(): TestEndpointIdentity = getOrCreate()
+
+    override suspend fun sign(message: ByteArray): ByteArray = withContext(Dispatchers.IO) {
+        synchronized(lock) {
+            signWithStoredIdentity(message)
+        }
+    }
+
+
+    private fun signWithStoredIdentity(message: ByteArray): ByteArray {
+        if (storedState() != StoredState.COMPLETE) {
+            throw IdentityStorageException("Protected Lab identity is unavailable for signing")
+        }
+        val prefs = preferences()
+        val ciphertext = decodeRequired(prefs.getString(KEY_CIPHERTEXT, null))
+        val iv = decodeRequired(prefs.getString(KEY_IV, null))
+        val storedPublicKey = decodeRequired(prefs.getString(KEY_PUBLIC_KEY, null))
+        val privateKeySeed = try {
+            decrypt(ciphertext, iv)
+        } catch (t: Throwable) {
+            throw IdentityStorageException("Unable to decrypt protected Lab identity", t)
+        }
+        try {
+            val derivedPublicKey = Ed25519IdentityMaterial.publicKeyFromPrivateSeed(privateKeySeed)
+            if (!derivedPublicKey.contentEquals(storedPublicKey)) {
+                throw IdentityStorageException(
+                    "Protected Lab identity integrity check failed; refusing to sign",
+                )
+            }
+            return Ed25519IdentityMaterial.sign(privateKeySeed, message)
+        } finally {
+            privateKeySeed.fill(0)
         }
     }
 

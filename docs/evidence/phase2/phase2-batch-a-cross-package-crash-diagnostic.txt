@@ -1,0 +1,127 @@
+=== MWA LAB PHASE 2 — BATCH A CROSS-PACKAGE DIAG + RESUME ===
+repo=/home/abbaas/mwa-lab
+branch=phase2-core-request-signing
+head=76aeab50c7202bd372d6986bd8ca266aff61f086
+worktree:
+## phase2-core-request-signing
+ M .github/workflows/android.yml
+ M app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt
+ M app/src/main/java/dev/mwalab/app/MwaLabComposition.kt
+ M app/src/main/java/dev/mwalab/identity/AndroidKeystoreIdentityRepository.kt
+ M app/src/main/java/dev/mwalab/identity/Ed25519IdentityMaterial.kt
+ M app/src/main/java/dev/mwalab/mwa/MobileWalletAdapterActivity.kt
+ M app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt
+ M app/src/main/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicy.kt
+ M app/src/main/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfile.kt
+ M app/src/main/java/dev/mwalab/mwa/evidence/MwaSessionEvidence.kt
+ M app/src/main/java/dev/mwalab/protocol/ProtocolEvidence.kt
+ M app/src/main/java/dev/mwalab/protocol/ProtocolMethod.kt
+ M app/src/test/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfileTest.kt
+ M demo-client/build.gradle.kts
+ M demo-client/src/androidTest/java/dev/mwalab/democlient/DemoClientCrossAppInstrumentedTest.kt
+ M demo-client/src/main/java/dev/mwalab/democlient/DemoClientActivity.kt
+?? app/src/androidTest/java/dev/mwalab/identity/LabSigningServiceInstrumentedTest.kt
+?? app/src/main/java/dev/mwalab/approval/ApprovalCoordinator.kt
+?? app/src/main/java/dev/mwalab/signing/LabSigningService.kt
+?? app/src/main/java/dev/mwalab/transaction/SolanaTransactionMessageDetector.kt
+?? app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt
+?? app/src/test/java/dev/mwalab/identity/Ed25519SigningTest.kt
+?? app/src/test/java/dev/mwalab/transaction/SolanaTransactionMessageDetectorTest.kt
+?? demo-client/src/main/java/dev/mwalab/democlient/Phase2AcceptanceRunner.kt
+?? docs/evidence/phase2/phase2-batch-a-api-authority.txt
+?? docs/evidence/phase2/phase2-batch-a-cross-package-crash-diagnostic.txt
+?? docs/evidence/phase2/phase2-batch-a-cross-package-exit-info.txt
+?? docs/evidence/phase2/phase2-batch-a-cross-package-logcat.txt
+?? docs/evidence/phase2/phase2-batch-a-device-acceptance.txt
+?? docs/evidence/phase2/phase2-batch-a-security-contract.txt
+?? scripts/phase2_static.sh
+
+=== DEVICE PRECONDITIONS ===
+device=emulator-5554
+android_release=16
+android_sdk=36
+device_model=sdk_gphone64_x86_64
+
+=== VERIFY INSTALLED PACKAGES ===
+dev.mwalab=installed
+dev.mwalab.test=installed
+dev.mwalab.democlient=installed
+dev.mwalab.democlient.test=installed
+
+=== CLEAN PROCESS STATE ===
+
+=== TARGETED PHASE 1 CROSS-PACKAGE RETRY ===
+INSTRUMENTATION_RESULT: shortMsg=Process crashed.
+INSTRUMENTATION_CODE: 0
+host_command_rc=0
+
+=== TARGETED RETRY FAILED — CRASH EVIDENCE ===
+logcat_file=docs/evidence/phase2/phase2-batch-a-cross-package-logcat.txt
+exit_info_file=docs/evidence/phase2/phase2-batch-a-cross-package-exit-info.txt
+
+--- RELEVANT LOGCAT ---
+09-27 10:24:30.370  4676  4676 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-27 10:24:30.377  4676  4676 I AndroidRuntime: Using default boot image
+09-27 10:24:30.377  4676  4676 I AndroidRuntime: Leaving lock profiling enabled
+09-27 10:24:30.512  4676  4676 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+09-27 10:24:30.526  4676  4676 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+09-27 10:24:30.529   804  2034 I ActivityManager: Force stopping dev.mwalab.democlient appid=10218 user=0: start instr
+09-27 10:24:30.531   804  2034 I AppsFilter: interaction: PackageSetting{92f8b8c com.android.microdroid.empty_payload/10207} -> PackageSetting{98fc25e dev.mwalab.democlient/10218} BLOCKED
+09-27 10:24:30.531   804  2034 I AppsFilter: interaction: PackageSetting{aa9f78d dev.mwalab.test/10217} -> PackageSetting{98fc25e dev.mwalab.democlient/10218} BLOCKED
+09-27 10:24:30.531   804  2034 I AppsFilter: interaction: PackageSetting{1a4f373 dev.mwalab/10216} -> PackageSetting{98fc25e dev.mwalab.democlient/10218} BLOCKED
+09-27 10:24:30.533   804  1020 I AppWidgetServiceImpl: Updating package stopped masked state for uid 10218 package dev.mwalab.democlient isStopped false
+09-27 10:24:30.539   804   851 I ActivityManager: Start proc 4687:dev.mwalab.democlient/u0a218 for added application dev.mwalab.democlient
+09-27 10:24:30.622  4687  4687 W ActivityThread: Package uses different ABI(s) than its instrumentation: package[dev.mwalab.democlient]: x86_64, null instrumentation[dev.mwalab.democlient.test]: null, null
+09-27 10:24:30.910  4687  4687 D nativeloader: Configuring clns-9 for other apk /data/app/~~6rcA3ZFmNAjwXBA-vWLYUg==/dev.mwalab.democlient.test-bbFSY6_HDAzxRkWJHxTC_g==/base.apk:/data/app/~~bosyhJHWl_HDIxChMBCgQg==/dev.mwalab.democlient-Fw9JTgN7dbJAb85rKe4v0g==/base.apk. target_sdk_version=37, uses_libraries=, library_path=/data/app/~~6rcA3ZFmNAjwXBA-vWLYUg==/dev.mwalab.democlient.test-bbFSY6_HDAzxRkWJHxTC_g==/lib/x86_64:/data/app/~~bosyhJHWl_HDIxChMBCgQg==/dev.mwalab.democlient-Fw9JTgN7dbJAb85rKe4v0g==/lib/x86_64:/data/app/~~6rcA3ZFmNAjwXBA-vWLYUg==/dev.mwalab.democlient.test-bbFSY6_HDAzxRkWJHxTC_g==/base.apk!/lib/x86_64:/data/app/~~bosyhJHWl_HDIxChMBCgQg==/dev.mwalab.democlient-Fw9JTgN7dbJAb85rKe4v0g==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/dev.mwalab.democlient
+09-27 10:24:30.917  4687  4687 V GraphicsEnvironment: dev.mwalab.democlient is not listed in per-application setting
+09-27 10:24:30.917  4687  4687 V GraphicsEnvironment: dev.mwalab.democlient is not listed in ANGLE allowlist or settings, returning default
+09-27 10:24:31.181  4687  4687 D AndroidRuntime: Shutting down VM
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: FATAL EXCEPTION: main
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: Process: dev.mwalab.democlient, PID: 4687
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate instrumentation ComponentInfo{dev.mwalab.democlient.test/androidx.test.runner.AndroidJUnitRunner}: java.lang.ClassNotFoundException: Didn't find class "androidx.test.runner.AndroidJUnitRunner" on path: DexPathList[[zip file "/data/app/~~6rcA3ZFmNAjwXBA-vWLYUg==/dev.mwalab.democlient.test-bbFSY6_HDAzxRkWJHxTC_g==/base.apk", zip file "/data/app/~~bosyhJHWl_HDIxChMBCgQg==/dev.mwalab.democlient-Fw9JTgN7dbJAb85rKe4v0g==/base.apk"],nativeLibraryDirectories=[/system/lib64, /system_ext/lib64]]
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.app.ActivityThread.initInstrumentation(ActivityThread.java:8086)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:7754)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.app.ActivityThread.-$$Nest$mhandleBindApplication(Unknown Source:0)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2546)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:248)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:338)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "androidx.test.runner.AndroidJUnitRunner" on path: DexPathList[[zip file "/data/app/~~6rcA3ZFmNAjwXBA-vWLYUg==/dev.mwalab.democlient.test-bbFSY6_HDAzxRkWJHxTC_g==/base.apk", zip file "/data/app/~~bosyhJHWl_HDIxChMBCgQg==/dev.mwalab.democlient-Fw9JTgN7dbJAb85rKe4v0g==/base.apk"],nativeLibraryDirectories=[/system/lib64, /system_ext/lib64]]
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:637)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:573)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	at android.app.ActivityThread.initInstrumentation(ActivityThread.java:8082)
+09-27 10:24:31.182  4687  4687 E AndroidRuntime: 	... 10 more
+09-27 10:24:31.195   804  2048 I ActivityManager: Process dev.mwalab.democlient (pid 4687) has died: fg  CEM
+09-27 10:24:31.196   804  2048 W ActivityManager: Crash of app dev.mwalab.democlient running instrumentation ComponentInfo{dev.mwalab.democlient.test/androidx.test.runner.AndroidJUnitRunner}
+09-27 10:24:31.196   804  2048 I ActivityManager: Force stopping dev.mwalab.democlient appid=10218 user=0: finished inst
+09-27 10:24:31.197  4676  4676 I AndroidRuntime: VM exiting with result code 0.
+
+--- APP EXIT INFO ---
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 2026-09-26 17:20:59.496
+  package: dev.mwalab.democlient
+    Historical Process Exit for uid=10218
+        ApplicationExitInfo #0:
+          timestamp=2026-09-27 10:24:31.184 pid=4687 realUid=10218 packageUid=10218 definingUid=10218 user=0
+          process=dev.mwalab.democlient reason=4 (APP CRASH(EXCEPTION)) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=0.00 description=crash state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-09-27 10:24:29.070 pid=4487 realUid=10218 packageUid=10218 definingUid=10218 user=0
+          process=dev.mwalab.democlient reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=400 pss=0.00 rss=180MB description=stop dev.mwalab.democlient due to from pid 4664 state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-09-27 10:20:14.017 pid=4441 realUid=10218 packageUid=10218 definingUid=10218 user=0
+          process=dev.mwalab.democlient reason=4 (APP CRASH(EXCEPTION)) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=0.00 description=crash state=empty trace=null
+
+============================================================
+CROSS-PACKAGE RETRY: FAILED
+NO PRODUCTION SOURCE WAS MODIFIED BY THIS SCRIPT
+Do not commit or tag.
+Send this complete terminal output next.
+============================================================

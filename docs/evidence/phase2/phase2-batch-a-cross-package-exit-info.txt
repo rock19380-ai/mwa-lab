@@ -1,0 +1,16 @@
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 2026-09-26 17:20:59.496
+  package: dev.mwalab.democlient
+    Historical Process Exit for uid=10218
+        ApplicationExitInfo #0:
+          timestamp=2026-09-27 10:24:31.184 pid=4687 realUid=10218 packageUid=10218 definingUid=10218 user=0
+          process=dev.mwalab.democlient reason=4 (APP CRASH(EXCEPTION)) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=0.00 description=crash state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-09-27 10:24:29.070 pid=4487 realUid=10218 packageUid=10218 definingUid=10218 user=0
+          process=dev.mwalab.democlient reason=10 (USER REQUESTED) subreason=21 (FORCE STOP) status=0
+          importance=400 pss=0.00 rss=180MB description=stop dev.mwalab.democlient due to from pid 4664 state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-09-27 10:20:14.017 pid=4441 realUid=10218 packageUid=10218 definingUid=10218 user=0
+          process=dev.mwalab.democlient reason=4 (APP CRASH(EXCEPTION)) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=0.00 description=crash state=empty trace=null

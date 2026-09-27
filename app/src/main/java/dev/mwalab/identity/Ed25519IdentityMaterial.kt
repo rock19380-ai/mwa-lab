@@ -5,6 +5,7 @@ import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator
 import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
+import org.bouncycastle.crypto.signers.Ed25519Signer
 import java.security.SecureRandom
 
 internal object Ed25519IdentityMaterial {
@@ -34,6 +35,16 @@ internal object Ed25519IdentityMaterial {
 
         val privateKey = Ed25519PrivateKeyParameters(privateKeySeed, 0)
         return privateKey.generatePublicKey().encoded
+    }
+
+    fun sign(privateKeySeed: ByteArray, message: ByteArray): ByteArray {
+        require(privateKeySeed.size == PRIVATE_KEY_SEED_SIZE) {
+            "Ed25519 private seed must be exactly $PRIVATE_KEY_SEED_SIZE bytes"
+        }
+        val signer = Ed25519Signer()
+        signer.init(true, Ed25519PrivateKeyParameters(privateKeySeed, 0))
+        signer.update(message, 0, message.size)
+        return signer.generateSignature()
     }
 
     fun displayAddress(publicKey: ByteArray): String {
