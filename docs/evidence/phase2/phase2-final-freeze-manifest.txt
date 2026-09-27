@@ -1,0 +1,25 @@
+MWA Lab Phase 2 — final freeze manifest
+Date: 2026-09-27
+
+branch=phase2-core-request-signing
+frozen_batch_a_sha=9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+frozen_batch_a_tag=phase2-batch-a-sign-messages-2026-09-27
+implementation_sha=3d70dc62295937248fc456f738d93c460ee565b8
+implementation_tree_sha=cc5d57d2e527643a8e88beb2edbbec90811851ed
+implementation_ci_run=36315211028
+implementation_ci_conclusion=success
+final_tag=phase2-core-request-signing-2026-09-27
+
+Closeout commit identity:
+- intentionally resolved by the containing Git commit after this manifest is written
+- must pass exact-head GitHub Actions before final tag creation
+
+Freeze invariants:
+- Devnet only
+- no mainnet signing/submission
+- no production wallet secrets
+- no raw auth/association token or raw signing payload material in diagnostics
+- active authorization plus explicit approval required for signing
+- legacy transaction signing only in Phase 2
+- fixed Devnet RPC endpoint
+- no Phase 3 Room/persistent timeline implementation

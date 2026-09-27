@@ -1,0 +1,46 @@
+MWA Lab Phase 2 — Step 2.12 final closeout evidence
+Date: 2026-09-27
+Branch: phase2-core-request-signing
+
+Result at evidence creation:
+PHASE 2 IMPLEMENTATION VERIFIED / REMOTE CI PASS / FINAL FREEZE CANDIDATE
+
+Frozen predecessor:
+- Batch A commit: 9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+- Batch A tag: phase2-batch-a-sign-messages-2026-09-27
+
+Verified Phase 2 implementation:
+- implementation commit: 3d70dc62295937248fc456f738d93c460ee565b8
+- implementation tree: cc5d57d2e527643a8e88beb2edbbec90811851ed
+- implementation tracked-file count: 204
+- exact-head GitHub Actions run: 36315211028
+- implementation CI URL: https://github.com/rock19380-ai/mwa-lab/actions/runs/36315211028
+- implementation CI status: completed
+- implementation CI conclusion: success
+- remote branch matched implementation commit before closeout: PASS
+- clean worktree before closeout evidence: PASS
+
+Phase 2 closure:
+- Step 2.10 live sign_transactions / sign_and_send acceptance: PASS
+- Step 2.11 hostile negative/lifecycle closeout: PASS
+- Step 2.12A documentation/report/CI pre-freeze: PASS
+- README/protocol/architecture/security/testing truth reconciliation: PASS
+- Phase 1 deterministic static regression: PASS
+- Phase 2 deterministic static regression: PASS
+- Devnet-only fixed RPC authority retained: PASS
+- revoked authorization hardening retained: PASS
+- secret/logcat/evidence audits retained: PASS
+- Phase 3 Room/persistent timeline scope not introduced: PASS
+
+Final freeze protocol:
+1. This evidence and the freeze manifest are committed in one evidence-only closeout commit.
+2. That exact closeout commit must pass GitHub Actions.
+3. Only after exact-head closeout CI succeeds may annotated tag phase2-core-request-signing-2026-09-27 be created.
+4. The tag must peel to the exact closeout commit.
+5. Local branch HEAD, remote branch HEAD, and peeled final tag commit must be identical.
+6. Worktree must be clean.
+
+Important:
+- This file intentionally does not self-reference the closeout commit SHA.
+- The containing commit is the authoritative Phase 2 closeout commit.
+- The final annotated tag and exact closeout-CI run are recorded in the external final-freeze receipt generated after successful tag publication.
