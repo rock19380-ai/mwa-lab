@@ -1,0 +1,47 @@
+MWA Lab Phase 2 — Step 2.11B2 live authorization/concurrency/lifecycle acceptance
+Date: 2026-09-27
+Branch: phase2-core-request-signing
+Frozen parent HEAD: 9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+
+Result:
+STEP 2.11B2 PASS
+
+Clientlib concurrency classification:
+- walletlib/clientlib version: 2.0.7
+- JsonRpc20Client permits only one outstanding request per client association
+- the original attempt to issue two simultaneous sign_messages calls on one client failed locally with UnsupportedOperationException before a second wallet callback could exist
+- the repaired live scenario therefore proves client-side serialization plus payload/address/signature isolation for the one outstanding request
+- wallet callback-level simultaneous approval single-flight/decision isolation remains covered deterministically by ApprovalCoordinatorTest from Step 2.11A
+- no evidence claims that two live wallet callbacks occurred on one client association
+
+Authorization hardening:
+- revoked current-session authorization cannot reach approval
+- revoked token is rejected cross-session
+- MWA Lab session-local active-authorization generation is invalidated by deauthorize/session teardown/association replacement
+- privileged flows re-check authorization before approval and after approval before signing/submission
+
+full_gradle_gate=PASS
+static_regression=PASS
+single_outstanding_request_live_isolation=PASS
+identity_reset_authority_change=PASS
+valid_cross_session_reauthorization=PASS
+revoked_authorization_live_rejection=PASS
+single_outstanding_request_live_isolation_full=PASS
+pending_approval_cleared_after_session_close=PASS
+fresh_session_after_teardown=PASS
+primary_instrumentation=PASS
+cross_package_instrumentation=PASS
+device_logcat_secret_audit=PASS
+step2_10_live_regression_after_b2_repairs=PASS
+final_static_and_secret_audit=PASS
+
+Combined Step 2.11 evidence:
+- Step 2.11A: malformed/over-limit/approval-coordinator hostile cases, callback single-flight isolation, and diagnostic sanitization
+- Step 2.11B1: RPC/submission errors, commitment ordering, cancellation, partial submission, and no-resubmission
+- Step 2.11B2: revoked authorization, clientlib single-outstanding-request behavior, payload/signature isolation, identity reset, and live session teardown/recovery
+
+Repository status:
+NOT COMMITTED / NOT TAGGED
+
+Next:
+Phase 2.11 final closeout audit before Phase 2.12 documentation/CI/report/freeze.

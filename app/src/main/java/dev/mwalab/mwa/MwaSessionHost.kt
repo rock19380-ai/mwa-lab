@@ -35,10 +35,18 @@ import dev.mwalab.protocol.ProtocolEvidenceStore
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
 import dev.mwalab.protocol.ProtocolOutcome
+import dev.mwalab.rpc.DevnetRpcGateway
+import dev.mwalab.rpc.DevnetRpcResult
+import dev.mwalab.rpc.DevnetSendOptions
+import dev.mwalab.rpc.SignAndSendFatalReason
+import dev.mwalab.rpc.SignAndSendSubmission
+import dev.mwalab.rpc.SignAndSendSubmissionExecutor
+import dev.mwalab.rpc.SignAndSendSubmissionResult
 import dev.mwalab.security.DiagnosticSanitizer
 import dev.mwalab.security.NetworkDecision
 import dev.mwalab.security.NetworkPolicy
 import dev.mwalab.signing.LabSigningService
+import dev.mwalab.transaction.LegacyTransactionCodec
 import dev.mwalab.transaction.SolanaTransactionMessageDetector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +64,7 @@ class MwaSessionHost(
         MwaLabComposition.signingService(context.applicationContext),
     private val approvalCoordinator: ApprovalCoordinator =
         MwaLabComposition.approvalCoordinator(),
+    private val rpcGateway: DevnetRpcGateway = MwaLabComposition.devnetRpcGateway(),
     private val evidenceSink: MwaSessionEvidenceSink = MwaSessionEvidenceStore,
     private val protocolEvidenceSink: ProtocolEvidenceSink = ProtocolEvidenceStore,
     private val onSessionFinished: () -> Unit = {},
@@ -69,6 +78,7 @@ class MwaSessionHost(
     // Local associations can overlap briefly in a singleTask Activity. A late
     // callback from the previous association must never mutate or finish the replacement.
     private val sessionGeneration = AtomicLong(0)
+    private val activeAuthorizationGeneration = AtomicLong(NO_AUTHORIZATION_GENERATION)
     @Volatile
     private var activeSessionId: String = UUID.randomUUID().toString()
     private val protocolSequence = AtomicLong(0)
@@ -78,6 +88,7 @@ class MwaSessionHost(
 
     fun openAssociation(uri: Uri?): AssociationOpenResult {
         val generation = sessionGeneration.incrementAndGet()
+        activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
         closeCurrentScenario(recordClose = false)
         activeSessionId = UUID.randomUUID().toString()
         protocolSequence.set(0)
@@ -151,11 +162,13 @@ class MwaSessionHost(
 
     override fun close() {
         sessionGeneration.incrementAndGet()
+        activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
         closeCurrentScenario(recordClose = true)
         authorizationScope.cancel()
     }
 
     private fun closeCurrentScenario(recordClose: Boolean) {
+        activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
         approvalCoordinator.cancelPending()
         val current = synchronized(lock) {
             scenario.also { scenario = null }
@@ -258,6 +271,7 @@ class MwaSessionHost(
 
                 when (decision) {
                     is LabAuthorizationDecision.Granted -> {
+                        markAuthorizationActive(generation)
                         request.completeWithAuthorize(
                             arrayOf(decision.account),
                             null,
@@ -353,6 +367,7 @@ class MwaSessionHost(
             val allowed = NetworkPolicy.evaluate(request.chain) is NetworkDecision.Allowed &&
                 LabAuthorizationPolicy.isCurrentAuthorizationScope(request.authorizationScope)
             if (allowed) {
+                markAuthorizationActive(generation)
                 request.completeWithReauthorize()
                 record(MwaSessionEvent.REAUTHORIZE_SUCCEEDED)
                 recordProtocol(
@@ -382,10 +397,17 @@ class MwaSessionHost(
                 request.completeWithDecline()
                 return
             }
-            // Transaction signing is Phase 2.6+. Keep this callback fail-closed
-            // until the bounded legacy transaction codec is in place.
-            record(MwaSessionEvent.SIGN_TRANSACTIONS_DECLINED_PHASE_1)
-            request.completeWithDecline()
+            val startedAt = System.currentTimeMillis()
+            val sessionId = activeSessionId
+            record(MwaSessionEvent.SIGN_TRANSACTIONS_REQUEST)
+            authorizationScope.launch {
+                handleSignTransactions(
+                    request = request,
+                    startedAt = startedAt,
+                    generation = generation,
+                    sessionId = sessionId,
+                )
+            }
         }
 
         override fun onSignMessagesRequest(request: SignMessagesRequest) {
@@ -413,8 +435,17 @@ class MwaSessionHost(
                 request.completeWithDecline()
                 return
             }
-            record(MwaSessionEvent.SIGN_AND_SEND_DECLINED_PHASE_1)
-            request.completeWithDecline()
+            val startedAt = System.currentTimeMillis()
+            val sessionId = activeSessionId
+            record(MwaSessionEvent.SIGN_AND_SEND_REQUEST)
+            authorizationScope.launch {
+                handleSignAndSendTransactions(
+                    request = request,
+                    startedAt = startedAt,
+                    generation = generation,
+                    sessionId = sessionId,
+                )
+            }
         }
 
         override fun onDeauthorizedEvent(event: DeauthorizedEvent) {
@@ -423,6 +454,7 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
+            invalidateAuthorization(generation)
             event.complete()
             record(MwaSessionEvent.DEAUTHORIZED_COMPLETED)
             recordProtocol(
@@ -439,6 +471,643 @@ class MwaSessionHost(
         }
     }
 
+    private sealed interface TransactionPreparationResult {
+        data class Ready(
+            val transactions: List<LegacyTransactionCodec.Parsed>,
+        ) : TransactionPreparationResult
+
+        data class Invalid(
+            val valid: BooleanArray,
+            val reason: String,
+            val failureSource: ProtocolFailureSource,
+        ) : TransactionPreparationResult
+
+        data object AuthorizationInvalid : TransactionPreparationResult
+        data object IdentityUnavailable : TransactionPreparationResult
+        data object RpcUnavailable : TransactionPreparationResult
+    }
+
+    private data class SignedLegacyTransaction(
+        val parsed: LegacyTransactionCodec.Parsed,
+        val payload: ByteArray,
+    )
+
+    private suspend fun prepareLegacyTransactions(
+        payloads: Array<ByteArray>,
+        authorizedPublicKeys: List<ByteArray>,
+        chain: String,
+        authorizationScopeBytes: ByteArray,
+        minContextSlot: Int? = null,
+    ): TransactionPreparationResult {
+        if (NetworkPolicy.evaluate(chain) !is NetworkDecision.Allowed ||
+            !LabAuthorizationPolicy.isCurrentAuthorizationScope(authorizationScopeBytes)
+        ) {
+            return TransactionPreparationResult.AuthorizationInvalid
+        }
+
+        if (payloads.isEmpty()) {
+            return TransactionPreparationResult.Invalid(
+                valid = BooleanArray(0),
+                reason = "empty_request",
+                failureSource = ProtocolFailureSource.LOCAL_PARSER,
+            )
+        }
+
+        val identity = try {
+            signingService.publicIdentity()
+        } catch (_: Throwable) {
+            return TransactionPreparationResult.IdentityUnavailable
+        }
+        val signerPublicKey = identity.publicKeyBytes()
+        if (authorizedPublicKeys.none { it.contentEquals(signerPublicKey) }) {
+            return TransactionPreparationResult.AuthorizationInvalid
+        }
+
+        val valid = BooleanArray(payloads.size) { true }
+        val parsed = ArrayList<LegacyTransactionCodec.Parsed>(payloads.size)
+        payloads.forEachIndexed { index, payload ->
+            try {
+                parsed += LegacyTransactionCodec.parseForSigner(payload, signerPublicKey)
+            } catch (_: LegacyTransactionCodec.Rejected) {
+                valid[index] = false
+            }
+        }
+        if (!valid.all { it }) {
+            return TransactionPreparationResult.Invalid(
+                valid = valid,
+                reason = "invalid_legacy_transaction",
+                failureSource = ProtocolFailureSource.LOCAL_PARSER,
+            )
+        }
+
+        parsed.forEachIndexed { index, transaction ->
+            when (
+                val blockhashResult = rpcGateway.isBlockhashValid(
+                    blockhash = transaction.recentBlockhash,
+                    minContextSlot = minContextSlot,
+                )
+            ) {
+                is DevnetRpcResult.Success -> {
+                    if (!blockhashResult.value) valid[index] = false
+                }
+
+                is DevnetRpcResult.RpcError,
+                is DevnetRpcResult.TransportFailure,
+                DevnetRpcResult.MalformedResponse -> return TransactionPreparationResult.RpcUnavailable
+            }
+        }
+        if (!valid.all { it }) {
+            return TransactionPreparationResult.Invalid(
+                valid = valid,
+                reason = "blockhash_not_valid_on_devnet",
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+            )
+        }
+
+        return TransactionPreparationResult.Ready(parsed)
+    }
+
+    private suspend fun signLegacyTransactions(
+        prepared: List<LegacyTransactionCodec.Parsed>,
+    ): List<SignedLegacyTransaction> {
+        val result = ArrayList<SignedLegacyTransaction>(prepared.size)
+        for (transaction in prepared) {
+            val signature = signingService.sign(transaction.message)
+            require(signature.size == LegacyTransactionCodec.SIGNATURE_BYTES) {
+                "Unexpected Ed25519 signature length"
+            }
+            result += SignedLegacyTransaction(
+                parsed = transaction,
+                payload = transaction.withSignature(signature),
+            )
+        }
+        return result
+    }
+
+    private suspend fun handleSignTransactions(
+        request: SignTransactionsRequest,
+        startedAt: Long,
+        generation: Long,
+        sessionId: String,
+    ) {
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "session_authorization_inactive"),
+            )
+            return
+        }
+
+        val payloads = request.payloads
+        val requestSummary = signingRequestSummary(
+            method = ProtocolMethod.SIGN_TRANSACTIONS,
+            payloads = payloads,
+            addressCount = request.authorizedAccounts.size,
+            chain = request.chain,
+        )
+
+        if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
+            request.completeWithTooManyPayloads()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_TOO_MANY_PAYLOADS,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "too_many_payloads"),
+            )
+            return
+        }
+
+        val preparation = prepareLegacyTransactions(
+            payloads = payloads,
+            authorizedPublicKeys = request.authorizedAccounts.map { it.publicKey },
+            chain = request.chain,
+            authorizationScopeBytes = request.authorizationScope,
+        )
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+
+        val ready = when (preparation) {
+            is TransactionPreparationResult.Ready -> preparation
+            is TransactionPreparationResult.Invalid -> {
+                request.completeWithInvalidPayloads(preparation.valid)
+                record(MwaSessionEvent.SIGN_TRANSACTIONS_INVALID)
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_INVALID_PAYLOADS,
+                    failureSource = preparation.failureSource,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to preparation.reason),
+                )
+                return
+            }
+
+            TransactionPreparationResult.AuthorizationInvalid -> {
+                request.completeWithAuthorizationNotValid()
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                    failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to "authorization_context_rejected"),
+                )
+                return
+            }
+
+            TransactionPreparationResult.IdentityUnavailable -> {
+                request.completeWithInternalError(IllegalStateException("Lab signing identity unavailable"))
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    failureSource = ProtocolFailureSource.UNKNOWN,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to "identity_unavailable"),
+                )
+                return
+            }
+
+            TransactionPreparationResult.RpcUnavailable -> {
+                request.completeWithInternalError(IllegalStateException("Devnet blockhash validation unavailable"))
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    failureSource = ProtocolFailureSource.RPC_NETWORK,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to "devnet_blockhash_validation_unavailable"),
+                )
+                return
+            }
+        }
+
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "authorization_revoked_before_approval"),
+            )
+            return
+        }
+
+        val approval = approvalCoordinator.requestApproval(
+            ApprovalRequest(
+                sessionId = sessionId,
+                method = ProtocolMethod.SIGN_TRANSACTIONS.wireName,
+                dappIdentityName = request.identityName,
+                chain = request.chain,
+                payloadFingerprints = payloads.map { DiagnosticSanitizer.sha256(it) },
+                payloadLengths = payloads.map { it.size },
+            ),
+        )
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "authorization_revoked_during_approval"),
+            )
+            return
+        }
+        if (approval !is ApprovalDecision.Approved) {
+            request.completeWithDecline()
+            record(MwaSessionEvent.SIGN_TRANSACTIONS_REJECTED)
+            recordProtocol(
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = if (approval is ApprovalDecision.Cancelled) {
+                    ProtocolOutcome.CANCELLED
+                } else {
+                    ProtocolOutcome.FAILURE
+                },
+                protocolErrorCode = ProtocolContract.ERROR_NOT_SIGNED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to approval.javaClass.simpleName.lowercase()),
+            )
+            return
+        }
+
+        record(MwaSessionEvent.SIGN_TRANSACTIONS_APPROVED)
+        val signed = try {
+            signLegacyTransactions(ready.transactions)
+        } catch (_: Throwable) {
+            request.completeWithInternalError(IllegalStateException("Lab transaction signing failed"))
+            recordProtocol(
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "signing_failed"),
+            )
+            return
+        }
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            return
+        }
+
+        request.completeWithSignedPayloads(signed.map { it.payload }.toTypedArray())
+        record(MwaSessionEvent.SIGN_TRANSACTIONS_SUCCEEDED)
+        recordProtocol(
+            method = ProtocolMethod.SIGN_TRANSACTIONS,
+            startedAt = startedAt,
+            outcome = ProtocolOutcome.SUCCESS,
+            requestSummary = requestSummary,
+            responseSummary = mapOf(
+                "result" to "signed",
+                "signed_payload_count" to signed.size.toString(),
+                "transaction_version" to "legacy",
+                "network_validation" to "devnet_blockhash_valid",
+            ),
+        )
+    }
+
+    private suspend fun handleSignAndSendTransactions(
+        request: SignAndSendTransactionsRequest,
+        startedAt: Long,
+        generation: Long,
+        sessionId: String,
+    ) {
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "session_authorization_inactive"),
+            )
+            return
+        }
+
+        val payloads = request.payloads
+        val requestSummary = signingRequestSummary(
+            method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+            payloads = payloads,
+            addressCount = request.authorizedAccounts.size,
+            chain = request.chain,
+        ) + mapOf(
+            "min_context_slot_present" to (request.minContextSlot != null).toString(),
+            "commitment" to (request.commitment ?: "<default>"),
+            "skip_preflight" to (request.skipPreflight?.toString() ?: "<default>"),
+            "max_retries_present" to (request.maxRetries != null).toString(),
+            "wait_for_commitment" to
+                (request.waitForCommitmentToSendNextTransaction?.toString() ?: "<default>"),
+        )
+
+        if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
+            request.completeWithTooManyPayloads()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_TOO_MANY_PAYLOADS,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "too_many_payloads"),
+            )
+            return
+        }
+
+        val sendOptions = DevnetSendOptions(
+            minContextSlot = request.minContextSlot,
+            commitment = request.commitment,
+            skipPreflight = request.skipPreflight,
+            maxRetries = request.maxRetries,
+            waitForCommitmentToSendNextTransaction = request.waitForCommitmentToSendNextTransaction,
+        ).validatedOrNull()
+        if (sendOptions == null) {
+            request.completeWithInternalError(IllegalArgumentException("Unsupported sign_and_send options"))
+            recordProtocol(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                failureSource = ProtocolFailureSource.LOCAL_PARSER,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "invalid_send_options"),
+            )
+            return
+        }
+
+        val preparation = prepareLegacyTransactions(
+            payloads = payloads,
+            authorizedPublicKeys = request.authorizedAccounts.map { it.publicKey },
+            chain = request.chain,
+            authorizationScopeBytes = request.authorizationScope,
+            minContextSlot = sendOptions.minContextSlot,
+        )
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+
+        val ready = when (preparation) {
+            is TransactionPreparationResult.Ready -> preparation
+            is TransactionPreparationResult.Invalid -> {
+                request.completeWithInvalidSignatures(preparation.valid)
+                record(MwaSessionEvent.SIGN_AND_SEND_INVALID)
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_INVALID_PAYLOADS,
+                    failureSource = preparation.failureSource,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to preparation.reason),
+                )
+                return
+            }
+
+            TransactionPreparationResult.AuthorizationInvalid -> {
+                request.completeWithAuthorizationNotValid()
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                    failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to "authorization_context_rejected"),
+                )
+                return
+            }
+
+            TransactionPreparationResult.IdentityUnavailable -> {
+                request.completeWithInternalError(IllegalStateException("Lab signing identity unavailable"))
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    failureSource = ProtocolFailureSource.UNKNOWN,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to "identity_unavailable"),
+                )
+                return
+            }
+
+            TransactionPreparationResult.RpcUnavailable -> {
+                request.completeWithInternalError(IllegalStateException("Devnet blockhash validation unavailable"))
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    failureSource = ProtocolFailureSource.RPC_NETWORK,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to "devnet_blockhash_validation_unavailable"),
+                )
+                return
+            }
+        }
+
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "authorization_revoked_before_approval"),
+            )
+            return
+        }
+
+        val approval = approvalCoordinator.requestApproval(
+            ApprovalRequest(
+                sessionId = sessionId,
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS.wireName,
+                dappIdentityName = request.identityName,
+                chain = request.chain,
+                payloadFingerprints = payloads.map { DiagnosticSanitizer.sha256(it) },
+                payloadLengths = payloads.map { it.size },
+            ),
+        )
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "authorization_revoked_during_approval"),
+            )
+            return
+        }
+        if (approval !is ApprovalDecision.Approved) {
+            request.completeWithDecline()
+            record(MwaSessionEvent.SIGN_AND_SEND_REJECTED)
+            recordProtocol(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = if (approval is ApprovalDecision.Cancelled) {
+                    ProtocolOutcome.CANCELLED
+                } else {
+                    ProtocolOutcome.FAILURE
+                },
+                protocolErrorCode = ProtocolContract.ERROR_NOT_SIGNED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to approval.javaClass.simpleName.lowercase()),
+            )
+            return
+        }
+
+        record(MwaSessionEvent.SIGN_AND_SEND_APPROVED)
+        val signed = try {
+            signLegacyTransactions(ready.transactions)
+        } catch (_: Throwable) {
+            request.completeWithInternalError(IllegalStateException("Lab transaction signing failed"))
+            recordProtocol(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "signing_failed"),
+            )
+            return
+        }
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            return
+        }
+
+        val submissionResult = SignAndSendSubmissionExecutor(rpcGateway).execute(
+            transactions = signed.map { transaction ->
+                SignAndSendSubmission(
+                    payload = transaction.payload,
+                    expectedSignature = transaction.parsed.primarySignature(transaction.payload),
+                )
+            },
+            options = sendOptions,
+            isRequestCurrent = { isAuthorizationActive(generation) },
+        )
+
+        when (submissionResult) {
+            SignAndSendSubmissionResult.Cancelled -> {
+                if (isCurrentGeneration(generation) && !isAuthorizationActive(generation)) {
+                    request.completeWithAuthorizationNotValid()
+                } else {
+                    request.completeWithDecline()
+                }
+                return
+            }
+
+            is SignAndSendSubmissionResult.NotSubmitted -> {
+                request.completeWithNotSubmitted(submissionResult.signatures.toTypedArray())
+                record(MwaSessionEvent.SIGN_AND_SEND_NOT_SUBMITTED)
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_NOT_SUBMITTED,
+                    failureSource = ProtocolFailureSource.RPC_NETWORK,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf(
+                        "result" to "one_or_more_not_submitted",
+                        "submitted_count" to submissionResult.signatures.count { it != null }.toString(),
+                        "not_submitted_count" to submissionResult.signatures.count { it == null }.toString(),
+                    ),
+                )
+                return
+            }
+
+            is SignAndSendSubmissionResult.Fatal -> {
+                val message = when (submissionResult.reason) {
+                    SignAndSendFatalReason.SIGNATURE_MISMATCH ->
+                        "Devnet RPC returned an unexpected transaction signature"
+                    SignAndSendFatalReason.COMMITMENT_NOT_REACHED_BEFORE_NEXT,
+                    SignAndSendFatalReason.COMMITMENT_NOT_REACHED ->
+                        "Devnet commitment verification did not succeed"
+                    SignAndSendFatalReason.COMMITMENT_UNAVAILABLE_BEFORE_NEXT,
+                    SignAndSendFatalReason.COMMITMENT_UNAVAILABLE ->
+                        "Devnet commitment verification unavailable"
+                }
+                request.completeWithInternalError(IllegalStateException(message))
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    failureSource = ProtocolFailureSource.RPC_NETWORK,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf(
+                        "result" to submissionResult.reason.evidenceResult,
+                        "submitted_count" to submissionResult.submittedCount.toString(),
+                    ),
+                )
+                return
+            }
+
+            is SignAndSendSubmissionResult.Submitted -> {
+                val signatures = submissionResult.signatures.toTypedArray()
+                request.completeWithSignatures(signatures)
+                record(MwaSessionEvent.SIGN_AND_SEND_SUBMITTED)
+                recordProtocol(
+                    method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.SUCCESS,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf(
+                        "result" to "submitted",
+                        "submitted_count" to signatures.size.toString(),
+                        "rpc_network" to "solana_devnet",
+                        "commitment_verified" to (sendOptions.commitment != null).toString(),
+                    ),
+                )
+            }
+        }
+    }
+
     private suspend fun handleSignMessages(
         request: SignMessagesRequest,
         startedAt: Long,
@@ -447,6 +1116,18 @@ class MwaSessionHost(
     ) {
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_MESSAGES,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "session_authorization_inactive"),
+            )
             return
         }
 
@@ -560,6 +1241,20 @@ class MwaSessionHost(
             return
         }
 
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_MESSAGES,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "authorization_revoked_before_approval"),
+            )
+            return
+        }
+
         val approval = approvalCoordinator.requestApproval(
             ApprovalRequest(
                 sessionId = sessionId,
@@ -572,6 +1267,18 @@ class MwaSessionHost(
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordProtocol(
+                method = ProtocolMethod.SIGN_MESSAGES,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "authorization_revoked_during_approval"),
+            )
             return
         }
 
@@ -615,6 +1322,10 @@ class MwaSessionHost(
                 }
             }
             val signedPayloadArray = signedPayloads.toTypedArray()
+            if (!isAuthorizationActive(generation)) {
+                request.completeWithAuthorizationNotValid()
+                return
+            }
             request.completeWithSignedPayloads(signedPayloadArray)
             record(MwaSessionEvent.SIGN_MESSAGES_SUCCEEDED)
             recordProtocol(
@@ -639,6 +1350,23 @@ class MwaSessionHost(
             )
         }
     }
+
+    private fun markAuthorizationActive(generation: Long) {
+        if (isCurrentGeneration(generation)) {
+            activeAuthorizationGeneration.set(generation)
+        }
+    }
+
+    private fun invalidateAuthorization(generation: Long) {
+        activeAuthorizationGeneration.compareAndSet(
+            generation,
+            NO_AUTHORIZATION_GENERATION,
+        )
+    }
+
+    private fun isAuthorizationActive(generation: Long): Boolean =
+        isCurrentGeneration(generation) &&
+            activeAuthorizationGeneration.get() == generation
 
     private fun isCurrentGeneration(generation: Long): Boolean =
         sessionGeneration.get() == generation
@@ -707,6 +1435,7 @@ class MwaSessionHost(
     }
 
     companion object {
+        private const val NO_AUTHORIZATION_GENERATION = -1L
         private const val REQUIRED_SCHEME = "solana-wallet"
         private const val AUTH_ISSUER_NAME = "mwa-lab-phase1"
         private const val MAX_MESSAGE_BYTES = 64 * 1024

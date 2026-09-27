@@ -1,0 +1,45 @@
+MWA Lab Phase 2 — Step 2.10 closeout
+Date: 2026-09-27
+Branch: phase2-core-request-signing
+Frozen parent HEAD: 9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+
+Result:
+STEP 2.10 COMPLETE / PASS
+
+Observed live acceptance:
+- sign_transactions approval path: PASS
+- signed legacy transaction verification: PASS
+- sign_and_send_transactions rejection path: PASS
+- sign_and_send_transactions approved Devnet path: PASS
+- Phase 1 static regression: PASS
+- Phase 2 static regression: PASS
+
+Wallet success-path contract:
+- sendTransaction executes against fixed Solana Devnet RPC
+- returned RPC signature is cross-checked against the transaction primary signature
+- when a commitment is requested, awaitCommitment executes before success response
+- completeWithSignatures occurs only after the requested commitment gate succeeds
+
+Acceptance-harness contract:
+- demo client verifies the returned transaction signature cryptographically against the exact transaction message
+- duplicate Android-side post-response getSignatureStatuses corroboration is not a Step 2.10 success gate
+- temporary diagnostic UI/logging is absent
+
+Independent host RPC corroboration:
+- optional / non-gating
+- unavailable after live device acceptance because host curl requests to the public Devnet endpoint timed out
+- no production/device acceptance result is reclassified because of this auxiliary host-network failure
+
+Security:
+- no private key, seed, mnemonic, or auth token recorded here
+- no raw transaction payload recorded here
+- no raw transaction signature recorded here
+
+Source evidence:
+docs/evidence/phase2/phase2-step2.10-live-devnet-acceptance.txt
+
+Repository status:
+NOT COMMITTED / NOT TAGGED
+
+Next:
+Phase 2.11 — hostile negative and lifecycle testing

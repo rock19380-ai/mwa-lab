@@ -2,44 +2,49 @@
 
 **The on-device protocol debugger and deterministic failure simulator for Solana Mobile Wallet Adapter.**
 
-Trace protocol sessions.<br>
-Reproduce wallet failure paths.<br>
-Inspect protocol behavior.<br>
-Build toward safe diagnostic reports.
+Trace protocol sessions.
+Reproduce wallet failure paths.
+Inspect signing/submission behavior.
+Build toward safe, shareable diagnostics.
 
 > ⚠️ DEVNET-ONLY LAB TOOL — NEVER USE REAL FUNDS.
 
-## Devnet vs MWA
+## What MWA Lab is
 
-**Devnet** tells you which Solana network a transaction is being tested on.
+**Devnet** defines which Solana network a transaction is tested on.
 
 **Mobile Wallet Adapter (MWA)** defines how an Android dApp and wallet endpoint
 discover each other, establish a session, authorize, negotiate capabilities,
-request signing behavior, fail, and return protocol results.
+request signing/submission, fail, and return protocol results.
 
-MWA Lab is built to make that protocol boundary visible and reproducible.
+MWA Lab is a developer-facing MWA endpoint built to make that protocol boundary
+visible and reproducible. It is not a production wallet and is not a replacement
+for Phantom, Solflare, Seed Vault Wallet, or another production wallet.
 
-MWA Lab is not a production wallet and is not a replacement for Phantom,
-Solflare, Seed Vault Wallet, or other production wallets.
+## Phase 2 verified boundary
 
-## Phase 1 verified boundary
+Phase 2 extends the frozen Phase 1 association/authorization foundation and is
+verified against pinned `mobile-wallet-adapter-walletlib:2.0.7` /
+`clientlib:2.0.7`.
 
-Phase 1 proves the wallet-side protocol boundary against pinned
-`mobile-wallet-adapter-walletlib:2.0.7`.
+Verified behavior includes:
 
-Verified on Android emulator/device evidence:
-
-- real `solana-wallet://` discovery/association;
-- wallet-side session establishment and teardown;
+- real cross-package `solana-wallet://` discovery and local association;
 - persistent protected Devnet Lab identity;
-- first Devnet authorization;
-- mainnet and missing-chain authorization rejection;
-- walletlib-managed authorization state;
+- first authorization and valid cross-session reauthorization;
 - `get_capabilities`;
-- deauthorization;
-- rejected reuse of revoked authorization state;
-- typed sanitized protocol evidence;
-- deterministic cross-package demo client.
+- deauthorization plus rejected revoked authorization/token reuse;
+- explicit user approval for signing;
+- bounded `sign_messages` with Ed25519 signatures;
+- bounded legacy `sign_transactions`;
+- legacy transaction parsing/signature-slot patching with immutable approval binding;
+- fixed Solana Devnet RPC authority;
+- `sign_and_send_transactions` submission and commitment handling;
+- defined rejection/error mappings including `ERROR_NOT_SIGNED`,
+  `ERROR_AUTHORIZATION_FAILED`, invalid payload/too-many-payload responses, and
+  `ERROR_NOT_SUBMITTED`;
+- deterministic hostile RPC/submission/lifecycle tests;
+- sanitized structured protocol evidence.
 
 The deterministic test client lives in `:demo-client` and is explicitly labeled:
 
@@ -48,29 +53,60 @@ MWA Lab Demo Client
 FOR TESTING ONLY
 ```
 
-It repeats the canonical Phase 1 sequence:
+Phase 2 live acceptance exercised both:
 
 ```text
-CONNECT
-→ AUTHORIZE
-→ GET_CAPABILITIES
-→ DEAUTHORIZE
-→ CLOSE
+dApp
+→ MWA Lab
+→ authorize / reauthorize
+→ approve
+→ sign
+→ Devnet result
 ```
 
-## Deliberately not implemented in Phase 1
+and:
 
-Phase 1 does **not** perform successful message signing, transaction signing,
-transaction submission, Devnet RPC submission, production-wallet secret import,
-or mainnet behavior.
+```text
+dApp
+→ MWA Lab
+→ deliberate user rejection
+→ defined MWA error
+```
 
-Pinned MWA 2.0 defines some signing methods as mandatory protocol surface.
-MWA Lab implements those callbacks fail-closed in Phase 1; successful signing
-behavior belongs to Phase 2.
+## Current Phase 2 capability envelope
 
-## Build
+```text
+network                         Solana Devnet only
+max signing payloads/request    10
+message signing                 supported with explicit approval
+transaction signing             legacy transactions only
+max transaction wire size       1232 bytes
+sign_and_send                    Devnet only
+RPC endpoint                     https://api.devnet.solana.com
+SIWS                             not advertised
+versioned transactions           rejected in Phase 2
+mainnet / testnet                rejected
+```
 
-Deterministic CI gates:
+Pinned walletlib 2.0.7 requires `sign_transactions` to be advertised as an
+optional feature for that method to be callable; Phase 2 advertises exactly that
+verified feature and no SIWS feature.
+
+## What Phase 2 deliberately does not implement
+
+Phase 2 does **not** include the Phase 3 product recorder/timeline:
+
+- no Room/SQLite session history;
+- no restart-surviving protocol timeline;
+- no full diagnostic report export bundle;
+- no deterministic fault engine;
+- no production-wallet secret import;
+- no mainnet signing/submission.
+
+Those later product layers must extend, not weaken, the verified Phase 2
+protocol boundary.
+
+## Build and deterministic verification
 
 ```bash
 ./gradlew lint
@@ -78,31 +114,47 @@ Deterministic CI gates:
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
+./scripts/phase2_static.sh
 ```
 
-Device-level association proof is intentionally separate from GitHub Actions and
-is recorded under `docs/evidence/phase1/`.
+GitHub Actions runs deterministic non-device gates. Real Android association,
+interactive approval, and live Devnet acceptance are recorded separately under
+`docs/evidence/phase2/`.
 
 ## Modules
 
 ```text
 :app          MWA Lab wallet-side protocol endpoint
-:demo-client  deterministic cross-package Phase 1 test client
+:demo-client  deterministic cross-package test client
 ```
 
-## Safety
+The production `:app` uses walletlib; clientlib is used by the demo/test
+boundary, not as application signing authority.
+
+## Safety invariants
 
 MWA Lab must never:
 
 - enable mainnet signing/submission;
 - import production wallet secrets;
-- expose private keys or seeds;
-- include raw authorization tokens in diagnostics;
-- present synthetic failures as organically observed wallet failures.
+- expose private keys, seeds, mnemonics, raw auth tokens, association tokens,
+  raw transaction/message payloads, or raw signature material in diagnostics;
+- sign without active authorization plus explicit approval;
+- present synthetic/injected failures as organically observed wallet failures.
 
-## Project documentation
+## Phase 2 report and evidence
 
-See `docs/`.
+See:
+
+- `PHASE_2_REPORT.md`
+- `docs/PROTOCOL_SUPPORT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/SECURITY.md`
+- `docs/TESTING.md`
+- `docs/evidence/phase2/`
+
+Final freeze commit/tag/remote-CI identity is recorded by the Phase 2 final
+closeout/freeze evidence rather than self-referenced inside this report.
 
 ## License
 

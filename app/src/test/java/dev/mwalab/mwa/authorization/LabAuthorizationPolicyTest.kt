@@ -105,4 +105,43 @@ class LabAuthorizationPolicyTest {
         )
         assertTrue(decision is LabAuthorizationDecision.Granted)
     }
+    @Test
+    fun missingTestnetAndUnknownChainsFailClosed() = runBlocking {
+        val rejectedChains = listOf<String?>(
+            null,
+            ProtocolContract.CHAIN_SOLANA_TESTNET,
+            "solana:unknown",
+        )
+        for (chain in rejectedChains) {
+            assertEquals(
+                LabAuthorizationDecision.UnsupportedChain,
+                policy.evaluate(chain, null, null, false),
+            )
+        }
+    }
+
+    @Test
+    fun malformedRequestedAddressFailsClosed() = runBlocking {
+        assertEquals(
+            LabAuthorizationDecision.RequestedAddressUnavailable,
+            policy.evaluate(
+                ProtocolContract.CHAIN_SOLANA_DEVNET,
+                null,
+                arrayOf("not-valid-base64%%%"),
+                false,
+            ),
+        )
+    }
+
+    @Test
+    fun authorizationScopeRejectsMutation() {
+        val granted = runBlocking {
+            policy.evaluate(ProtocolContract.CHAIN_SOLANA_DEVNET, null, null, false)
+        } as LabAuthorizationDecision.Granted
+
+        assertTrue(LabAuthorizationPolicy.isCurrentAuthorizationScope(granted.authorizationScope))
+        val changed = granted.authorizationScope.copyOf().also { it[it.lastIndex] = (it.last() + 1).toByte() }
+        assertTrue(!LabAuthorizationPolicy.isCurrentAuthorizationScope(changed))
+    }
+
 }

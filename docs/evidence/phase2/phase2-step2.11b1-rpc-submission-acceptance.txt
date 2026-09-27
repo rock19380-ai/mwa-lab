@@ -1,0 +1,52 @@
+MWA Lab Phase 2 — Step 2.11B1 RPC/submission lifecycle acceptance
+Date: 2026-09-27
+Branch: phase2-core-request-signing
+Frozen parent HEAD: 9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+
+Result:
+STEP 2.11B1 PASS
+
+Observed earlier in this Step 2.11B1 run:
+- targeted RPC/submission unit tests: PASS
+- full Gradle regression gate after DEX-safe test rename: PASS
+- DEX-name repair changed test method identifiers only, not test bodies or production behavior
+
+Static-verifier compatibility repair:
+- phase2_static.sh stale human-readable test-name anchors updated to DEX-safe camelCase identifiers
+- production_source_change_for_static_repair=false
+
+static_regression=PASS
+mocked_rpc_matrix_instrumentation=PASS
+primary_instrumentation=PASS
+cross_package_instrumentation=PASS
+device_logcat_secret_audit=PASS
+step2_10_live_regression_after_executor_refactor=PASS
+post_live_regression_and_secret_audit=PASS
+
+Covered:
+- successful mocked submit
+- DNS/connection-class I/O failure classification
+- timeout classification
+- HTTP failure classification
+- JSON-RPC error classification
+- malformed/missing/oversized RPC response rejection
+- malformed returned transaction signature rejection
+- partial submission preserves successful positions and does not retry failed positions
+- RPC-returned signature mismatch fails closed
+- requested commitment must succeed before success response
+- wait-for-commitment gates the next transaction
+- commitment failure/unavailability fails closed
+- cancellation before first submission performs zero sends
+- cancellation after an RPC completion stops remaining submissions
+- cancellation after commitment prevents the next transaction submission
+- fixed Devnet endpoint retained
+- live Step 2.10 A/B/C signing/submission regression passed after executor refactor
+
+Deferred to Step 2.11B2:
+- revoked authorization cross-session device proof
+- two close-together live signing callbacks
+- approval serialization and live decision/signature isolation
+- live session close during approval and fresh-session recovery
+
+Repository status:
+NOT COMMITTED / NOT TAGGED

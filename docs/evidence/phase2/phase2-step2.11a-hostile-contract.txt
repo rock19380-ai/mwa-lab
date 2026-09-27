@@ -1,0 +1,26 @@
+MWA Lab Phase 2 — Step 2.11A deterministic hostile-boundary contract
+Date: 2026-09-27
+
+Scope:
+- authorization fail-closed inputs: missing/testnet/unknown chain, unavailable/malformed requested address, scope mutation
+- capability truthfulness: only sign_transactions optional feature is advertised; SIWS remains absent
+- approval lifecycle: single-flight Busy, cancellation, expiry cleanup, duplicate/stale decision rejection
+- legacy transaction parser: empty/truncated/non-canonical/duplicate-signer/wrong-signature-length rejection
+- approval binding seam: parsed transaction owns immutable copies of transaction/message bytes
+- diagnostic secret defense: authorization/association token and raw message/transaction/signature fields redact
+- network policy internal-whitespace/overlong identifiers fail closed; leading/trailing whitespace retains frozen Phase 1 normalization semantics
+
+Not covered in 2.11A (reserved for 2.11B):
+- real revoked-token cross-session acceptance
+- session-close-during-approval on device
+- two live signing callbacks close together
+- mocked RPC submission failure matrix at the MwaSessionHost boundary
+- cancellation proving zero post-cancel transaction submission
+- device logcat secret scan
+
+Invariants:
+- Devnet only
+- no mainnet signing path
+- Phase 1 issuer/scope compatibility unchanged
+- no private keys, seeds, mnemonics, auth tokens, association tokens, raw payloads, or raw signatures in evidence
+- no commit or tag in Step 2.11A

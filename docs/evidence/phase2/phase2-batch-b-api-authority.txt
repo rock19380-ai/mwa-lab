@@ -1,0 +1,31 @@
+MWA Lab Phase 2 Batch B (2.6-2.9) API authority freeze
+Date: 2026-09-27
+
+Pinned Mobile Wallet Adapter authority:
+- com.solanamobile:mobile-wallet-adapter-walletlib:2.0.7
+- com.solanamobile:mobile-wallet-adapter-clientlib:2.0.7
+- Upstream source/tag authority: solana-mobile/mobile-wallet-adapter v2.0.7
+
+Pinned protocol facts used by this batch:
+- sign_transactions accepts one or more serialized transaction payloads and returns signed_payloads.
+- walletlib 2.0.7 dispatches sign_transactions only when optionalFeatures contains
+  ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS (solana:signTransactions).
+- ERROR_INVALID_PAYLOADS carries a per-payload validity vector.
+- ERROR_NOT_SIGNED represents user/wallet refusal to sign.
+- ERROR_TOO_MANY_PAYLOADS represents implementation request limits.
+- sign_and_send_transactions options include min_context_slot, commitment, skip_preflight,
+  max_retries, and wait_for_commitment_to_send_next_transaction.
+- commitment values supported by the specification are processed, confirmed, finalized.
+- if wait_for_commitment_to_send_next_transaction is true and commitment is absent,
+  the specified default wait target is confirmed.
+- ERROR_NOT_SUBMITTED carries one signature per transaction, with null for transactions
+  that could not be submitted.
+- The dApp does not choose the RPC server used by sign_and_send_transactions.
+
+MWA Lab Phase 2 profile:
+- Legacy Solana transactions only.
+- Versioned transactions fail closed.
+- Devnet-only authorization/signing/submission.
+- Fixed RPC authority: https://api.devnet.solana.com
+- A recent blockhash must validate against Devnet before transaction signing.
+- Transaction approval remains explicit and user-visible.

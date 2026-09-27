@@ -1,0 +1,30 @@
+MWA Lab Phase 2 — Step 2.12 documentation / CI contract
+Date: 2026-09-27
+Branch: phase2-core-request-signing
+Frozen Batch A parent: 9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+
+Purpose:
+Reconcile public/repository documentation with the already verified Phase 2
+implementation before final commit, exact-head remote CI, and tag/freeze.
+
+Required truths:
+- README describes Phase 2 signing/submission behavior, not the old Phase 1 deferred state.
+- PROTOCOL_SUPPORT marks only exercised behavior VERIFIED.
+- ARCHITECTURE documents approval, legacy transaction codec, Devnet RPC,
+  submission executor, session generation, and active-authorization boundaries.
+- SECURITY documents Devnet-only RPC, explicit approval, revocation hardening,
+  bounded transaction parsing, fail-closed submission, and expanded sanitizer.
+- TESTING distinguishes deterministic CI from Android/live acceptance.
+- clientlib 2.0.7 single-outstanding-request behavior is represented truthfully.
+- Phase 3 Room/SQLite timeline/history/export/fault-engine scope remains deferred.
+- PHASE_2_REPORT.md summarizes the verified implementation without inventing a
+  final commit/tag before those exist.
+- CI continues to run lint, tests, debug/APK builds, AndroidTest builds, and
+  Phase 1/Phase 2 deterministic static gates.
+- phase2_static.sh fails if Phase 2 documentation/report truth markers regress.
+
+Freeze discipline:
+- this documentation step does not commit, tag, push, reset, rebase, clean, or
+  rewrite history;
+- exact-head remote CI and final annotated tag occur only after this local
+  documentation/verification gate is green.

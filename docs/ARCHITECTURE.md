@@ -1,9 +1,9 @@
 # Architecture
 
-## Verified Phase 1 boundary
+## Verified Phase 2 boundary
 
 ```text
-MWA Lab Demo Client (:demo-client)
+MWA Lab Demo Client (:demo-client / clientlib 2.0.7)
         ↓ real solana-wallet:// Android association
 MobileWalletAdapterActivity (:app)
         ↓
@@ -12,9 +12,15 @@ AssociationUri.parse / LocalAssociationUri
 MwaSessionHost
         ├── NetworkPolicy
         ├── LabAuthorizationPolicy
-        ├── IdentityRepository
-        ├── MwaCapabilityProfile
         ├── walletlib 2.0.7 authorization repository
+        ├── session-generation guard
+        ├── active-authorization generation guard
+        ├── ApprovalCoordinator
+        ├── IdentityRepository / LabSigningService
+        ├── MwaCapabilityProfile
+        ├── LegacyTransactionCodec
+        ├── SignAndSendSubmissionExecutor
+        │       └── DevnetRpcGateway
         ├── ProtocolEvidenceStore
         └── DiagnosticSanitizer
 ```
@@ -30,16 +36,22 @@ Owns:
 - Android association entrypoint;
 - `MwaSessionHost`;
 - Devnet-only network policy;
-- protected Lab test identity;
-- authorization/deauthorization policy;
+- protected persistent Lab test identity;
+- walletlib authorization/deauthorization boundary;
+- session-local active-authorization state;
+- explicit signing approval coordination;
+- message signing;
+- legacy transaction parsing/signing;
+- Devnet-only transaction submission;
 - centralized capability configuration;
-- minimal typed/sanitized protocol evidence seam.
+- typed/sanitized process-local protocol evidence.
 
-The UI does not own protocol, authorization, capability, or key semantics.
+The UI does not own protocol, authorization, capability, transaction parsing,
+RPC, or key semantics.
 
 ### `:demo-client`
 
-Deterministic cross-package Phase 1 test infrastructure.
+Deterministic cross-package test infrastructure.
 
 Identity:
 
@@ -48,15 +60,9 @@ MWA Lab Demo Client
 FOR TESTING ONLY
 ```
 
-It uses pinned `clientlib:2.0.7` to exercise:
-
-```text
-CONNECT
-AUTHORIZE
-GET_CAPABILITIES
-DEAUTHORIZE
-CLOSE
-```
+It uses pinned `clientlib:2.0.7` to exercise authorization, reauthorization,
+capability negotiation, message signing, transaction signing,
+sign-and-send, rejection, revocation, and session lifecycle behavior.
 
 It is not the primary product and is not a production dApp.
 
@@ -64,46 +70,84 @@ It is not the primary product and is not a production dApp.
 
 ### MWA protocol
 
-Pinned official MWA semantics are authoritative.
-
-Phase 1 uses walletlib `2.0.7`; in that artifact the scenario lifecycle starts
-with `Scenario.start()`, not newer upstream `Scenario.startAsync()`.
+Pinned official MWA `v2.0.7` semantics are authoritative for this phase.
 
 ### Authorization state
 
-MWA Lab decides whether a request is eligible for authorization.
+walletlib 2.0.7 owns auth-token issuance/records and validates/revokes those
+records.
 
-walletlib 2.0.7 owns auth-token issuance, authorization-record persistence,
-validation, and revocation.
+MWA Lab additionally maintains a **session-local active-authorization generation**. A successful authorize/reauthorize activates the current
+association generation; deauthorize, replacement association, teardown, or host
+close invalidates it.
 
-MWA Lab never parses or persists raw auth-token contents for diagnostics.
+Privileged handlers verify this local active authority before approval and again
+after approval before signing/submission. This is defense in depth around the
+pinned walletlib authorization state.
+
+Raw auth-token content is never parsed into diagnostic evidence.
+
+### Approval
+
+`ApprovalCoordinator` is the single-flight request-bound approval boundary.
+
+One pending signing decision cannot be stolen by another request. Cancellation,
+expiry, stale completion, and duplicate completion fail closed.
+
+### Identity and signing
+
+`IdentityRepository` exposes public identity state.
+
+`LabSigningService` performs Ed25519 signing inside the protected identity
+boundary. The session host receives signature bytes, never raw private seed
+bytes.
+
+### Transaction codec
+
+`LegacyTransactionCodec` owns bounded parsing and signature-slot replacement for
+legacy Solana wire transactions.
+
+It snapshots approved bytes, validates canonical structure, requires the Lab
+identity to be a required signer, preserves other signature slots, and rejects
+unsupported/malformed/versioned input.
+
+### Devnet RPC
+
+`DevnetRpcGateway` has a fixed production endpoint:
+
+```text
+https://api.devnet.solana.com
+```
+
+Callers cannot supply an alternate RPC URL.
+
+`SignAndSendSubmissionExecutor` owns submission ordering, returned-signature
+cross-checking, requested-commitment sequencing, partial failure behavior, and
+cancellation/no-resubmission behavior.
 
 ### Capability truth
 
-`MwaCapabilityProfile` is the single application-level authority for values fed
-to `MobileWalletAdapterConfig`.
-
-`get_capabilities` itself is served internally by walletlib.
+`MwaCapabilityProfile` supplies explicit Phase 2 request limits, legacy
+transaction support, and the pinned-walletlib `sign_transactions` feature.
 
 ### Evidence
 
-`ProtocolEvidenceStore` is a minimal in-memory Phase 1 seam.
+`ProtocolEvidenceStore` remains process-local and sanitized in Phase 2.
 
-It records typed/sanitized summaries for protocol interactions where MWA Lab has
-an application callback. The demo client records typed capability-step evidence
-because pinned walletlib handles `get_capabilities` internally without a wallet
-callback.
-
-This is **not** the full Phase 3 recorder: no Room history, timeline product,
-diagnostic export bundle, or fault-event model is implemented in Phase 1.
+This is **not** the Phase 3 product recorder. Phase 2 does not add Room/SQLite
+history, restart-surviving session timelines, full report export, or the
+deterministic fault engine.
 
 ## Architectural invariants
 
-1. UI components do not own protocol/signing logic.
-2. Devnet-only authorization policy is enforced below the UI.
-3. Private identity material is behind the identity/security boundary.
-4. Raw auth tokens and private material do not enter diagnostics.
+1. UI components do not own protocol/signing/RPC logic.
+2. Devnet-only authorization and RPC policy are enforced below the UI.
+3. Private identity material stays behind the signing/security boundary.
+4. Raw auth/association tokens, payloads, signatures, and private material do not enter diagnostics.
 5. Capability values are centralized and pinned-library-aware.
-6. Malformed/unsupported authorization fails closed.
-7. Production-wallet behavior is compatibility evidence, not protocol authority.
-8. Phase 2 must extend this frozen boundary rather than replace it.
+6. Malformed/unsupported inputs fail closed.
+7. Signing requires current authorization plus explicit approval.
+8. Authorization is re-checked around approval/signing/submission.
+9. Stale association callbacks cannot terminate or authorize a replacement session.
+10. Production-wallet behavior is compatibility evidence, not protocol authority.
+11. Phase 3 must extend this verified boundary rather than replace it.

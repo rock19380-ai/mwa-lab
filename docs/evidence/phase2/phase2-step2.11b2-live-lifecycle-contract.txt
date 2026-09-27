@@ -1,0 +1,30 @@
+MWA Lab Phase 2 — Step 2.11B2 live lifecycle/concurrency contract
+Date: 2026-09-27
+
+Scope:
+- revoked current-session authorization must reject privileged signing
+- revoked auth token must reject cross-session reauthorization
+- valid cross-session reauthorization must remain functional
+- MWA clientlib v2.0.7 permits only one outstanding JSON-RPC request per client association
+- a second same-association sign_messages call while the first is outstanding must be rejected locally with UnsupportedOperationException
+- the first outstanding request must still reach one approval and its returned signature must verify only against its own payload and authorized Lab address
+- wallet-side simultaneous approval callbacks are covered deterministically by ApprovalCoordinatorTest; the live demo must not claim two wallet callbacks when clientlib prevents them
+- closing the dApp association while approval is pending must cancel the pending approval without signing
+- a fresh association after teardown must obtain a fresh approval and sign successfully
+- identity reset authority-change behavior remains covered by AndroidKeystoreIdentityRepositoryInstrumentedTest
+- no auth token, association token, raw payload, or raw signature may enter evidence/logcat
+
+Out of scope:
+- persistent session/timeline storage (Phase 3)
+- mainnet execution
+- production wallet secrets
+
+Repository status:
+NOT COMMITTED / NOT TAGGED
+
+Revocation defense-in-depth:
+- MWA Lab tracks active authorization as a session generation, independently of authorization-scope bytes.
+- authorize/reauthorize success activates the current generation.
+- deauthorize, association replacement, serving completion, and host close invalidate local active authority.
+- privileged handlers re-check active authority before approval and after approval before signing/submission.
+- sign-and-send cancellation predicate includes active-authorization state, so revocation can stop later submissions.

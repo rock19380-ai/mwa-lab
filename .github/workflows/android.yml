@@ -34,6 +34,9 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh
 
+      - name: Validate shell gate syntax
+        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh
+
       - name: Lint
         run: ./gradlew lint
 
@@ -55,5 +58,5 @@ jobs:
       - name: Phase 1 deterministic static gate
         run: ./scripts/phase1_static.sh
 
-      - name: Phase 2 deterministic static gate
+      - name: Phase 2 final deterministic static gate
         run: ./scripts/phase2_static.sh

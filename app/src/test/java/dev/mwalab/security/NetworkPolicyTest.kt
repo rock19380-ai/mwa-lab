@@ -75,4 +75,31 @@ class NetworkPolicyTest {
             (decision as NetworkDecision.Rejected).reason,
         )
     }
+    @Test
+    fun internalWhitespaceAndOverlongNetworkIdentifiersFailClosed() {
+        val values = listOf(
+            "solana: devnet",
+            "x".repeat(129),
+        )
+        values.forEach { value ->
+            val decision = NetworkPolicy.evaluate(value)
+            assertTrue(decision is NetworkDecision.Rejected)
+            assertEquals(
+                NetworkRejectionReason.MISSING_OR_MALFORMED,
+                (decision as NetworkDecision.Rejected).reason,
+            )
+        }
+    }
+
+    @Test
+    fun leadingAndTrailingWhitespaceRemainPhase1Normalized() {
+        val decision = NetworkPolicy.evaluate(
+            " \t${ProtocolContract.CHAIN_SOLANA_DEVNET}\n",
+        )
+        assertEquals(
+            NetworkDecision.Allowed(ProtocolContract.CHAIN_SOLANA_DEVNET),
+            decision,
+        )
+    }
+
 }

@@ -1,0 +1,42 @@
+MWA Lab Phase 2 — Step 2.12A documentation/report/CI pre-freeze acceptance
+Date: 2026-09-27
+Branch: phase2-core-request-signing
+Frozen Batch A parent: 9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+Reviewed clean snapshot SHA-256: dc1271779e47e5a1557537be09a93dbcbfb11b280050ce27d5f9d40123ffc830
+
+Result:
+STEP 2.12A LOCAL PREFREEZE PASS
+
+Scope:
+- reconciled README from Phase 1 wording to verified Phase 2 behavior
+- reconciled protocol support matrix
+- documented current approval/signing/RPC/authorization architecture
+- documented Phase 2 security invariants and hostile-test boundary
+- documented deterministic/device/live testing truth
+- added PHASE_2_REPORT.md
+- updated changelog
+- added deterministic CI shell-syntax validation
+- advanced phase2_static.sh to Step 2.12 pre-freeze documentation/report checks
+- preserved Phase 3 Room/timeline/export/fault-engine boundary
+
+Verification:
+step2_11_baseline_digest=PASS
+production_source_change=false
+documentation_truth_contract=PASS
+ci_static_contract=PASS
+full_gradle_gate=PASS
+static_regression=PASS
+debug_apk_existence=PASS
+final_security_boundary_audit=PASS
+git_diff_check=PASS
+
+Freeze status:
+NOT COMMITTED
+NOT PUSHED
+NOT TAGGED
+REMOTE CI NOT YET RUN FOR FINAL PHASE 2 IMPLEMENTATION COMMIT
+
+Next:
+Create one path-selective Phase 2 implementation/documentation commit, push it,
+and require exact-head GitHub Actions PASS before writing final closeout evidence
+or creating the final Phase 2 tag.

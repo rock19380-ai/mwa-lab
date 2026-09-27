@@ -1,0 +1,17 @@
+MWA Lab Phase 2 Batch B (2.6-2.9) security contract
+Date: 2026-09-27
+
+1. Never expose, log, return, or persist the Lab private seed.
+2. Legacy transaction signatures are produced only through LabSigningService.
+3. The parser is bounded and exact; malformed/trailing/versioned transactions fail closed.
+4. The Lab public key must be inside the required signer region and the walletlib-authorized accounts.
+5. Existing transaction signatures are preserved; only the Lab signer slot is replaced.
+6. The signed bytes are the canonical serialized legacy message bytes, not the full transaction.
+7. Signing requires a blockhash currently valid on Solana Devnet.
+8. RPC endpoint selection is server-authoritative and fixed to Solana Devnet.
+9. Raw transaction bytes/signatures/RPC bodies are not written to ProtocolEvidence.
+10. Approval is request/session-bound through ApprovalCoordinator before signing.
+11. User rejection maps to ERROR_NOT_SIGNED.
+12. Partial/failed submission maps to ERROR_NOT_SUBMITTED with null entries for unsent transactions.
+13. Commitment verification failures never produce a false successful confirmation claim.
+14. Phase 1 authorization issuer/scope and lifecycle behavior remain unchanged.

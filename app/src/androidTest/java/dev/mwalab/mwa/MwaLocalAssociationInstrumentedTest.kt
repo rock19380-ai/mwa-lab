@@ -80,7 +80,10 @@ class MwaLocalAssociationInstrumentedTest {
             arrayOf<Any>("legacy"),
             capabilities.supportedTransactionVersions,
         )
-        assertTrue(capabilities.supportedOptionalFeatures.isEmpty())
+        assertArrayEquals(
+            arrayOf(ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS),
+            capabilities.supportedOptionalFeatures,
+        )
 
         val identityUri = Uri.parse("https://phase1-client.invalid")
         val iconUri = Uri.parse("icon.png")

@@ -1,5 +1,6 @@
 package dev.mwalab.mwa.capabilities
 
+import com.solana.mobilewalletadapter.common.ProtocolContract
 import com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterConfig
 
 data class MwaCapabilitySnapshot(
@@ -26,7 +27,7 @@ object MwaCapabilityProfile {
             MAX_MESSAGES_PER_SIGNING_REQUEST,
             arrayOf(MobileWalletAdapterConfig.LEGACY_TRANSACTION_VERSION),
             LOW_POWER_NO_CONNECTION_TIMEOUT_MS,
-            emptyArray(),
+            arrayOf(ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS),
         )
 
     fun snapshot(): MwaCapabilitySnapshot =
@@ -35,6 +36,6 @@ object MwaCapabilityProfile {
             maxMessagesPerSigningRequest = MAX_MESSAGES_PER_SIGNING_REQUEST,
             supportedTransactionVersions =
                 listOf(MobileWalletAdapterConfig.LEGACY_TRANSACTION_VERSION),
-            optionalFeatures = emptyList(),
+            optionalFeatures = listOf(ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS),
         )
 }

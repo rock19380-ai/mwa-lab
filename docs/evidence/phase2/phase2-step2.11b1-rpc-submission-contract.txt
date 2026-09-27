@@ -1,0 +1,44 @@
+MWA Lab Phase 2 — Step 2.11B1 RPC/submission lifecycle contract
+Date: 2026-09-27
+
+Scope:
+- deterministic RPC transport/result classification
+- sign-and-send submission sequencing
+- partial-submission preservation
+- requested-commitment gating
+- request/session cancellation during submission
+- zero resubmission after cancellation
+
+Production invariants:
+- RPC endpoint remains fixed to https://api.devnet.solana.com
+- no caller-controlled RPC URL is introduced
+- sendTransaction failures remain ERROR_NOT_SUBMITTED candidates, not fabricated wallet signatures
+- a returned RPC signature must exactly match the primary transaction signature
+- requested commitment must succeed before successful protocol completion
+- wait-for-commitment gates the next transaction when requested
+- once the request/session generation becomes stale, no later transaction is submitted or re-submitted
+- raw transactions, signatures, RPC bodies, and remote error messages are not added to diagnostics
+
+Deterministic failure matrix:
+- successful mocked submission
+- DNS/connection-class I/O failure
+- timeout
+- HTTP failure
+- JSON-RPC error
+- malformed JSON / missing result / oversized response
+- malformed returned signature
+- partial submission
+- RPC signature mismatch
+- commitment not reached
+- commitment RPC unavailable
+- cancellation before first submit
+- cancellation after first RPC completion
+- cancellation after commitment response before next submit
+
+Deferred to Step 2.11B2:
+- revoked authorization cross-session device proof
+- close-together live signing callbacks and decision/signature isolation
+- live session close during approval and fresh-session recovery
+
+Repository status:
+NOT COMMITTED / NOT TAGGED

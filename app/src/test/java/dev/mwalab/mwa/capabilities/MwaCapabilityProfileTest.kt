@@ -1,7 +1,7 @@
 package dev.mwalab.mwa.capabilities
 
+import com.solana.mobilewalletadapter.common.ProtocolContract
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MwaCapabilityProfileTest {
@@ -12,7 +12,10 @@ class MwaCapabilityProfileTest {
         assertEquals(10, snapshot.maxTransactionsPerSigningRequest)
         assertEquals(10, snapshot.maxMessagesPerSigningRequest)
         assertEquals(listOf("legacy"), snapshot.supportedTransactionVersions)
-        assertTrue(snapshot.optionalFeatures.isEmpty())
+        assertEquals(
+            listOf(ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS),
+            snapshot.optionalFeatures,
+        )
     }
 
     @Test
@@ -37,4 +40,12 @@ class MwaCapabilityProfileTest {
             config.optionalFeatures.toList(),
         )
     }
+    @Test
+    fun onlyExplicitSignTransactionsOptionalFeatureIsAdvertised() {
+        val features = MwaCapabilityProfile.snapshot().optionalFeatures
+
+        assertEquals(listOf(ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS), features)
+        assertEquals(false, features.contains(ProtocolContract.FEATURE_ID_SIGN_IN_WITH_SOLANA))
+    }
+
 }

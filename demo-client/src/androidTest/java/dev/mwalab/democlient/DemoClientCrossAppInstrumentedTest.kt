@@ -2,6 +2,7 @@ package dev.mwalab.democlient
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.solana.mobilewalletadapter.common.ProtocolContract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -29,7 +30,10 @@ class DemoClientCrossAppInstrumentedTest {
         assertEquals(10, first.maxTransactionsPerSigningRequest)
         assertEquals(10, first.maxMessagesPerSigningRequest)
         assertEquals(listOf("legacy"), first.supportedTransactionVersions)
-        assertTrue(first.optionalFeatures.isEmpty())
+        assertEquals(
+            listOf(ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS),
+            first.optionalFeatures,
+        )
 
         assertEquals(first.maxTransactionsPerSigningRequest, second.maxTransactionsPerSigningRequest)
         assertEquals(first.maxMessagesPerSigningRequest, second.maxMessagesPerSigningRequest)

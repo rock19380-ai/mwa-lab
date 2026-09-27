@@ -1,0 +1,51 @@
+MWA Lab Phase 2 — Step 2.11A deterministic hostile acceptance
+Date: 2026-09-27
+Branch: phase2-core-request-signing
+Frozen parent HEAD: 9d2dea7c17997c7b1d3f1275b7456ef77a1feab7
+
+Result:
+STEP 2.11A PASS
+
+Previously observed in this Step 2.11A run:
+- targeted hostile unit tests: PASS
+- full Gradle regression gate: PASS
+- Phase 1 static gate: PASS
+- Phase 2 static gate through 2.11A: PASS
+- static/test-output secret audit: PASS
+
+Device resume proof:
+- primary instrumentation: PASS
+- cross-package instrumentation: PASS
+- device logcat secret audit: PASS
+
+Instrumentation success contract:
+- adb instrumentation process exit code is zero
+- AndroidJUnitRunner reports OK (<n> tests)
+- no FAILURES, crash, shortMsg, abort, or instrumentation-failed marker
+- INSTRUMENTATION_CODE is not required because it is not emitted consistently by this Android 16/emulator command surface
+
+Covered:
+- authorization missing/testnet/unknown chain fail closed
+- malformed/unavailable requested address fail closed
+- authorization scope mutation rejected
+- SIWS remains unadvertised
+- approval single-flight Busy behavior
+- cancellation/expiry cleanup
+- duplicate and stale approval completion rejection
+- empty/truncated/non-canonical/duplicate-signer legacy transaction rejection
+- immutable parsed transaction snapshot before approval/signing
+- wrong Ed25519 signature length rejected
+- diagnostic redaction for authorization/association tokens and raw payload/signature fields
+- internal-whitespace and overlong network identifiers fail closed
+- frozen Phase 1 leading/trailing network whitespace normalization remains unchanged
+- Phase 2 sign_transactions capability expectation repaired in both device regression harnesses
+
+Deferred to Step 2.11B:
+- revoked authorization cross-session device proof
+- session close/cancel during live approval
+- close-together live signing callbacks and decision isolation
+- mocked RPC failure/submission matrix at the session-host boundary
+- cancellation proving zero transaction resubmission
+
+Repository status:
+NOT COMMITTED / NOT TAGGED

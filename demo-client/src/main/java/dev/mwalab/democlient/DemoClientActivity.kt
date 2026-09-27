@@ -18,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.solana.mobilewalletadapter.clientlib.protocol.JsonRpc20Client
+import com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient
+import java.util.concurrent.ExecutionException
 
 class DemoClientActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,8 +50,11 @@ class DemoClientActivity : ComponentActivity() {
                                 Phase2AcceptanceRunner(applicationContext).run(phase2Scenario)
                             }.fold(
                                 onSuccess = { DemoUiState.Phase2Complete(it) },
-                                onFailure = {
-                                    DemoUiState.Failed("PHASE2 ${phase2Scenario.wireName}")
+                                onFailure = { failure ->
+                                    DemoUiState.Failed(
+                                        label = "PHASE2 ${phase2Scenario.wireName}",
+                                        detail = phase2FailureDetail(failure),
+                                    )
                                 },
                             )
                         }
@@ -80,6 +86,7 @@ class DemoClientActivity : ComponentActivity() {
                         DemoUiState.Running -> Text("Running…")
                         is DemoUiState.Failed -> {
                             Text("${current.label}: FAIL")
+                            current.detail?.let { Text("Failure: $it") }
                         }
                         is DemoUiState.CanonicalComplete -> {
                             Text("Result: PASS")
@@ -117,9 +124,30 @@ class DemoClientActivity : ComponentActivity() {
     }
 }
 
+private fun phase2FailureDetail(failure: Throwable): String {
+    if (failure is Phase2FundingRequiredException) return checkNotNull(failure.message)
+
+    val cause = unwrapPhase2Failure(failure)
+    return when (cause) {
+        is MobileWalletAdapterClient.InvalidPayloadsException ->
+            "InvalidPayloadsException valid=${cause.validPayloads.joinToString(prefix = "[", postfix = "]")}"
+        is JsonRpc20Client.JsonRpc20RemoteException ->
+            "JsonRpc20RemoteException code=${cause.code}"
+        else -> cause::class.java.simpleName
+    }
+}
+
+private fun unwrapPhase2Failure(failure: Throwable): Throwable {
+    var current = failure
+    while (current is ExecutionException && current.cause != null) {
+        current = current.cause!!
+    }
+    return current
+}
+
 private sealed interface DemoUiState {
     data object Running : DemoUiState
-    data class Failed(val label: String) : DemoUiState
+    data class Failed(val label: String, val detail: String? = null) : DemoUiState
     data class CanonicalComplete(val result: DemoRunResult) : DemoUiState
     data class Phase2Complete(val result: Phase2AcceptanceResult) : DemoUiState
 }

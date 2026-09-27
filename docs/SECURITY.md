@@ -1,13 +1,21 @@
 # Security and Diagnostic Invariants
 
-## S1 — Devnet-only authorization boundary
+## S1 — Devnet-only network boundary
 
-Phase 1 authorization accepts only `solana:devnet` when all other validation
-passes.
+MWA Lab accepts supported authorization/signing behavior only for
+`solana:devnet`.
 
-Mainnet, testnet, unknown, malformed, and missing-chain requests fail closed.
+Mainnet, testnet, unknown, malformed, and missing-chain authorization requests
+fail closed.
 
-There is no UI/settings path that enables mainnet.
+Transaction submission uses only:
+
+```text
+https://api.devnet.solana.com
+```
+
+There is no caller-supplied RPC URL and no UI/settings path that enables
+mainnet.
 
 ## S2 — Protected Lab identity
 
@@ -25,7 +33,10 @@ MWA Lab does not support:
 - Seed Vault extraction;
 - production-wallet migration.
 
-## S3 — Authorization-token authority
+The signing implementation re-derives public-key integrity before use and
+zeroes temporary decrypted seed material in `finally`.
+
+## S3 — Authorization authority and revocation
 
 MWA Lab does not mint auth tokens.
 
@@ -36,18 +47,73 @@ Pinned walletlib 2.0.7 owns:
 - token validation;
 - token revocation.
 
-MWA Lab does not log, display, export, or persist raw auth-token content for
-diagnostics.
+MWA Lab adds a session-local active-authorization generation so privileged
+requests fail closed even if a stale/revoked callback reaches the application
+boundary.
 
-## S4 — Sanitized evidence
+Successful authorize/reauthorize activates the current generation.
+Deauthorize, association replacement, session teardown, and host close
+invalidate it.
 
-Phase 1 evidence prefers:
+Privileged signing/submission handlers re-check authorization before approval
+and after approval before signing/submission.
+
+## S4 — Explicit user approval
+
+Successful `sign_messages`, `sign_transactions`, and
+`sign_and_send_transactions` require explicit approval in the normal Phase 2
+path.
+
+Approval is:
+
+- single-flight;
+- request-bound;
+- cancellable;
+- expiry-aware;
+- resistant to stale or duplicate completion.
+
+Session teardown cancels pending approval.
+
+## S5 — Bounded signing inputs
+
+Message and transaction signing requests are bounded to 10 payloads.
+
+Message signing rejects transaction-message-shaped content.
+
+Legacy transaction signing additionally enforces:
+
+- maximum wire size 1232 bytes;
+- canonical short-vector structure;
+- signature/header consistency;
+- Lab identity in a required signer slot;
+- immutable approved transaction snapshot;
+- malformed/truncated/trailing/versioned input rejection.
+
+## S6 — Submission fail-closed behavior
+
+`sign_and_send_transactions` uses the fixed Devnet RPC boundary and validates:
+
+- returned signature shape;
+- returned signature matches the signed transaction;
+- requested commitment is reached before success where required;
+- transaction-status errors are not treated as commitment success.
+
+Transport timeout/I/O/HTTP, JSON-RPC, malformed-response, signature-mismatch,
+commitment failure, and submission failure remain defined failures.
+
+Cancellation prevents later submissions and does not resubmit a failed/cancelled
+transaction.
+
+## S7 — Sanitized evidence
+
+Structured evidence may include:
 
 - protocol method;
 - public chain identifier;
 - public account metadata;
-- request counts;
+- request counts/lengths;
 - outcome/error enum;
+- failure source;
 - timing/duration;
 - safe result summaries.
 
@@ -55,16 +121,17 @@ Never diagnostic-export or log:
 
 - private key;
 - seed/mnemonic;
-- raw auth token;
+- raw auth/authorization token;
 - Keystore/encryption secret;
-- association token/public key;
-- transaction/message payload;
-- signature bytes.
+- association token;
+- raw message payload;
+- raw transaction payload;
+- raw signature bytes.
 
-`MwaSessionHost` passes structured protocol summaries through
-`DiagnosticSanitizer` before they enter `ProtocolEvidenceStore`.
+`DiagnosticSanitizer` is applied before structured protocol data enters
+`ProtocolEvidenceStore`.
 
-## S5 — Explicit lab identity
+## S8 — Explicit lab identity
 
 Primary wallet UI communicates:
 
@@ -81,38 +148,38 @@ MWA Lab Demo Client
 FOR TESTING ONLY
 ```
 
-## S6 — Phase 1 signing behavior
-
-Successful signing is not implemented in Phase 1.
-
-MWA 2.0 mandatory signing callbacks are present because the pinned protocol
-requires them, but Phase 1 returns protocol-defined decline results.
-
-No message/transaction is signed and no transaction is submitted.
-
-## S7 — Fail closed
-
-Malformed, missing-chain, unsupported-chain, unavailable-identity, unsupported
-optional-feature, and unsupported sign-in authorization conditions do not become
-successful authorization.
-
-## S8 — Diagnostic truthfulness
+## S9 — Diagnostic truthfulness
 
 Unknown data remains unknown.
 
 Do not invent:
 
-- wallet compatibility;
+- production-wallet compatibility;
 - program names;
 - amounts;
 - token symbols;
 - instruction semantics;
 - protocol causes;
-- signing success.
+- signing/submission success.
 
-## S9 — Failure-source integrity
+MWA clientlib 2.0.7 permits only one outstanding request per client association;
+Phase 2 evidence records that limitation rather than claiming two live
+same-association wallet callbacks.
 
-Structured protocol evidence classifies failure source explicitly.
+## S10 — Failure-source integrity
 
-Synthetic/injected failure behavior belongs to later phases and must not be
-represented as naturally observed protocol failure.
+Synthetic/injected failure behavior belongs to later phases.
+
+Phase 2 does not present injected failures as naturally observed wallet or RPC
+failures.
+
+## S11 — Phase boundary
+
+Phase 2 intentionally does not add:
+
+- Room/SQLite protocol history;
+- persistent session timeline;
+- full diagnostic export bundle;
+- deterministic fault engine.
+
+Those later features must preserve all invariants above.
