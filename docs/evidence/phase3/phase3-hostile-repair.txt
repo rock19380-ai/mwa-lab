@@ -35,3 +35,11 @@ an error string rather than propagating a useful file-copy exit code.
 Classification: verifier setup defect. Initialize Home, check file existence
 and SQLite header before snapshot. Full cross-package/restart/UI acceptance
 then passed. No product schema or validation was weakened.
+
+Final lint compatibility failure:
+java.util.Map.putIfAbsent requires API 24 on this target; minimum SDK is 23.
+Classification: implementation compatibility defect.
+Repair: preserve first close summary with containsKey and assignment under the
+existing recorder mutex, using API 23-compatible map operations. No SDK raise,
+compatibility flag, lint suppression, baseline, or weakened assertion.
+Exact lint and recorder gates are rerun before resuming the complete gate.

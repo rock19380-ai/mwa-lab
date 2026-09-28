@@ -139,7 +139,9 @@ class PersistentProtocolRecorder(
     ): List<ProtocolRecorder.CompletionResult> {
         val safeCloseSummary = safeSummary(responseSummary)
         val handles = mutex.withLock {
-            closedSessionSummaries.putIfAbsent(sessionId, safeCloseSummary)
+            if (!closedSessionSummaries.containsKey(sessionId)) {
+                closedSessionSummaries[sessionId] = safeCloseSummary
+            }
             pendingByEventId.values.filter { it.sessionId == sessionId }.sortedBy { it.sequence }
         }
         val results = handles.map { handle ->
