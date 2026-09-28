@@ -7,6 +7,8 @@ import dev.mwalab.protocol.ProtocolOutcome
 import dev.mwalab.protocol.recorder.EventClock
 import dev.mwalab.protocol.recorder.ProtocolEventHandle
 import dev.mwalab.protocol.recorder.ProtocolRecorder
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
@@ -112,6 +114,31 @@ class SessionLifecycleCoordinatorTest {
             SessionLifecycleCoordinator.PersistenceResult.PersistenceFailed,
             coordinator.finishSession("session-a", SessionCloseReason.HOST_CLOSED),
         )
+    }
+
+    @Test
+    fun firstCloseTimestampAndReasonWinWhenDuplicateCloseFinishesFirst() = runBlocking {
+        val repository = FakeSessionRepository()
+        val entered = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        var first = true
+        val recorder = object : ProtocolRecorder by FakeProtocolRecorder() {
+            override suspend fun cancelPendingForSession(sessionId: SessionId,
+                responseSummary: Map<String, String>): List<ProtocolRecorder.CompletionResult> {
+                if (first) { first = false; entered.complete(Unit); release.await() }
+                return emptyList()
+            }
+        }
+        var now = 100L
+        val coordinator = SessionLifecycleCoordinator(repository, recorder, EventClock { now })
+        val original = async { coordinator.finishSession("a", SessionCloseReason.HOST_CLOSED) }
+        entered.await()
+        now = 200L
+        coordinator.finishSession("a", SessionCloseReason.TEARDOWN_COMPLETE)
+        release.complete(Unit)
+        original.await()
+        assertEquals(listOf(100L, 100L), repository.finished.map { it.second })
+        assertTrue(repository.finished.all { it.third == SessionCloseReason.HOST_CLOSED })
     }
 
     private class FixedClock(private val value: Long) : EventClock {

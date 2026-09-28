@@ -11,3 +11,27 @@ late begins on closed sessions settle CANCELLED in their original session.
 Also normalize external chain/commitment metadata to bounded known values or unsupported.
 Wallet protocol decisions, completion calls, and ordering are unchanged by this repair.
 Follow-up test results recorded in final acceptance evidence.
+
+Final lifecycle race audit:
+firstCloseTimestampAndReasonWinWhenDuplicateCloseFinishesFirst reproduced an
+AssertionError: a duplicate close could write its later timestamp first.
+Classification: diagnostic lifecycle implementation defect.
+Repair: atomically capture first close reason AND epoch time before settlement;
+all duplicate finalizations use that metadata. Session end denotes observed
+close initiation; cancelled event settlement may finish later.
+Source audit also moved START_FAILED diagnostic finalization before candidate
+cleanup, so synchronous cleanup callbacks cannot overwrite the initiating cause.
+Existing wallet close calls and protocol responses retain their order.
+
+UI fixture failure:
+unknownErrorIsRenderedNumericallyAndCapabilitiesAreNotTimelineEvents used the
+reserved session ID unknown, which correctly failed domain validation.
+Classification: new test fixture defect; repaired by assigning unknown-error.
+Exact failing test then passed; full six-test Compose rerun passed.
+
+Device acceptance setup failure:
+The connected harness had removed the target database. exec-out cat returned
+an error string rather than propagating a useful file-copy exit code.
+Classification: verifier setup defect. Initialize Home, check file existence
+and SQLite header before snapshot. Full cross-package/restart/UI acceptance
+then passed. No product schema or validation was weakened.

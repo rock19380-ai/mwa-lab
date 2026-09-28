@@ -176,11 +176,11 @@ class MwaSessionHost(
                     scenario = null
                 }
             }
-            runCatching { candidate.close() }
             finishPersistentSession(
                 sessionId = persistentSessionId,
                 closeReason = SessionCloseReason.START_FAILED,
             )
+            runCatching { candidate.close() }
             clearActivePersistentSessionIfMatches(persistentSessionId)
             record(MwaSessionEvent.ASSOCIATION_REJECTED, "scenario_start_failed")
             AssociationOpenResult.Rejected(

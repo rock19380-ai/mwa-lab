@@ -18,7 +18,8 @@ class SessionLifecycleCoordinator(
     private val protocolRecorder: ProtocolRecorder,
     private val clock: EventClock = SystemEventClock,
 ) {
-    private val firstCloseReasonBySession = ConcurrentHashMap<SessionId, SessionCloseReason>()
+    private data class CloseMetadata(val reason: SessionCloseReason, val atEpochMillis: Long)
+    private val firstCloseBySession = ConcurrentHashMap<SessionId, CloseMetadata>()
 
     suspend fun createSession(sessionId: SessionId): PersistenceResult {
         val session = MwaSession(
@@ -45,10 +46,9 @@ class SessionLifecycleCoordinator(
         sessionId: SessionId,
         closeReason: SessionCloseReason,
     ): PersistenceResult {
-        val authoritativeReason = firstCloseReasonBySession.putIfAbsent(
-            sessionId,
-            closeReason,
-        ) ?: closeReason
+        val observedClose = CloseMetadata(closeReason, clock.nowEpochMillis().coerceAtLeast(0L))
+        val firstClose = firstCloseBySession.putIfAbsent(sessionId, observedClose) ?: observedClose
+        val authoritativeReason = firstClose.reason
 
         // Settle recorder-owned handles first so a final SessionSummary never
         // needs to pretend a begun request completed successfully.
@@ -64,7 +64,7 @@ class SessionLifecycleCoordinator(
         return persist {
             sessionRepository.finishSession(
                 sessionId = sessionId,
-                completedAtEpochMillis = clock.nowEpochMillis().coerceAtLeast(0L),
+                completedAtEpochMillis = firstClose.atEpochMillis,
                 closeReason = authoritativeReason,
             )
         }
