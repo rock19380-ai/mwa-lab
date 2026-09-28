@@ -1,0 +1,13 @@
+Hostile recorder acceptance, 2026-09-28
+Initial focused command:
+./gradlew :app:testDebugUnitTest --tests dev.mwalab.protocol.recorder.PersistentProtocolRecorderTest
+Executed: 15 tests, 2 failed.
+closeWaitsForClaimedPersistenceBeforePublishingClosedSession: AssertionError
+invalidResponseCannotOrphanHandleAndCloseCanStillSettleIt: NoSuchElementException
+Classification: implementation defects in diagnostic recorder ownership.
+Repair: validate before pending removal; track claimed writes with completion barriers;
+close waits for claimed writes; claimed persistence settles despite caller cancellation;
+late begins on closed sessions settle CANCELLED in their original session.
+Also normalize external chain/commitment metadata to bounded known values or unsupported.
+Wallet protocol decisions, completion calls, and ordering are unchanged by this repair.
+Follow-up test results recorded in final acceptance evidence.

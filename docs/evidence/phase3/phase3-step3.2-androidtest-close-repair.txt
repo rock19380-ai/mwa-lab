@@ -1,0 +1,13 @@
+MWA Lab Phase 3 Step 3.2 Android instrumentation close repair
+timestamp=2026-09-28T11:10:19+06:30
+branch=phase3-protocol-recorder-timeline
+head=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+phase2_baseline=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+test_file=app/src/androidTest/java/dev/mwalab/storage/RoomSessionRepositoryInstrumentedTest.kt
+test_sha_before=596c1046fbcca4d13d62d0bf2bd75b41b0505cd2e801ec8679fd9aae25fc7f76
+test_sha_after=d9f57f0e37f82244d53d7ee534039fd37fa975301be579e2378b3c5cfed6a93e
+repair_scope=androidTest-only
+production_source_changed_by_repair=NO
+room_database_close_strategy=explicit_try_finally_close
+ksp=2.3.12
+room=2.8.5

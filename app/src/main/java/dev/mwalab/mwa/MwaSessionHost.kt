@@ -35,6 +35,8 @@ import dev.mwalab.protocol.ProtocolEvidenceStore
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
 import dev.mwalab.protocol.ProtocolOutcome
+import dev.mwalab.protocol.recorder.ProtocolEventHandle
+import dev.mwalab.protocol.recorder.ProtocolRecorder
 import dev.mwalab.rpc.DevnetRpcGateway
 import dev.mwalab.rpc.DevnetRpcResult
 import dev.mwalab.rpc.DevnetSendOptions
@@ -42,17 +44,21 @@ import dev.mwalab.rpc.SignAndSendFatalReason
 import dev.mwalab.rpc.SignAndSendSubmission
 import dev.mwalab.rpc.SignAndSendSubmissionExecutor
 import dev.mwalab.rpc.SignAndSendSubmissionResult
+import dev.mwalab.session.SessionCloseReason
+import dev.mwalab.session.SessionLifecycleCoordinator
 import dev.mwalab.security.DiagnosticSanitizer
 import dev.mwalab.security.NetworkDecision
 import dev.mwalab.security.NetworkPolicy
 import dev.mwalab.signing.LabSigningService
 import dev.mwalab.transaction.LegacyTransactionCodec
 import dev.mwalab.transaction.SolanaTransactionMessageDetector
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 
@@ -67,6 +73,10 @@ class MwaSessionHost(
     private val rpcGateway: DevnetRpcGateway = MwaLabComposition.devnetRpcGateway(),
     private val evidenceSink: MwaSessionEvidenceSink = MwaSessionEvidenceStore,
     private val protocolEvidenceSink: ProtocolEvidenceSink = ProtocolEvidenceStore,
+    private val protocolRecorder: ProtocolRecorder =
+        MwaLabComposition.protocolRecorder(context.applicationContext),
+    private val sessionLifecycleCoordinator: SessionLifecycleCoordinator =
+        MwaLabComposition.sessionLifecycleCoordinator(context.applicationContext),
     private val onSessionFinished: () -> Unit = {},
 ) : AutoCloseable {
     private val appContext = context.applicationContext
@@ -81,6 +91,8 @@ class MwaSessionHost(
     private val activeAuthorizationGeneration = AtomicLong(NO_AUTHORIZATION_GENERATION)
     @Volatile
     private var activeSessionId: String = UUID.randomUUID().toString()
+    @Volatile
+    private var activePersistentSessionId: String? = null
     private val protocolSequence = AtomicLong(0)
 
     private val walletConfig = MwaCapabilityProfile.createWalletConfig()
@@ -89,7 +101,15 @@ class MwaSessionHost(
     fun openAssociation(uri: Uri?): AssociationOpenResult {
         val generation = sessionGeneration.incrementAndGet()
         activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
+        val replacedSessionId = activePersistentSessionId
         closeCurrentScenario(recordClose = false)
+        if (replacedSessionId != null) {
+            finishPersistentSession(
+                sessionId = replacedSessionId,
+                closeReason = SessionCloseReason.REPLACED_BY_ASSOCIATION_ATTEMPT,
+            )
+            clearActivePersistentSessionIfMatches(replacedSessionId)
+        }
         activeSessionId = UUID.randomUUID().toString()
         protocolSequence.set(0)
 
@@ -128,7 +148,7 @@ class MwaSessionHost(
                 appContext,
                 walletConfig,
                 authIssuerConfig,
-                createCallbacks(generation),
+                createCallbacks(generation, activeSessionId),
             )
         } catch (_: Throwable) {
             record(MwaSessionEvent.ASSOCIATION_REJECTED, "scenario_creation_failed")
@@ -136,6 +156,10 @@ class MwaSessionHost(
                 AssociationOpenResult.Reason.SCENARIO_CREATION_FAILED,
             )
         }
+
+        val persistentSessionId = activeSessionId
+        createPersistentSession(persistentSessionId)
+        activePersistentSessionId = persistentSessionId
 
         synchronized(lock) {
             scenario = candidate
@@ -153,6 +177,11 @@ class MwaSessionHost(
                 }
             }
             runCatching { candidate.close() }
+            finishPersistentSession(
+                sessionId = persistentSessionId,
+                closeReason = SessionCloseReason.START_FAILED,
+            )
+            clearActivePersistentSessionIfMatches(persistentSessionId)
             record(MwaSessionEvent.ASSOCIATION_REJECTED, "scenario_start_failed")
             AssociationOpenResult.Rejected(
                 AssociationOpenResult.Reason.SCENARIO_START_FAILED,
@@ -163,7 +192,12 @@ class MwaSessionHost(
     override fun close() {
         sessionGeneration.incrementAndGet()
         activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
+        val sessionId = activePersistentSessionId
         closeCurrentScenario(recordClose = true)
+        if (sessionId != null) {
+            finishPersistentSession(sessionId, SessionCloseReason.HOST_CLOSED)
+            clearActivePersistentSessionIfMatches(sessionId)
+        }
         authorizationScope.cancel()
     }
 
@@ -182,7 +216,10 @@ class MwaSessionHost(
         }
     }
 
-    private fun createCallbacks(generation: Long) = object : LocalScenario.Callbacks {
+    private fun createCallbacks(
+        generation: Long,
+        persistentSessionId: String,
+    ) = object : LocalScenario.Callbacks {
         override fun onScenarioReady() {
             if (!isCurrentGeneration(generation)) return
             record(MwaSessionEvent.SCENARIO_READY)
@@ -196,29 +233,42 @@ class MwaSessionHost(
         override fun onScenarioServingComplete() {
             if (!isCurrentGeneration(generation)) return
             record(MwaSessionEvent.SERVING_COMPLETE)
+            finishPersistentSession(persistentSessionId, SessionCloseReason.SERVING_COMPLETE)
+            clearActivePersistentSessionIfMatches(persistentSessionId)
             closeCurrentScenario(recordClose = false)
         }
 
         override fun onScenarioComplete() {
             if (!isCurrentGeneration(generation)) return
             record(MwaSessionEvent.SCENARIO_COMPLETE)
+            finishPersistentSession(persistentSessionId, SessionCloseReason.SCENARIO_COMPLETE)
+            clearActivePersistentSessionIfMatches(persistentSessionId)
         }
 
         override fun onScenarioError() {
             if (!isCurrentGeneration(generation)) return
             record(MwaSessionEvent.SCENARIO_ERROR)
+            finishPersistentSession(persistentSessionId, SessionCloseReason.SCENARIO_ERROR)
+            clearActivePersistentSessionIfMatches(persistentSessionId)
             notifySessionFinishedIfCurrent(generation)
         }
 
         override fun onScenarioTeardownComplete() {
             if (!isCurrentGeneration(generation)) return
             record(MwaSessionEvent.TEARDOWN_COMPLETE)
+            finishPersistentSession(persistentSessionId, SessionCloseReason.TEARDOWN_COMPLETE)
+            clearActivePersistentSessionIfMatches(persistentSessionId)
             notifySessionFinishedIfCurrent(generation)
         }
 
         override fun onLowPowerAndNoConnection() {
             if (!isCurrentGeneration(generation)) return
             record(MwaSessionEvent.LOW_POWER_NO_CONNECTION)
+            finishPersistentSession(
+                persistentSessionId,
+                SessionCloseReason.LOW_POWER_NO_CONNECTION,
+            )
+            clearActivePersistentSessionIfMatches(persistentSessionId)
             notifySessionFinishedIfCurrent(generation)
         }
 
@@ -234,6 +284,12 @@ class MwaSessionHost(
                 "requested_address_count" to (request.addresses?.size ?: 0).toString(),
                 "sign_in_requested" to (request.signInPayload != null).toString(),
             )
+            val protocolHandle = beginPersistentProtocol(
+                sessionId = persistentSessionId,
+                method = ProtocolMethod.AUTHORIZE,
+                requestSummary = requestSummary,
+            )
+            updatePersistentDappIdentity(persistentSessionId, request.identityName)
 
             record(MwaSessionEvent.AUTHORIZE_REQUEST)
 
@@ -252,6 +308,13 @@ class MwaSessionHost(
                     }
                     record(MwaSessionEvent.AUTHORIZE_IDENTITY_UNAVAILABLE)
                     request.completeWithDecline()
+                    completePersistentProtocol(
+                        handle = protocolHandle,
+                        outcome = ProtocolOutcome.FAILURE,
+                        protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                        failureSource = ProtocolFailureSource.UNKNOWN,
+                        responseSummary = mapOf("result" to "identity_unavailable"),
+                    )
                     recordProtocol(
                         method = ProtocolMethod.AUTHORIZE,
                         startedAt = startedAt,
@@ -279,6 +342,17 @@ class MwaSessionHost(
                             null,
                         )
                         record(MwaSessionEvent.AUTHORIZE_SUCCEEDED)
+                        completePersistentProtocol(
+                            handle = protocolHandle,
+                            outcome = ProtocolOutcome.SUCCESS,
+                            responseSummary = mapOf(
+                                "result" to "authorized",
+                                "chain" to (request.chain ?: "<missing>"),
+                                "public_account" to
+                                    (decision.account.displayAddress ?: "<public-key-only>"),
+                                "authorization_state" to "walletlib_managed",
+                            ),
+                        )
                         recordProtocol(
                             method = ProtocolMethod.AUTHORIZE,
                             startedAt = startedAt,
@@ -297,6 +371,13 @@ class MwaSessionHost(
                     LabAuthorizationDecision.UnsupportedChain -> {
                         record(MwaSessionEvent.AUTHORIZE_CHAIN_REJECTED)
                         request.completeWithClusterNotSupported()
+                        completePersistentProtocol(
+                            handle = protocolHandle,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_CLUSTER_NOT_SUPPORTED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            responseSummary = mapOf("result" to "unsupported_chain"),
+                        )
                         recordProtocol(
                             method = ProtocolMethod.AUTHORIZE,
                             startedAt = startedAt,
@@ -311,6 +392,13 @@ class MwaSessionHost(
                     LabAuthorizationDecision.UnsupportedOptionalFeatures -> {
                         record(MwaSessionEvent.AUTHORIZE_OPTIONAL_FEATURES_REJECTED)
                         request.completeWithDecline()
+                        completePersistentProtocol(
+                            handle = protocolHandle,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            responseSummary = mapOf("result" to "unsupported_optional_features"),
+                        )
                         recordProtocol(
                             method = ProtocolMethod.AUTHORIZE,
                             startedAt = startedAt,
@@ -325,6 +413,13 @@ class MwaSessionHost(
                     LabAuthorizationDecision.UnsupportedSignIn -> {
                         record(MwaSessionEvent.AUTHORIZE_SIGN_IN_REJECTED)
                         request.completeWithDecline()
+                        completePersistentProtocol(
+                            handle = protocolHandle,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            responseSummary = mapOf("result" to "unsupported_sign_in"),
+                        )
                         recordProtocol(
                             method = ProtocolMethod.AUTHORIZE,
                             startedAt = startedAt,
@@ -339,6 +434,13 @@ class MwaSessionHost(
                     LabAuthorizationDecision.RequestedAddressUnavailable -> {
                         record(MwaSessionEvent.AUTHORIZE_REQUESTED_ADDRESS_REJECTED)
                         request.completeWithDecline()
+                        completePersistentProtocol(
+                            handle = protocolHandle,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                            responseSummary = mapOf("result" to "requested_address_unavailable"),
+                        )
                         recordProtocol(
                             method = ProtocolMethod.AUTHORIZE,
                             startedAt = startedAt,
@@ -359,17 +461,28 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
-            record(MwaSessionEvent.REAUTHORIZE_REQUEST)
             val requestSummary = mapOf(
                 "chain" to request.chain,
                 "authorization_reference" to "walletlib_managed",
             )
+            val protocolHandle = beginPersistentProtocol(
+                sessionId = persistentSessionId,
+                method = ProtocolMethod.REAUTHORIZE,
+                requestSummary = requestSummary,
+            )
+            updatePersistentDappIdentity(persistentSessionId, request.identityName)
+            record(MwaSessionEvent.REAUTHORIZE_REQUEST)
             val allowed = NetworkPolicy.evaluate(request.chain) is NetworkDecision.Allowed &&
                 LabAuthorizationPolicy.isCurrentAuthorizationScope(request.authorizationScope)
             if (allowed) {
                 markAuthorizationActive(generation)
                 request.completeWithReauthorize()
                 record(MwaSessionEvent.REAUTHORIZE_SUCCEEDED)
+                completePersistentProtocolBlocking(
+                    handle = protocolHandle,
+                    outcome = ProtocolOutcome.SUCCESS,
+                    responseSummary = mapOf("result" to "reauthorized"),
+                )
                 recordProtocol(
                     method = ProtocolMethod.REAUTHORIZE,
                     startedAt = startedAt,
@@ -380,6 +493,13 @@ class MwaSessionHost(
             } else {
                 request.completeWithDecline()
                 record(MwaSessionEvent.REAUTHORIZE_REJECTED)
+                completePersistentProtocolBlocking(
+                    handle = protocolHandle,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                    failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                    responseSummary = mapOf("result" to "authorization_context_rejected"),
+                )
                 recordProtocol(
                     method = ProtocolMethod.REAUTHORIZE,
                     startedAt = startedAt,
@@ -398,14 +518,27 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
-            val sessionId = activeSessionId
+            val requestSummary = signingRequestSummary(
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                payloads = request.payloads,
+                addressCount = request.authorizedAccounts.size,
+                chain = request.chain,
+            )
+            val protocolHandle = beginPersistentProtocol(
+                sessionId = persistentSessionId,
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                requestSummary = requestSummary,
+            )
+            updatePersistentDappIdentity(persistentSessionId, request.identityName)
             record(MwaSessionEvent.SIGN_TRANSACTIONS_REQUEST)
             authorizationScope.launch {
                 handleSignTransactions(
                     request = request,
                     startedAt = startedAt,
                     generation = generation,
-                    sessionId = sessionId,
+                    sessionId = persistentSessionId,
+                    protocolHandle = protocolHandle,
+                    requestSummary = requestSummary,
                 )
             }
         }
@@ -416,14 +549,27 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
-            val sessionId = activeSessionId
+            val requestSummary = signingRequestSummary(
+                method = ProtocolMethod.SIGN_MESSAGES,
+                payloads = request.payloads,
+                addressCount = request.addresses.size,
+                chain = request.chain,
+            )
+            val protocolHandle = beginPersistentProtocol(
+                sessionId = persistentSessionId,
+                method = ProtocolMethod.SIGN_MESSAGES,
+                requestSummary = requestSummary,
+            )
+            updatePersistentDappIdentity(persistentSessionId, request.identityName)
             record(MwaSessionEvent.SIGN_MESSAGES_REQUEST)
             authorizationScope.launch {
                 handleSignMessages(
                     request = request,
                     startedAt = startedAt,
                     generation = generation,
-                    sessionId = sessionId,
+                    sessionId = persistentSessionId,
+                    protocolHandle = protocolHandle,
+                    requestSummary = requestSummary,
                 )
             }
         }
@@ -436,14 +582,34 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
-            val sessionId = activeSessionId
+            val requestSummary = signingRequestSummary(
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                payloads = request.payloads,
+                addressCount = request.authorizedAccounts.size,
+                chain = request.chain,
+            ) + mapOf(
+                "min_context_slot_present" to (request.minContextSlot != null).toString(),
+                "commitment" to (request.commitment ?: "<default>"),
+                "skip_preflight" to (request.skipPreflight?.toString() ?: "<default>"),
+                "max_retries_present" to (request.maxRetries != null).toString(),
+                "wait_for_commitment" to
+                    (request.waitForCommitmentToSendNextTransaction?.toString() ?: "<default>"),
+            )
+            val protocolHandle = beginPersistentProtocol(
+                sessionId = persistentSessionId,
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                requestSummary = requestSummary,
+            )
+            updatePersistentDappIdentity(persistentSessionId, request.identityName)
             record(MwaSessionEvent.SIGN_AND_SEND_REQUEST)
             authorizationScope.launch {
                 handleSignAndSendTransactions(
                     request = request,
                     startedAt = startedAt,
                     generation = generation,
-                    sessionId = sessionId,
+                    sessionId = persistentSessionId,
+                    protocolHandle = protocolHandle,
+                    requestSummary = requestSummary,
                 )
             }
         }
@@ -454,9 +620,22 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
+            val protocolHandle = beginPersistentProtocol(
+                sessionId = persistentSessionId,
+                method = ProtocolMethod.DEAUTHORIZE,
+                requestSummary = mapOf(
+                    "authorization_reference" to "walletlib_managed",
+                ),
+            )
+            updatePersistentDappIdentity(persistentSessionId, event.identityName)
             invalidateAuthorization(generation)
             event.complete()
             record(MwaSessionEvent.DEAUTHORIZED_COMPLETED)
+            completePersistentProtocolBlocking(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.SUCCESS,
+                responseSummary = mapOf("result" to "revoked"),
+            )
             recordProtocol(
                 method = ProtocolMethod.DEAUTHORIZE,
                 startedAt = startedAt,
@@ -589,14 +768,23 @@ class MwaSessionHost(
         startedAt: Long,
         generation: Long,
         sessionId: String,
+        protocolHandle: ProtocolEventHandle?,
+        requestSummary: Map<String, String>,
     ) {
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_session_generation"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -608,16 +796,11 @@ class MwaSessionHost(
         }
 
         val payloads = request.payloads
-        val requestSummary = signingRequestSummary(
-            method = ProtocolMethod.SIGN_TRANSACTIONS,
-            payloads = payloads,
-            addressCount = request.authorizedAccounts.size,
-            chain = request.chain,
-        )
 
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -637,6 +820,12 @@ class MwaSessionHost(
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_after_preparation"),
+            )
             return
         }
 
@@ -645,7 +834,8 @@ class MwaSessionHost(
             is TransactionPreparationResult.Invalid -> {
                 request.completeWithInvalidPayloads(preparation.valid)
                 record(MwaSessionEvent.SIGN_TRANSACTIONS_INVALID)
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -659,7 +849,8 @@ class MwaSessionHost(
 
             TransactionPreparationResult.AuthorizationInvalid -> {
                 request.completeWithAuthorizationNotValid()
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -673,7 +864,8 @@ class MwaSessionHost(
 
             TransactionPreparationResult.IdentityUnavailable -> {
                 request.completeWithInternalError(IllegalStateException("Lab signing identity unavailable"))
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -686,7 +878,8 @@ class MwaSessionHost(
 
             TransactionPreparationResult.RpcUnavailable -> {
                 request.completeWithInternalError(IllegalStateException("Devnet blockhash validation unavailable"))
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -700,7 +893,8 @@ class MwaSessionHost(
 
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -724,11 +918,18 @@ class MwaSessionHost(
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_during_approval"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -741,7 +942,8 @@ class MwaSessionHost(
         if (approval !is ApprovalDecision.Approved) {
             request.completeWithDecline()
             record(MwaSessionEvent.SIGN_TRANSACTIONS_REJECTED)
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = if (approval is ApprovalDecision.Cancelled) {
@@ -762,7 +964,8 @@ class MwaSessionHost(
             signLegacyTransactions(ready.transactions)
         } catch (_: Throwable) {
             request.completeWithInternalError(IllegalStateException("Lab transaction signing failed"))
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -774,16 +977,32 @@ class MwaSessionHost(
         }
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_after_signing"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "authorization_revoked_after_signing"),
+            )
             return
         }
 
         request.completeWithSignedPayloads(signed.map { it.payload }.toTypedArray())
         record(MwaSessionEvent.SIGN_TRANSACTIONS_SUCCEEDED)
-        recordProtocol(
+        recordMigratedSigningProtocol(
+            handle = protocolHandle,
             method = ProtocolMethod.SIGN_TRANSACTIONS,
             startedAt = startedAt,
             outcome = ProtocolOutcome.SUCCESS,
@@ -802,14 +1021,23 @@ class MwaSessionHost(
         startedAt: Long,
         generation: Long,
         sessionId: String,
+        protocolHandle: ProtocolEventHandle?,
+        requestSummary: Map<String, String>,
     ) {
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_session_generation"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -821,23 +1049,11 @@ class MwaSessionHost(
         }
 
         val payloads = request.payloads
-        val requestSummary = signingRequestSummary(
-            method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
-            payloads = payloads,
-            addressCount = request.authorizedAccounts.size,
-            chain = request.chain,
-        ) + mapOf(
-            "min_context_slot_present" to (request.minContextSlot != null).toString(),
-            "commitment" to (request.commitment ?: "<default>"),
-            "skip_preflight" to (request.skipPreflight?.toString() ?: "<default>"),
-            "max_retries_present" to (request.maxRetries != null).toString(),
-            "wait_for_commitment" to
-                (request.waitForCommitmentToSendNextTransaction?.toString() ?: "<default>"),
-        )
 
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -858,7 +1074,8 @@ class MwaSessionHost(
         ).validatedOrNull()
         if (sendOptions == null) {
             request.completeWithInternalError(IllegalArgumentException("Unsupported sign_and_send options"))
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -878,6 +1095,12 @@ class MwaSessionHost(
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_after_preparation"),
+            )
             return
         }
 
@@ -886,7 +1109,8 @@ class MwaSessionHost(
             is TransactionPreparationResult.Invalid -> {
                 request.completeWithInvalidSignatures(preparation.valid)
                 record(MwaSessionEvent.SIGN_AND_SEND_INVALID)
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -900,7 +1124,8 @@ class MwaSessionHost(
 
             TransactionPreparationResult.AuthorizationInvalid -> {
                 request.completeWithAuthorizationNotValid()
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -914,7 +1139,8 @@ class MwaSessionHost(
 
             TransactionPreparationResult.IdentityUnavailable -> {
                 request.completeWithInternalError(IllegalStateException("Lab signing identity unavailable"))
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -927,7 +1153,8 @@ class MwaSessionHost(
 
             TransactionPreparationResult.RpcUnavailable -> {
                 request.completeWithInternalError(IllegalStateException("Devnet blockhash validation unavailable"))
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -941,7 +1168,8 @@ class MwaSessionHost(
 
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -965,11 +1193,18 @@ class MwaSessionHost(
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_during_approval"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -982,7 +1217,8 @@ class MwaSessionHost(
         if (approval !is ApprovalDecision.Approved) {
             request.completeWithDecline()
             record(MwaSessionEvent.SIGN_AND_SEND_REJECTED)
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = if (approval is ApprovalDecision.Cancelled) {
@@ -1003,7 +1239,8 @@ class MwaSessionHost(
             signLegacyTransactions(ready.transactions)
         } catch (_: Throwable) {
             request.completeWithInternalError(IllegalStateException("Lab transaction signing failed"))
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1015,10 +1252,25 @@ class MwaSessionHost(
         }
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_after_signing"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                responseSummary = mapOf("result" to "authorization_revoked_after_signing"),
+            )
             return
         }
 
@@ -1035,18 +1287,32 @@ class MwaSessionHost(
 
         when (submissionResult) {
             SignAndSendSubmissionResult.Cancelled -> {
-                if (isCurrentGeneration(generation) && !isAuthorizationActive(generation)) {
+                val authorizationInactive =
+                    isCurrentGeneration(generation) && !isAuthorizationActive(generation)
+                if (authorizationInactive) {
                     request.completeWithAuthorizationNotValid()
                 } else {
                     request.completeWithDecline()
                 }
+                completePersistentProtocol(
+                    handle = protocolHandle,
+                    outcome = ProtocolOutcome.CANCELLED,
+                    protocolErrorCode = if (authorizationInactive) {
+                        ProtocolContract.ERROR_AUTHORIZATION_FAILED
+                    } else {
+                        ProtocolContract.ERROR_NOT_SIGNED
+                    },
+                    failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                    responseSummary = mapOf("result" to "submission_cancelled"),
+                )
                 return
             }
 
             is SignAndSendSubmissionResult.NotSubmitted -> {
                 request.completeWithNotSubmitted(submissionResult.signatures.toTypedArray())
                 record(MwaSessionEvent.SIGN_AND_SEND_NOT_SUBMITTED)
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -1074,7 +1340,8 @@ class MwaSessionHost(
                         "Devnet commitment verification unavailable"
                 }
                 request.completeWithInternalError(IllegalStateException(message))
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.FAILURE,
@@ -1092,7 +1359,8 @@ class MwaSessionHost(
                 val signatures = submissionResult.signatures.toTypedArray()
                 request.completeWithSignatures(signatures)
                 record(MwaSessionEvent.SIGN_AND_SEND_SUBMITTED)
-                recordProtocol(
+                recordMigratedSigningProtocol(
+                handle = protocolHandle,
                     method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
                     startedAt = startedAt,
                     outcome = ProtocolOutcome.SUCCESS,
@@ -1113,14 +1381,23 @@ class MwaSessionHost(
         startedAt: Long,
         generation: Long,
         sessionId: String,
+        protocolHandle: ProtocolEventHandle?,
+        requestSummary: Map<String, String>,
     ) {
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_session_generation"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1133,18 +1410,13 @@ class MwaSessionHost(
 
         val payloads = request.payloads
         val addresses = request.addresses
-        val requestSummary = signingRequestSummary(
-            method = ProtocolMethod.SIGN_MESSAGES,
-            payloads = payloads,
-            addressCount = addresses.size,
-            chain = request.chain,
-        )
 
         if (NetworkPolicy.evaluate(request.chain) !is NetworkDecision.Allowed ||
             !LabAuthorizationPolicy.isCurrentAuthorizationScope(request.authorizationScope)
         ) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1160,7 +1432,8 @@ class MwaSessionHost(
             val valid = BooleanArray(payloads.size) { false }
             request.completeWithInvalidPayloads(valid)
             record(MwaSessionEvent.SIGN_MESSAGES_INVALID)
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1174,7 +1447,8 @@ class MwaSessionHost(
 
         if (payloads.size > MwaCapabilityProfile.MAX_MESSAGES_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1190,7 +1464,8 @@ class MwaSessionHost(
             signingService.publicIdentity()
         } catch (_: Throwable) {
             request.completeWithInternalError(IllegalStateException("Lab signing identity unavailable"))
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1208,7 +1483,8 @@ class MwaSessionHost(
         }
         if (!allAddressesAuthorized) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1229,7 +1505,8 @@ class MwaSessionHost(
         if (!valid.all { it }) {
             request.completeWithInvalidPayloads(valid)
             record(MwaSessionEvent.SIGN_MESSAGES_INVALID)
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1243,7 +1520,8 @@ class MwaSessionHost(
 
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1267,11 +1545,18 @@ class MwaSessionHost(
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_during_approval"),
+            )
             return
         }
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1285,7 +1570,8 @@ class MwaSessionHost(
         if (approval !is ApprovalDecision.Approved) {
             request.completeWithDecline()
             record(MwaSessionEvent.SIGN_MESSAGES_REJECTED)
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = if (approval is ApprovalDecision.Cancelled) {
@@ -1324,11 +1610,21 @@ class MwaSessionHost(
             val signedPayloadArray = signedPayloads.toTypedArray()
             if (!isAuthorizationActive(generation)) {
                 request.completeWithAuthorizationNotValid()
+                recordMigratedSigningProtocol(
+                    handle = protocolHandle,
+                    method = ProtocolMethod.SIGN_MESSAGES,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                    failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                    responseSummary = mapOf("result" to "authorization_revoked_after_signing"),
+                )
                 return
             }
             request.completeWithSignedPayloads(signedPayloadArray)
             record(MwaSessionEvent.SIGN_MESSAGES_SUCCEEDED)
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.SUCCESS,
@@ -1338,9 +1634,12 @@ class MwaSessionHost(
                     "signed_payload_count" to signedPayloadArray.size.toString(),
                 ),
             )
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (_: Throwable) {
             request.completeWithInternalError(IllegalStateException("Lab signing failed"))
-            recordProtocol(
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
                 method = ProtocolMethod.SIGN_MESSAGES,
                 startedAt = startedAt,
                 outcome = ProtocolOutcome.FAILURE,
@@ -1348,6 +1647,140 @@ class MwaSessionHost(
                 requestSummary = requestSummary,
                 responseSummary = mapOf("result" to "signing_failed"),
             )
+        }
+    }
+
+    private suspend fun recordMigratedSigningProtocol(
+        handle: ProtocolEventHandle?,
+        method: ProtocolMethod,
+        startedAt: Long,
+        outcome: ProtocolOutcome,
+        protocolErrorCode: Int? = null,
+        failureSource: ProtocolFailureSource = ProtocolFailureSource.NONE,
+        requestSummary: Map<String, String> = emptyMap(),
+        responseSummary: Map<String, String> = emptyMap(),
+    ) {
+        completePersistentProtocol(
+            handle = handle,
+            outcome = outcome,
+            protocolErrorCode = protocolErrorCode,
+            failureSource = failureSource,
+            responseSummary = responseSummary,
+        )
+        recordProtocol(
+            method = method,
+            startedAt = startedAt,
+            outcome = outcome,
+            protocolErrorCode = protocolErrorCode,
+            failureSource = failureSource,
+            requestSummary = requestSummary,
+            responseSummary = responseSummary,
+        )
+    }
+
+    private fun beginPersistentProtocol(
+        sessionId: String,
+        method: ProtocolMethod,
+        requestSummary: Map<String, String> = emptyMap(),
+    ): ProtocolEventHandle? = try {
+        runBlocking(Dispatchers.IO) {
+            protocolRecorder.begin(
+                sessionId = sessionId,
+                method = method,
+                requestSummary = requestSummary,
+            )
+        }
+    } catch (_: Exception) {
+        record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "protocol_begin_${method.wireName}")
+        null
+    }
+
+    private suspend fun completePersistentProtocol(
+        handle: ProtocolEventHandle?,
+        outcome: ProtocolOutcome,
+        protocolErrorCode: Int? = null,
+        failureSource: ProtocolFailureSource = ProtocolFailureSource.NONE,
+        responseSummary: Map<String, String> = emptyMap(),
+    ) {
+        if (handle == null) return
+        val result = try {
+            protocolRecorder.complete(
+                handle = handle,
+                outcome = outcome,
+                protocolErrorCode = protocolErrorCode,
+                failureSource = failureSource,
+                responseSummary = responseSummary,
+            )
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            record(
+                MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED,
+                "protocol_complete_${handle.method.wireName}",
+            )
+            return
+        }
+        if (result is ProtocolRecorder.CompletionResult.PersistenceFailed) {
+            record(
+                MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED,
+                "protocol_complete_${handle.method.wireName}",
+            )
+        }
+    }
+
+    private fun completePersistentProtocolBlocking(
+        handle: ProtocolEventHandle?,
+        outcome: ProtocolOutcome,
+        protocolErrorCode: Int? = null,
+        failureSource: ProtocolFailureSource = ProtocolFailureSource.NONE,
+        responseSummary: Map<String, String> = emptyMap(),
+    ) {
+        runBlocking(Dispatchers.IO) {
+            completePersistentProtocol(
+                handle = handle,
+                outcome = outcome,
+                protocolErrorCode = protocolErrorCode,
+                failureSource = failureSource,
+                responseSummary = responseSummary,
+            )
+        }
+    }
+
+    private fun createPersistentSession(sessionId: String) {
+        val result = runBlocking(Dispatchers.IO) {
+            sessionLifecycleCoordinator.createSession(sessionId)
+        }
+        if (result is SessionLifecycleCoordinator.PersistenceResult.PersistenceFailed) {
+            record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "session_create")
+        }
+    }
+
+    private fun finishPersistentSession(
+        sessionId: String,
+        closeReason: SessionCloseReason,
+    ) {
+        val result = runBlocking(Dispatchers.IO) {
+            sessionLifecycleCoordinator.finishSession(sessionId, closeReason)
+        }
+        if (result is SessionLifecycleCoordinator.PersistenceResult.PersistenceFailed) {
+            record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "session_finish")
+        }
+    }
+
+    private fun updatePersistentDappIdentity(sessionId: String, identityName: String?) {
+        val result = runBlocking(Dispatchers.IO) {
+            sessionLifecycleCoordinator.updateDappIdentity(sessionId, identityName)
+        }
+        if (result is SessionLifecycleCoordinator.PersistenceResult.PersistenceFailed) {
+            record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "dapp_identity")
+        }
+    }
+
+    private fun clearActivePersistentSessionIfMatches(sessionId: String) {
+        synchronized(lock) {
+            if (activePersistentSessionId == sessionId) {
+                activePersistentSessionId = null
+            }
         }
     }
 
@@ -1391,7 +1824,7 @@ class MwaSessionHost(
         put("chain", chain)
         put("payload_count", payloads.size.toString())
         put("address_count", addressCount.toString())
-        payloads.forEachIndexed { index, payload ->
+        payloads.take(MAX_PERSISTED_PAYLOAD_METADATA).forEachIndexed { index, payload ->
             put("payload_${index}_sha256", DiagnosticSanitizer.sha256(payload))
             put("payload_${index}_length", payload.size.toString())
         }
@@ -1439,5 +1872,6 @@ class MwaSessionHost(
         private const val REQUIRED_SCHEME = "solana-wallet"
         private const val AUTH_ISSUER_NAME = "mwa-lab-phase1"
         private const val MAX_MESSAGE_BYTES = 64 * 1024
+        private const val MAX_PERSISTED_PAYLOAD_METADATA = 10
     }
 }

@@ -1,10 +1,16 @@
 package dev.mwalab.protocol
 
+import dev.mwalab.session.SessionId
 import java.util.concurrent.CopyOnWriteArrayList
 
+/**
+ * The single terminal event model, also named [ProtocolEvent] by Phase 3.
+ * Summaries must already be sanitized; this compatibility model is not a raw
+ * request sanitizer or a persistence entry point. See the recorder design.
+ */
 data class ProtocolEvidence(
-    val sessionId: String = "unknown",
-    val eventId: String = "unknown:0",
+    val sessionId: SessionId = "unknown",
+    val eventId: EventId = "unknown:0",
     val sequence: Long = 0,
     val method: ProtocolMethod,
     val startedAtEpochMillis: Long,
@@ -14,6 +20,9 @@ data class ProtocolEvidence(
     val failureSource: ProtocolFailureSource = ProtocolFailureSource.NONE,
     val requestSummary: Map<String, String> = emptyMap(),
     val responseSummary: Map<String, String> = emptyMap(),
+    // Reserved metadata only. Phase 3 producers leave both null.
+    val injectedFaultId: String? = null,
+    val capabilityContext: Map<String, String>? = null,
 ) {
     val durationMillis: Long
         get() = (completedAtEpochMillis - startedAtEpochMillis).coerceAtLeast(0)

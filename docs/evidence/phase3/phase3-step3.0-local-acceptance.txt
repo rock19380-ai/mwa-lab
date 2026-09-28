@@ -1,0 +1,496 @@
+
+===== lint =====
+MWA Lab Phase 3 start audit
+started_utc=2026-09-28T03:05:56.320919+00:00
+command=./gradlew lint
+Starting a Gradle Daemon, 1 incompatible Daemon could not be reused, use --status for details
+Calculating task graph as configuration cache cannot be reused because file 'gradle/libs.versions.toml' has changed.
+> Task :app:preBuild UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:extractProguardFiles UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :demo-client:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :demo-client:generateDebugLintReportModel UP-TO-DATE
+> Task :demo-client:lintAnalyzeDebug UP-TO-DATE
+> Task :app:lintAnalyzeDebug UP-TO-DATE
+> Task :app:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :app:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :app:generateDebugLintReportModel UP-TO-DATE
+> Task :app:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :demo-client:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :app:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :demo-client:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :app:lintReportDebug UP-TO-DATE
+> Task :demo-client:lintReportDebug UP-TO-DATE
+> Task :app:lintDebug
+> Task :demo-client:lintDebug
+> Task :app:lint
+> Task :demo-client:lint
+
+BUILD SUCCESSFUL in 19s
+54 actionable tasks: 2 executed, 52 up-to-date
+Configuration cache entry stored.
+
+exit_code=0
+finished_utc=2026-09-28T03:06:16.357933+00:00
+
+===== test =====
+MWA Lab Phase 3 start audit
+started_utc=2026-09-28T03:06:16.358270+00:00
+command=./gradlew test
+Calculating task graph as configuration cache cannot be reused because file 'gradle/libs.versions.toml' has changed.
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :demo-client:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :demo-client:processDebugJavaRes UP-TO-DATE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :demo-client:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :demo-client:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:testDebugUnitTest UP-TO-DATE
+> Task :demo-client:testDebugUnitTest UP-TO-DATE
+> Task :app:test UP-TO-DATE
+> Task :demo-client:test UP-TO-DATE
+
+BUILD SUCCESSFUL in 2s
+48 actionable tasks: 48 up-to-date
+Configuration cache entry stored.
+
+exit_code=0
+finished_utc=2026-09-28T03:06:19.322219+00:00
+
+===== assemble-debug =====
+MWA Lab Phase 3 start audit
+started_utc=2026-09-28T03:06:19.322363+00:00
+command=./gradlew assembleDebug
+Calculating task graph as configuration cache cannot be reused because file 'gradle/libs.versions.toml' has changed.
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :demo-client:generateDebugAssets UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :demo-client:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :demo-client:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugJavaRes UP-TO-DATE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :demo-client:desugarDebugFileDependencies UP-TO-DATE
+> Task :demo-client:mergeDebugJavaResource UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :demo-client:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :demo-client:compressDebugAssets UP-TO-DATE
+> Task :demo-client:validateSigningDebug UP-TO-DATE
+> Task :demo-client:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :demo-client:writeDebugAppMetadata UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :demo-client:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :demo-client:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :demo-client:mergeDebugNativeLibs UP-TO-DATE
+> Task :demo-client:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :demo-client:dexBuilderDebug UP-TO-DATE
+> Task :demo-client:mergeProjectDexDebug UP-TO-DATE
+> Task :demo-client:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :demo-client:packageDebug UP-TO-DATE
+> Task :app:packageDebug UP-TO-DATE
+> Task :app:assembleDebug UP-TO-DATE
+> Task :demo-client:assembleDebug UP-TO-DATE
+> Task :demo-client:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+
+BUILD SUCCESSFUL in 1s
+72 actionable tasks: 72 up-to-date
+Configuration cache entry stored.
+
+exit_code=0
+finished_utc=2026-09-28T03:06:21.319798+00:00
+
+===== assemble-androidtest =====
+MWA Lab Phase 3 start audit
+started_utc=2026-09-28T03:06:21.320080+00:00
+command=./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
+Calculating task graph as configuration cache cannot be reused because file 'gradle/libs.versions.toml' has changed.
+> Task :demo-client:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:packageDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :demo-client:packageDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :demo-client:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :demo-client:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :demo-client:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :demo-client:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :demo-client:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :demo-client:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestManifest UP-TO-DATE
+> Task :demo-client:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :demo-client:mergeDebugJniLibFolders UP-TO-DATE
+> Task :demo-client:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :demo-client:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :demo-client:mergeDebugNativeLibs UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :demo-client:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :demo-client:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :demo-client:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :demo-client:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :demo-client:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :demo-client:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :demo-client:packageDebugAndroidTest UP-TO-DATE
+> Task :demo-client:assembleDebugAndroidTest UP-TO-DATE
+> Task :demo-client:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:packageDebugAndroidTest UP-TO-DATE
+> Task :app:assembleDebugAndroidTest UP-TO-DATE
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+
+BUILD SUCCESSFUL in 2s
+100 actionable tasks: 100 up-to-date
+Configuration cache entry stored.
+
+exit_code=0
+finished_utc=2026-09-28T03:06:23.471150+00:00
+
+===== phase1-static =====
+MWA Lab Phase 3 start audit
+started_utc=2026-09-28T03:06:23.471348+00:00
+command=./scripts/phase1_static.sh
+=== MWA LAB PHASE 1 STATIC / CI GATE ===
+PHASE 1 STATIC / CI GATE: PASS
+
+exit_code=0
+finished_utc=2026-09-28T03:06:23.523718+00:00
+
+===== phase2-static =====
+MWA Lab Phase 3 start audit
+started_utc=2026-09-28T03:06:23.523944+00:00
+command=./scripts/phase2_static.sh
+=== MWA LAB PHASE 2 STATIC / CI GATE — BATCH 2.0–2.12 PRE-FREEZE ===
+=== MWA LAB PHASE 1 STATIC / CI GATE ===
+PHASE 1 STATIC / CI GATE: PASS
+PHASE 2 STATIC / CI GATE — BATCH 2.0–2.12 PRE-FREEZE: PASS
+
+exit_code=0
+finished_utc=2026-09-28T03:06:23.702603+00:00
+
+===== test-rerun =====
+started_utc=2026-09-28T03:08:57.603365+00:00
+command=./gradlew test --rerun-tasks
+Reusing configuration cache.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:createDebugCompatibleScreenManifests
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :demo-client:generateDebugResources
+> Task :app:extractDeepLinksDebug
+> Task :app:processDebugNavigationResources
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:javaPreCompileDebug
+> Task :app:compileDebugNavigationResources
+> Task :demo-client:javaPreCompileDebug
+> Task :demo-client:mapDebugSourceSetPaths
+> Task :demo-client:processDebugNavigationResources
+> Task :demo-client:compileDebugNavigationResources
+> Task :demo-client:createDebugCompatibleScreenManifests
+> Task :demo-client:extractDeepLinksDebug
+> Task :app:checkDebugAarMetadata
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata
+> Task :demo-client:javaPreCompileDebugUnitTest
+> Task :demo-client:packageDebugResources
+> Task :app:packageDebugResources
+> Task :demo-client:parseDebugLocalResources
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :demo-client:processDebugMainManifest
+> Task :demo-client:generateDebugRFile
+> Task :app:generateDebugRFile
+> Task :demo-client:processDebugManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :demo-client:processDebugManifestForPackage
+> Task :demo-client:mergeDebugResources
+> Task :app:mergeDebugResources
+> Task :demo-client:processDebugResources
+> Task :app:processDebugResources
+
+> Task :demo-client:compileDebugKotlin
+w: file:///home/abbaas/mwa-lab/demo-client/src/main/java/dev/mwalab/democlient/Phase2AcceptanceRunner.kt:310:41 'fun signTransactions(p0: Array<(out) ByteArray!>): MobileWalletAdapterClient.SignPayloadsFuture' is deprecated. Deprecated in Java.
+
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugJavaRes
+> Task :demo-client:bundleDebugClassesToCompileJar
+> Task :demo-client:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :demo-client:compileDebugUnitTestKotlin
+> Task :demo-client:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugUnitTestJavaRes
+> Task :demo-client:testDebugUnitTest
+> Task :demo-client:test
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+> Task :app:test
+
+BUILD SUCCESSFUL in 36s
+48 actionable tasks: 48 executed
+Configuration cache entry reused.
+
+exit_code=0
+
+Fresh test XML summary after --rerun-tasks:
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.ExampleUnitTest.xml {'tests': 1, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=5d59656a31c7ab3f05ab077dd8da3646b50c96d0aae2e399d72da48d3cc95866
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.approval.ApprovalCoordinatorTest.xml {'tests': 5, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=86d12b03d1abd2f1e9099752cd296a76fd92bc1ff48350245343aefd3c9a7788
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.identity.Ed25519IdentityMaterialTest.xml {'tests': 1, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=5097d632426b7bd77bd38c4d156db63d59bf77a90eb3404eae7b868f9a00d821
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.identity.Ed25519SigningTest.xml {'tests': 1, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=0f42fc1e1256bf9ddf8ed607af0033cfc5d9d36adafbb2a0f207316279d92f16
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.mwa.authorization.LabAuthorizationPolicyTest.xml {'tests': 9, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=e83c506e5427833e8641a1f387bddad276182d3fdd889924757e0a6d0bad5bb4
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.mwa.capabilities.MwaCapabilityProfileTest.xml {'tests': 3, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=4d7c5b572787b58650b80047a6e1fa717c650ffbc2dee74e9b39db1ef2386866
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.rpc.DevnetSendOptionsTest.xml {'tests': 2, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=23875b62173ae856532125b11edff344ea8209dd0d4288f6ee19be5d15684643
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.rpc.SignAndSendSubmissionExecutorTest.xml {'tests': 10, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=55e791afe0211cbf537449bece9c44cb7b3c2a2dcc0e0327a800c9efc761ce37
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.security.DiagnosticSanitizerTest.xml {'tests': 2, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=bc5a1ca6d349231dc40393e76c5a87b347c1fa188cdfc9f9644268dc48c63fc4
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.security.NetworkPolicyTest.xml {'tests': 9, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=626df6d5c1eb85859dc6d4febecdf1219d0aa7febf89932d78f51a2ef98452ee
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.transaction.LegacyTransactionCodecTest.xml {'tests': 10, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=721b63ecf99861680c383157cde946119f88f7ab4fdc9a4996c2f89534900f76
+app/build/test-results/testDebugUnitTest/TEST-dev.mwalab.transaction.SolanaTransactionMessageDetectorTest.xml {'tests': 2, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=2d35e5331d0915bb26a9f7c8fbcb288d78f0b12811b5f7d5d2eefac6bcf44032
+demo-client/build/test-results/testDebugUnitTest/TEST-dev.mwalab.democlient.DemoLegacyTransactionFactoryTest.xml {'tests': 3, 'failures': 0, 'errors': 0, 'skipped': 0} sha256=41ca60a156c584f712a208268004dc8424683de421547dac7bc72383902d44ce
+total_tests=58
+failures=0
+errors=0
+skipped=0

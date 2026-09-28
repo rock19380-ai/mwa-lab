@@ -1,0 +1,16 @@
+MWA Lab Phase 3 Step 3.2 KSP/AGP9 repair
+timestamp=2026-09-28T10:52:29+06:30
+branch=phase3-protocol-recorder-timeline
+head=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+phase2_baseline=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+agp=9.4.1
+kotlin=2.2.10
+room=2.8.5
+ksp_before=2.2.10-2.0.2
+ksp_after=2.3.12
+repair_scope=version-catalog-only
+android.disallowKotlinSourceSets=NOT_ADDED
+android.builtInKotlin=false=NOT_ADDED
+android.newDsl=false=NOT_ADDED
+phase2_static_sha=UNCHANGED
+phase2_mwa_host_sha=UNCHANGED

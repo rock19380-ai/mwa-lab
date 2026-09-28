@@ -1,0 +1,25 @@
+MWA Lab Phase 3 Step 3.2 persistence verification
+timestamp=2026-09-28T11:16:17+06:30
+branch=phase3-protocol-recorder-timeline
+head=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+phase2_baseline=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+agp=9.4.1
+kotlin=2.2.10
+ksp=2.3.12
+room=2.8.5
+instrumentation_test_sha=d9f57f0e37f82244d53d7ee534039fd37fa975301be579e2378b3c5cfed6a93e
+phase2_static_sha=cece909c93555038d8a7798678f2345d7ca9c6c8e6f1347f2f684e27804c5464
+phase2_host_sha=8374398cb1912f1f7c8a1b30de9523d6cf2a41e224e1917dda22f5e64b621eb2
+androidtest-compile=PASS
+ksp-main=PASS
+phase1-static=PASS
+focused-domain-tests=PASS
+lint=PASS
+test=PASS
+assemble-debug=PASS
+androidtest-apks=PASS
+room-connected-test=PASS
+room_schema=app/schemas/dev.mwalab.storage.MwaLabDatabase/1.json
+room_connected_test=PASS
+git_diff_check=PASS
+phase2_static_current_tree=NOT_RUN_BY_DESIGN_HISTORICAL_ROOM_ABSENCE_GATE

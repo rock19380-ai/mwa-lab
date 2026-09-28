@@ -1,0 +1,377 @@
+MWA Lab Phase 3.2 pinned source inspection
+created_utc=2026-09-28T03:28:42.992185+00:00
+command=gh api repos/solana-mobile/mobile-wallet-adapter/git/ref/tags/v2.0.7
+{"ref":"refs/tags/v2.0.7","node_id":"REF_kwDOHU5jT7ByZWZzL3RhZ3MvdjIuMC43","url":"https://api.github.com/repos/solana-mobile/mobile-wallet-adapter/git/refs/tags/v2.0.7","object":{"sha":"166c0f96868c45633253a0c0bcd61e828334b349","type":"commit","url":"https://api.github.com/repos/solana-mobile/mobile-wallet-adapter/git/commits/166c0f96868c45633253a0c0bcd61e828334b349"}}
+exit_code=0
+archive_url=https://codeload.github.com/solana-mobile/mobile-wallet-adapter/zip/166c0f96868c45633253a0c0bcd61e828334b349
+archive_sha256=831fc62e497585b4cdf91d1697799ed72c9650d24f66504bd74ead9c582ed617
+cached_pinned_aar_sha256=e5c639964c5740e187cacf31776f0e46b9a2433e26b50fc027ab8ffb481b177c
+pinned_artifact_digest_matches_start_audit=PASS
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/association/LocalAssociationUri.java
+sha256=f328afed3b203b0604e0a4cf95f805e2f35af7160216c8bf414fca9c37bb467a
+36: 
+37:     @NonNull
+38:     @Override
+39:     public LocalWebSocketServerScenario createScenario(@NonNull Context context,
+40:                                                        @NonNull MobileWalletAdapterConfig mobileWalletAdapterConfig,
+41:                                                        @NonNull AuthIssuerConfig authIssuerConfig,
+42:                                                        @NonNull Scenario.Callbacks callbacks) {
+43:         if (callbacks instanceof LocalScenario.Callbacks) {
+44:             return new LocalWebSocketServerScenario(context, mobileWalletAdapterConfig,
+45:                     authIssuerConfig, (LocalScenario.Callbacks) callbacks,
+46:                     associationPublicKey, associationProtocolVersions, port);
+47:         } else {
+48:             throw new IllegalArgumentException("callbacks must implement " + LocalScenario.Callbacks.class.getName());
+49:         }
+50:     }
+51: 
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/Scenario.java
+sha256=743334eb3fde9b5de1508f79c3469509c49339cba27337d02afba67c62ba378d
+15: 
+16:     byte[] getAssociationPublicKey();
+17:     List<SessionProperties.ProtocolVersion> getAssociationProtocolVersions();
+18: 
+19:     MessageReceiver createMessageReceiver();
+20: 
+21:     void start();
+22:     void close();
+23: 
+24:     interface Callbacks {
+25:         // Scenario state callbacks
+26:         void onScenarioReady();
+27:         void onScenarioServingClients();
+28:         void onScenarioServingComplete();
+29:         void onScenarioComplete();
+30:         void onScenarioError();
+31:         void onScenarioTeardownComplete();
+32: 
+33:         // Request callbacks
+34:         void onAuthorizeRequest(@NonNull AuthorizeRequest request);
+35:         void onReauthorizeRequest(@NonNull ReauthorizeRequest request);
+36:         void onSignTransactionsRequest(@NonNull SignTransactionsRequest request);
+37:         void onSignMessagesRequest(@NonNull SignMessagesRequest request);
+38:         void onSignAndSendTransactionsRequest(@NonNull SignAndSendTransactionsRequest request);
+39: 
+40:         // Event callbacks
+41:         void onDeauthorizedEvent(@NonNull DeauthorizedEvent event);
+42:     }
+43: }
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/LocalScenario.java
+sha256=c7f3850b940b575e9b0c5dd64dd069ce60d942927c2089a1569e25ca153800d2
+76: 
+77:     @Override
+78:     public MessageReceiver createMessageReceiver() {
+79:         return new MobileWalletAdapterSession(
+80:                 this,
+81:                 new MobileWalletAdapterServer(mMobileWalletAdapterConfig, mIoLooper, mMethodHandlers),
+82:                 mSessionStateCallbacks);
+83:     }
+108:     private final MobileWalletAdapterSessionCommon.StateCallbacks mSessionStateCallbacks =
+109:             new MobileWalletAdapterSessionCommon.StateCallbacks() {
+110:                 private final AtomicInteger mClientCount = new AtomicInteger();
+111: 
+112:                 @Override
+113:                 public void onSessionEstablished() {
+114:                     Log.d(TAG, "MobileWalletAdapter session established");
+115:                     if (mClientCount.incrementAndGet() == 1) {
+116:                         mIoHandler.post(LocalScenario.this::stopNoConnectionTimer);
+117:                         mIoHandler.post(mAuthRepository::start);
+118:                         mIoHandler.post(mCallbacks::onScenarioServingClients);
+119:                     }
+120:                 }
+121: 
+122:                 @Override
+123:                 public void onSessionClosed() {
+124:                     Log.d(TAG, "MobileWalletAdapter session terminated");
+125:                     if (mClientCount.decrementAndGet() == 0) {
+126:                         mIoHandler.post(LocalScenario.this::stopNoConnectionTimer);
+127:                         synchronized (mLock) {
+128:                             mActiveAuthorization = null;
+129:                         }
+130:                         mIoHandler.post(mCallbacks::onScenarioServingComplete);
+131:                         mIoHandler.post(mAuthRepository::stop);
+132:                     }
+133:                 }
+134: 
+135:                 @Override
+136:                 public void onSessionError() {
+137:                     Log.w(TAG, "MobileWalletAdapter session error");
+138:                     mIoHandler.post(LocalScenario.this::stopNoConnectionTimer);
+139:                     if (mClientCount.decrementAndGet() == 0) {
+140:                         synchronized (mLock) {
+141:                             mActiveAuthorization = null;
+142:                         }
+143:                         mIoHandler.post(mCallbacks::onScenarioServingComplete);
+144:                         mIoHandler.post(mAuthRepository::stop);
+145:                     }
+146:                 }
+147:             };
+148: 
+149:     public interface Callbacks extends Scenario.Callbacks {
+150:         void onLowPowerAndNoConnection();
+151:     }
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/BaseScenario.java
+sha256=c48f5a059f6140d6477b345fba45234c56ab3b9e7f333f546df1c72c6a04f89c
+125:     @Override
+126:     public abstract void close();
+127: 
+128:     /*package*/ final MobileWalletAdapterServer.MethodHandlers mMethodHandlers =
+129:             new MobileWalletAdapterServer.MethodHandlers() {
+130:                 @Override
+131:                 public void authorize(@NonNull MobileWalletAdapterServer.AuthorizeRequest request) {
+132:                     // Clear the active auth token immediately upon beginning authorization; it will be
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/LocalWebSocketServerScenario.java
+sha256=1ac832dc8ca7f5e55ce642974604b8c2fe230f183fdb0efe44f6602e8570ffcb
+90:     public void close() {
+91:         if (mState == State.CLOSED) {
+92:             return;
+93:         }
+94:         mState = State.CLOSED;
+95:         mIoHandler.post(() -> {
+96:             mCallbacks.onScenarioComplete();
+97:             mWebSocketServer.close(); // this will close all MobileWalletAdapterSessions
+98:             mCallbacks.onScenarioTeardownComplete();
+99:         });
+100:     }
+101: 
+102:     @NonNull
+103:     private final LocalWebSocketServer.Callbacks mWebSocketServerCallbacks =
+104:             new LocalWebSocketServer.Callbacks() {
+105:         @Override
+106:         public void onStarted() {
+107:             mIoHandler.post(mCallbacks::onScenarioReady);
+108:         }
+109: 
+110:         @Override
+111:         public void onFatalError() {
+112:             mIoHandler.post(mCallbacks::onScenarioError);
+113:         }
+114:     };
+115: 
+116:     private enum State {
+117:         NOT_STARTED, RUNNING, CLOSED
+118:     }
+119: }
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java
+sha256=6e6f42c735ff8abfd8154eb7dfeaa291553bb363614c5bd44b8518427371d720
+35: 
+36: public class MobileWalletAdapterServer extends JsonRpc20Server {
+37:     private static final String TAG = MobileWalletAdapterServer.class.getSimpleName();
+38: 
+39:     @NonNull
+40:     private final MobileWalletAdapterConfig mConfig;
+41:     @NonNull
+42:     private final Handler mHandler;
+43:     @NonNull
+44:     private final MethodHandlers mMethodHandlers;
+45: 
+46:     public interface MethodHandlers {
+47:         void authorize(@NonNull AuthorizeRequest request);
+48:         void deauthorize(@NonNull DeauthorizeRequest request);
+49:         void signTransactions(@NonNull SignTransactionsRequest request);
+50:         void signMessages(@NonNull SignMessagesRequest request);
+51:         void signAndSendTransactions(@NonNull SignAndSendTransactionsRequest request);
+52:     }
+53: 
+54:     public MobileWalletAdapterServer(@NonNull MobileWalletAdapterConfig config,
+55:                                      @NonNull Looper ioLooper,
+56:                                      @NonNull MethodHandlers methodHandlers) {
+57:         mConfig = config;
+58:         mHandler = new Handler(ioLooper);
+59:         mMethodHandlers = methodHandlers;
+60:     }
+61: 
+62:     @Override
+63:     protected void dispatchRpc(@Nullable Object id,
+64:                                @NonNull String method,
+65:                                @Nullable Object params) {
+66:         try {
+67:             switch (method) {
+68:                 case ProtocolContract.METHOD_AUTHORIZE:
+69:                 case ProtocolContract.METHOD_REAUTHORIZE:
+70:                     handleAuthorize(id, params);
+71:                     break;
+72:                 case ProtocolContract.METHOD_DEAUTHORIZE:
+73:                     handleDeauthorize(id, params);
+74:                     break;
+75:                 case ProtocolContract.METHOD_GET_CAPABILITIES:
+76:                     handleGetCapabilities(id, params);
+77:                     break;
+78:                 case ProtocolContract.METHOD_SIGN_TRANSACTIONS:
+79:                     if (Arrays.asList(mConfig.optionalFeatures).contains(ProtocolContract.FEATURE_ID_SIGN_TRANSACTIONS)) {
+80:                         handleSignTransactions(id, params);
+81:                     } else {
+82:                         handleRpcError(id, JsonRpc20Server.ERROR_METHOD_NOT_FOUND, "method '" +
+83:                                 ProtocolContract.METHOD_SIGN_TRANSACTIONS +
+84:                                 "' not available", null);
+85:                     }
+86:                     break;
+87:                 case ProtocolContract.METHOD_SIGN_MESSAGES:
+88:                     handleSignMessages(id, params);
+89:                     break;
+90:                 case ProtocolContract.METHOD_SIGN_AND_SEND_TRANSACTIONS:
+91:                     handleSignAndSendTransactions(id, params);
+92:                     break;
+93:                 default:
+94:                     handleRpcError(id, JsonRpc20Server.ERROR_METHOD_NOT_FOUND, "method '" +
+95:                             method + "' not available", null);
+96:                     break;
+97:             }
+98:         } catch (IOException e) {
+99:             Log.e(TAG, "Failed sending response for id=" + id, e);
+100:         }
+101:     }
+102: 
+103:     private static abstract class RequestFuture<T> extends NotifyingCompletableFuture<T> {
+104:         @Nullable
+105:         public final Object id;
+106: 
+492:     private void handleGetCapabilities(@Nullable Object id, @Nullable Object params) throws IOException {
+493:         if (!(params instanceof JSONObject)) {
+494:             handleRpcError(id, ERROR_INVALID_PARAMS, "params must be either a JSONObject", null);
+495:             return;
+496:         }
+497: 
+498:         final JSONObject o = (JSONObject) params;
+499:         if (o.keys().hasNext()) {
+500:             handleRpcError(id, ERROR_INVALID_PARAMS, "params expected to be empty", null);
+501:         }
+502: 
+503:         final JSONObject result = new JSONObject();
+504:         try {
+505:             result.put(ProtocolContract.RESULT_SUPPORTS_CLONE_AUTHORIZATION, false);
+506:             if (mConfig.maxTransactionsPerSigningRequest != 0) {
+507:                 result.put(ProtocolContract.RESULT_MAX_TRANSACTIONS_PER_REQUEST, mConfig.maxTransactionsPerSigningRequest);
+508:             }
+509:             if (mConfig.maxMessagesPerSigningRequest != 0) {
+510:                 result.put(ProtocolContract.RESULT_MAX_MESSAGES_PER_REQUEST, mConfig.maxMessagesPerSigningRequest);
+511:             }
+512:             result.put(ProtocolContract.RESULT_SUPPORTED_TRANSACTION_VERSIONS, new JSONArray(mConfig.supportedTransactionVersions));
+513:             result.put(ProtocolContract.RESULT_SUPPORTED_FEATURES, new JSONArray(mConfig.optionalFeatures));
+514: 
+515:             // retained for backwards compatibility
+516:             result.put(ProtocolContract.RESULT_SUPPORTS_SIGN_AND_SEND_TRANSACTIONS, mConfig.supportsSignAndSendTransactions);
+517:         } catch (JSONException e) {
+518:             throw new RuntimeException("Failed preparing get_capabilities response", e);
+519:         }
+520:         handleRpcResult(id, result);
+521:     }
+522: 
+523:     // =============================================================================================
+524:     // sign_* common
+525:     // =============================================================================================
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/JsonRpc20Server.java
+sha256=a9cc9993c213e8c620781c8f5433c546c6623266d62baafcc0ea28f670c333f6
+115:         if (params != null && !(params instanceof JSONObject) && !(params instanceof JSONArray)) {
+116:             Log.w(TAG, "params must be a structured value");
+117:             try {
+118:                 respondWithError(ERROR_INVALID_PARAMS, "params must be a structured value", null, id);
+119:             } catch (IOException e) {
+120:                 Log.e(TAG, "Failed sending ERROR_INVALID_PARAMS response", e);
+121:             }
+122:             return;
+123:         }
+124: 
+125:         dispatchRpc(id, method, params);
+126:     }
+127: 
+128:     protected abstract void dispatchRpc(@Nullable Object id,
+129:                                         @NonNull String method,
+130:                                         @Nullable Object params);
+131: 
+132:     protected void handleRpcResult(@Nullable Object id,
+133:                                    @NonNull Object result)
+134:             throws IOException {
+135:         if (id == null) {
+136:             Log.v(TAG, "Discarding response for notification");
+137:             return;
+138:         }
+139:         Log.d(TAG, "Responding with result for id=" + id);
+140:         respondWithResult(result, id);
+141:     }
+142: 
+143:     protected void handleRpcError(@Nullable Object id,
+144:                                   int code,
+145:                                   @NonNull String message,
+146:                                   @Nullable String data)
+147:             throws IOException {
+148:         if (id == null) {
+149:             Log.w(TAG, "Discarding error '" + message + "' for notification");
+150:             return;
+151:         }
+152:         Log.d(TAG, "Responding with error for id=" + id + " (code=" + code + ", message=" + message + ")");
+153:         respondWithError(code, message, data, id);
+154:     }
+155: 
+156:     // If non-null, data should be a type compatible with JSONObject.put(...)
+157:     private void respondWithError(int code,
+158:                                   @NonNull String message,
+159:                                   @Nullable Object data,
+160:                                   @Nullable Object id)
+161:             throws IOException {
+162:         final JSONObject o = new JSONObject();
+163:         try {
+164:             final JSONObject error = new JSONObject();
+
+source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/common/src/main/java/com/solana/mobilewalletadapter/common/protocol/MobileWalletAdapterSessionCommon.java
+sha256=4a9859c82a9d1dbfc19a9a15daa2ed67be5678823fe66c9d5ff56613253ca723
+46: 
+47:     @NonNull
+48:     private final MessageReceiver mDecryptedPayloadReceiver;
+49:     private final StateCallbacks mStateCallbacks;
+50: 
+51:     protected MessageSender mMessageSender;
+52:     @NonNull
+53:     private State mState = State.WAITING_FOR_CONNECTION;
+54:     private KeyPair mECDHKeypair;
+55:     private SecretKey mCachedEncryptionKey;
+56:     private int mSeqNumberTx;
+57:     private int mSeqNumberRx;
+58: 
+59:     protected MobileWalletAdapterSessionCommon(@NonNull MessageReceiver decryptedPayloadReceiver,
+60:                                                @Nullable StateCallbacks stateCallbacks) {
+61:         mDecryptedPayloadReceiver = decryptedPayloadReceiver;
+62:         mStateCallbacks = stateCallbacks;
+63:     }
+148:             throws SessionMessageException;
+149: 
+150:     private void handleEncryptedSessionPayload(@NonNull byte[] encryptedPayload)
+151:             throws SessionMessageException {
+152:         Log.v(TAG, "handleEncryptedSessionMessage");
+153:         final byte[] payload = decryptSessionPayload(encryptedPayload);
+154:         mDecryptedPayloadReceiver.receiverMessageReceived(payload);
+155:     }
+
+command=rg -n getCapabilities|GetCapabilities|dispatchRpc|createMessageReceiver|mMethodHandlers|mSessionStateCallbacks|observer|Observer|interceptor|Interceptor|listener|Listener /tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/transport/websockets/server/LocalWebSocketServer.java:89:        final MessageReceiver mr = mScenario.createMessageReceiver();
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/LocalScenario.java:78:    public MessageReceiver createMessageReceiver() {
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/LocalScenario.java:81:                new MobileWalletAdapterServer(mMobileWalletAdapterConfig, mIoLooper, mMethodHandlers),
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/LocalScenario.java:82:                mSessionStateCallbacks);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/LocalScenario.java:108:    private final MobileWalletAdapterSessionCommon.StateCallbacks mSessionStateCallbacks =
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/JsonRpc20Server.java:125:        dispatchRpc(id, method, params);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/JsonRpc20Server.java:128:    protected abstract void dispatchRpc(@Nullable Object id,
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/BaseScenario.java:128:    /*package*/ final MobileWalletAdapterServer.MethodHandlers mMethodHandlers =
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:44:    private final MethodHandlers mMethodHandlers;
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:59:        mMethodHandlers = methodHandlers;
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:63:    protected void dispatchRpc(@Nullable Object id,
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:76:                    handleGetCapabilities(id, params);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:207:        mMethodHandlers.authorize(request);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:444:        mMethodHandlers.deauthorize(request);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:492:    private void handleGetCapabilities(@Nullable Object id, @Nullable Object params) throws IOException {
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:727:        mMethodHandlers.signTransactions(request);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:791:        mMethodHandlers.signMessages(request);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java:983:        mMethodHandlers.signAndSendTransactions(request);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/Scenario.java:19:    MessageReceiver createMessageReceiver();
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/RemoteWebSocketServerScenario.java:218:    public MessageReceiver createMessageReceiver() {
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/RemoteWebSocketServerScenario.java:221:                new MobileWalletAdapterServer(mMobileWalletAdapterConfig, mIoLooper, mMethodHandlers),
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/RemoteWebSocketServerScenario.java:222:                mSessionStateCallbacks);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/RemoteWebSocketServerScenario.java:239:                createMessageReceiver(), mWebSocketStateCallbacks, CONNECT_TIMEOUT_MS);
+/tmp/mwa-phase3-domain/source/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/RemoteWebSocketServerScenario.java:358:    private final MobileWalletAdapterSessionCommon.StateCallbacks mSessionStateCallbacks =
+exit_code=0

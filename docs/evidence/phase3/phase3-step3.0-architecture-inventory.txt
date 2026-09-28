@@ -1,0 +1,550 @@
+MWA Lab Phase 3 start audit
+created_utc=2026-09-28T03:10:43.276196+00:00
+
+command=git ls-files
+.github/workflows/android.yml
+.gitignore
+CHANGELOG.md
+LICENSE
+PHASE_1_REPORT.md
+PHASE_2_BATCH_A_REPORT.md
+PHASE_2_REPORT.md
+README.md
+app/.gitignore
+app/build.gradle.kts
+app/src/androidTest/java/dev/mwalab/ExampleInstrumentedTest.kt
+app/src/androidTest/java/dev/mwalab/identity/AndroidKeystoreIdentityRepositoryInstrumentedTest.kt
+app/src/androidTest/java/dev/mwalab/identity/LabSigningServiceInstrumentedTest.kt
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt
+app/src/main/AndroidManifest.xml
+app/src/main/java/dev/mwalab/MainActivity.kt
+app/src/main/java/dev/mwalab/app/MwaLabComposition.kt
+app/src/main/java/dev/mwalab/approval/ApprovalCoordinator.kt
+app/src/main/java/dev/mwalab/identity/AndroidKeystoreIdentityRepository.kt
+app/src/main/java/dev/mwalab/identity/Ed25519IdentityMaterial.kt
+app/src/main/java/dev/mwalab/identity/IdentityRepository.kt
+app/src/main/java/dev/mwalab/identity/TestEndpointIdentity.kt
+app/src/main/java/dev/mwalab/mwa/MobileWalletAdapterActivity.kt
+app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt
+app/src/main/java/dev/mwalab/mwa/association/AssociationOpenResult.kt
+app/src/main/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicy.kt
+app/src/main/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfile.kt
+app/src/main/java/dev/mwalab/mwa/evidence/MwaSessionEvidence.kt
+app/src/main/java/dev/mwalab/protocol/ProtocolEvidence.kt
+app/src/main/java/dev/mwalab/protocol/ProtocolFailureSource.kt
+app/src/main/java/dev/mwalab/protocol/ProtocolMethod.kt
+app/src/main/java/dev/mwalab/protocol/ProtocolOutcome.kt
+app/src/main/java/dev/mwalab/rpc/DevnetRpcGateway.kt
+app/src/main/java/dev/mwalab/rpc/SignAndSendSubmissionExecutor.kt
+app/src/main/java/dev/mwalab/security/DiagnosticSanitizer.kt
+app/src/main/java/dev/mwalab/security/NetworkPolicy.kt
+app/src/main/java/dev/mwalab/signing/LabSigningService.kt
+app/src/main/java/dev/mwalab/transaction/LegacyTransactionCodec.kt
+app/src/main/java/dev/mwalab/transaction/SolanaTransactionMessageDetector.kt
+app/src/main/java/dev/mwalab/ui/theme/Color.kt
+app/src/main/java/dev/mwalab/ui/theme/Theme.kt
+app/src/main/java/dev/mwalab/ui/theme/Type.kt
+app/src/main/keepRules/rules.keep
+app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+app/src/main/res/drawable/ic_launcher_background.xml
+app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+app/src/main/res/mipmap-hdpi/ic_launcher.webp
+app/src/main/res/mipmap-hdpi/ic_launcher_round.webp
+app/src/main/res/mipmap-mdpi/ic_launcher.webp
+app/src/main/res/mipmap-mdpi/ic_launcher_round.webp
+app/src/main/res/mipmap-xhdpi/ic_launcher.webp
+app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp
+app/src/main/res/mipmap-xxhdpi/ic_launcher.webp
+app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp
+app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp
+app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp
+app/src/main/res/values/colors.xml
+app/src/main/res/values/strings.xml
+app/src/main/res/values/themes.xml
+app/src/main/res/xml/backup_rules.xml
+app/src/main/res/xml/data_extraction_rules.xml
+app/src/test/java/dev/mwalab/ExampleUnitTest.kt
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt
+app/src/test/java/dev/mwalab/identity/Ed25519IdentityMaterialTest.kt
+app/src/test/java/dev/mwalab/identity/Ed25519SigningTest.kt
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt
+app/src/test/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfileTest.kt
+app/src/test/java/dev/mwalab/rpc/DevnetSendOptionsTest.kt
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt
+app/src/test/java/dev/mwalab/security/DiagnosticSanitizerTest.kt
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt
+app/src/test/java/dev/mwalab/transaction/SolanaTransactionMessageDetectorTest.kt
+build.gradle.kts
+compatibility/README.md
+compatibility/verified-wallet-observations/.gitkeep
+demo-client/.gitignore
+demo-client/build.gradle.kts
+demo-client/src/androidTest/java/dev/mwalab/democlient/DemoClientCrossAppInstrumentedTest.kt
+demo-client/src/main/AndroidManifest.xml
+demo-client/src/main/java/dev/mwalab/democlient/DemoClientActivity.kt
+demo-client/src/main/java/dev/mwalab/democlient/DemoClientRunner.kt
+demo-client/src/main/java/dev/mwalab/democlient/DemoDevnetRpc.kt
+demo-client/src/main/java/dev/mwalab/democlient/DemoLegacyTransactionFactory.kt
+demo-client/src/main/java/dev/mwalab/democlient/Phase2AcceptanceRunner.kt
+demo-client/src/test/java/dev/mwalab/democlient/DemoLegacyTransactionFactoryTest.kt
+docs/ARCHITECTURE.md
+docs/COMPATIBILITY.md
+docs/COMPETITION.md
+docs/DEMO.md
+docs/PHASE_1_MWA_API_NOTES.md
+docs/PRIVACY.md
+docs/PRODUCT_POSITIONING.md
+docs/PROTOCOL_SUPPORT.md
+docs/RELEASE.md
+docs/SECURITY.md
+docs/TESTING.md
+docs/THREAT_MODEL.md
+docs/evidence/.gitkeep
+docs/evidence/phase0-runtime-gate-2026-09-26.txt
+docs/evidence/phase1/baseline-verification.txt
+docs/evidence/phase1/batch-b-androidtest-apk.sha256
+docs/evidence/phase1/batch-b-build-gate.txt
+docs/evidence/phase1/batch-b-connected-identity-test.txt
+docs/evidence/phase1/batch-b-debug-apk.sha256
+docs/evidence/phase1/batch-b-identity-security-design.txt
+docs/evidence/phase1/batch-b-runtime-classpath.txt
+docs/evidence/phase1/batch-b-runtime-verification.txt
+docs/evidence/phase1/batch-c-androidtest-apk.sha256
+docs/evidence/phase1/batch-c-androidtest-runtime-classpath.txt
+docs/evidence/phase1/batch-c-api-inventory-summary.txt
+docs/evidence/phase1/batch-c-build-gate.txt
+docs/evidence/phase1/batch-c-connected-association-test.txt
+docs/evidence/phase1/batch-c-debug-apk.sha256
+docs/evidence/phase1/batch-c-mwa2-mandatory-feature-boundary.txt
+docs/evidence/phase1/batch-c-production-runtime-classpath.txt
+docs/evidence/phase1/batch-c-runtime-verification.txt
+docs/evidence/phase1/batch-d-androidtest-apk.sha256
+docs/evidence/phase1/batch-d-authorization-authority.txt
+docs/evidence/phase1/batch-d-build-gate.txt
+docs/evidence/phase1/batch-d-connected-identity-regression.txt
+docs/evidence/phase1/batch-d-connected-protocol-test.txt
+docs/evidence/phase1/batch-d-debug-apk.sha256
+docs/evidence/phase1/batch-d-protocol-address-encoding.txt
+docs/evidence/phase1/batch-d-runtime-verification.txt
+docs/evidence/phase1/batch-e-build-gate.txt
+docs/evidence/phase1/batch-e-demo-client-androidtest-apk.sha256
+docs/evidence/phase1/batch-e-demo-client-connected-test.txt
+docs/evidence/phase1/batch-e-demo-client-debug-apk.sha256
+docs/evidence/phase1/batch-e-demo-client-design.txt
+docs/evidence/phase1/batch-e-primary-debug-apk.sha256
+docs/evidence/phase1/batch-e-primary-protocol-evidence-test.txt
+docs/evidence/phase1/batch-e-primary-runtime-classpath.txt
+docs/evidence/phase1/batch-e-runtime-verification.txt
+docs/evidence/phase1/batch-e-sanitizer-security-scan.txt
+docs/evidence/phase1/batch-e-structured-evidence-design.txt
+docs/evidence/phase1/batch-e-wallet-install.txt
+docs/evidence/phase1/build-gate.txt
+docs/evidence/phase1/debug-apk.sha256
+docs/evidence/phase1/debug-runtime-classpath.txt
+docs/evidence/phase1/dependency-api-pin.txt
+docs/evidence/phase1/phase1-ci-closeout.txt
+docs/evidence/phase1/phase1-final-app-launch.txt
+docs/evidence/phase1/phase1-final-build-gate.txt
+docs/evidence/phase1/phase1-final-clean-install.txt
+docs/evidence/phase1/phase1-final-demo-client-androidtest-apk.sha256
+docs/evidence/phase1/phase1-final-demo-client-debug-apk.sha256
+docs/evidence/phase1/phase1-final-demo-client-test.txt
+docs/evidence/phase1/phase1-final-identity-test.txt
+docs/evidence/phase1/phase1-final-local-acceptance.txt
+docs/evidence/phase1/phase1-final-primary-androidtest-apk.sha256
+docs/evidence/phase1/phase1-final-primary-debug-apk.sha256
+docs/evidence/phase1/phase1-final-protocol-test.txt
+docs/evidence/phase1/phase1-summary.md
+docs/evidence/phase1/sanitizer-security-scan.txt
+docs/evidence/phase1/walletlib-2.0.7-aar.sha256
+docs/evidence/phase1/walletlib-2.0.7-api-authority.txt
+docs/evidence/phase1/walletlib-2.0.7-api-inventory.txt
+docs/evidence/phase1/walletlib-2.0.7-api-members.tsv
+docs/evidence/phase1/walletlib-2.0.7-class-list.txt
+docs/evidence/phase2/phase2-batch-a-api-authority.txt
+docs/evidence/phase2/phase2-batch-a-cross-package-crash-diagnostic.txt
+docs/evidence/phase2/phase2-batch-a-cross-package-exit-info.txt
+docs/evidence/phase2/phase2-batch-a-cross-package-logcat.txt
+docs/evidence/phase2/phase2-batch-a-demo-androidtest-runtime-classpath.txt
+docs/evidence/phase2/phase2-batch-a-demo-runner-repair-acceptance.txt
+docs/evidence/phase2/phase2-batch-a-demo-runner-repair-logcat.txt
+docs/evidence/phase2/phase2-batch-a-device-acceptance.txt
+docs/evidence/phase2/phase2-batch-a-security-contract.txt
+docs/evidence/phase2/phase2-batch-a-session-generation-repair-acceptance.txt
+docs/evidence/phase2/phase2-batch-a-session-generation-repair-logcat.txt
+docs/evidence/phase2/phase2-batch-b-api-authority.txt
+docs/evidence/phase2/phase2-batch-b-security-contract.txt
+docs/evidence/phase2/phase2-final-freeze-manifest.txt
+docs/evidence/phase2/phase2-step2.10-closeout.txt
+docs/evidence/phase2/phase2-step2.10-live-devnet-acceptance.txt
+docs/evidence/phase2/phase2-step2.11-closeout.txt
+docs/evidence/phase2/phase2-step2.11-source-digests.txt
+docs/evidence/phase2/phase2-step2.11a-hostile-acceptance.txt
+docs/evidence/phase2/phase2-step2.11a-hostile-contract.txt
+docs/evidence/phase2/phase2-step2.11b1-rpc-submission-acceptance.txt
+docs/evidence/phase2/phase2-step2.11b1-rpc-submission-contract.txt
+docs/evidence/phase2/phase2-step2.11b2-live-lifecycle-acceptance.txt
+docs/evidence/phase2/phase2-step2.11b2-live-lifecycle-contract.txt
+docs/evidence/phase2/phase2-step2.12-documentation-contract.txt
+docs/evidence/phase2/phase2-step2.12-final-closeout.txt
+docs/evidence/phase2/phase2-step2.12-local-acceptance.txt
+docs/evidence/phase2/phase2-step2.12-prefreeze-digests.txt
+gradle.properties
+gradle/gradle-daemon-jvm.properties
+gradle/libs.versions.toml
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+gradlew
+gradlew.bat
+sample-dapp/README.md
+screenshots/.gitkeep
+scripts/phase0_gate.sh
+scripts/phase1_static.sh
+scripts/phase2_static.sh
+settings.gradle.kts
+test-vectors/faults/.gitkeep
+test-vectors/protocol/.gitkeep
+test-vectors/transactions/.gitkeep
+exit_code=0
+
+command=rg -n 'activeSessionId|protocolSequence|System.currentTimeMillis|recordProtocol|sessionGeneration|activeAuthorizationGeneration|override fun on|private .*fun' app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt
+80:    private val sessionGeneration = AtomicLong(0)
+81:    private val activeAuthorizationGeneration = AtomicLong(NO_AUTHORIZATION_GENERATION)
+83:    private var activeSessionId: String = UUID.randomUUID().toString()
+84:    private val protocolSequence = AtomicLong(0)
+90:        val generation = sessionGeneration.incrementAndGet()
+91:        activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
+93:        activeSessionId = UUID.randomUUID().toString()
+94:        protocolSequence.set(0)
+164:        sessionGeneration.incrementAndGet()
+165:        activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
+170:    private fun closeCurrentScenario(recordClose: Boolean) {
+171:        activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
+185:    private fun createCallbacks(generation: Long) = object : LocalScenario.Callbacks {
+186:        override fun onScenarioReady() {
+191:        override fun onScenarioServingClients() {
+196:        override fun onScenarioServingComplete() {
+202:        override fun onScenarioComplete() {
+207:        override fun onScenarioError() {
+213:        override fun onScenarioTeardownComplete() {
+219:        override fun onLowPowerAndNoConnection() {
+225:        override fun onAuthorizeRequest(request: AuthorizeRequest) {
+230:            val startedAt = System.currentTimeMillis()
+255:                    recordProtocol(
+282:                        recordProtocol(
+300:                        recordProtocol(
+314:                        recordProtocol(
+328:                        recordProtocol(
+342:                        recordProtocol(
+356:        override fun onReauthorizeRequest(request: ReauthorizeRequest) {
+361:            val startedAt = System.currentTimeMillis()
+373:                recordProtocol(
+383:                recordProtocol(
+395:        override fun onSignTransactionsRequest(request: SignTransactionsRequest) {
+400:            val startedAt = System.currentTimeMillis()
+401:            val sessionId = activeSessionId
+413:        override fun onSignMessagesRequest(request: SignMessagesRequest) {
+418:            val startedAt = System.currentTimeMillis()
+419:            val sessionId = activeSessionId
+431:        override fun onSignAndSendTransactionsRequest(
+438:            val startedAt = System.currentTimeMillis()
+439:            val sessionId = activeSessionId
+451:        override fun onDeauthorizedEvent(event: DeauthorizedEvent) {
+456:            val startedAt = System.currentTimeMillis()
+460:            recordProtocol(
+495:    private suspend fun prepareLegacyTransactions(
+570:    private suspend fun signLegacyTransactions(
+587:    private suspend fun handleSignTransactions(
+599:            recordProtocol(
+620:            recordProtocol(
+648:                recordProtocol(
+662:                recordProtocol(
+676:                recordProtocol(
+689:                recordProtocol(
+703:            recordProtocol(
+731:            recordProtocol(
+744:            recordProtocol(
+765:            recordProtocol(
+786:        recordProtocol(
+800:    private suspend fun handleSignAndSendTransactions(
+812:            recordProtocol(
+840:            recordProtocol(
+861:            recordProtocol(
+889:                recordProtocol(
+903:                recordProtocol(
+917:                recordProtocol(
+930:                recordProtocol(
+944:            recordProtocol(
+972:            recordProtocol(
+985:            recordProtocol(
+1006:            recordProtocol(
+1049:                recordProtocol(
+1077:                recordProtocol(
+1095:                recordProtocol(
+1111:    private suspend fun handleSignMessages(
+1123:            recordProtocol(
+1147:            recordProtocol(
+1163:            recordProtocol(
+1177:            recordProtocol(
+1193:            recordProtocol(
+1211:            recordProtocol(
+1232:            recordProtocol(
+1246:            recordProtocol(
+1274:            recordProtocol(
+1288:            recordProtocol(
+1331:            recordProtocol(
+1343:            recordProtocol(
+1354:    private fun markAuthorizationActive(generation: Long) {
+1356:            activeAuthorizationGeneration.set(generation)
+1360:    private fun invalidateAuthorization(generation: Long) {
+1361:        activeAuthorizationGeneration.compareAndSet(
+1367:    private fun isAuthorizationActive(generation: Long): Boolean =
+1369:            activeAuthorizationGeneration.get() == generation
+1371:    private fun isCurrentGeneration(generation: Long): Boolean =
+1372:        sessionGeneration.get() == generation
+1374:    private fun notifySessionFinishedIfCurrent(generation: Long) {
+1384:    private fun signingRequestSummary(
+1400:    private fun record(event: MwaSessionEvent, detail: String? = null) {
+1409:    private fun recordProtocol(
+1418:        val sequence = protocolSequence.incrementAndGet()
+1419:        val sessionId = activeSessionId
+1427:                completedAtEpochMillis = System.currentTimeMillis(),
+exit_code=0
+
+command=rg -n 'ProtocolEvidenceStore|MwaSessionEvidenceStore|protocolEvidenceSink|evidenceSink' app/src demo-client/src
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:13:import dev.mwalab.mwa.evidence.MwaSessionEvidenceStore
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:14:import dev.mwalab.protocol.ProtocolEvidenceStore
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:32:        MwaSessionEvidenceStore.resetForTest()
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:33:        ProtocolEvidenceStore.resetForTest()
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:109:            MwaSessionEvidenceStore.snapshot().count {
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:177:        val protocolEvidence = ProtocolEvidenceStore.snapshot()
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:214:        val events = MwaSessionEvidenceStore.snapshot()
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:240:            val count = MwaSessionEvidenceStore.snapshot().count {
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:251:                MwaSessionEvidenceStore.snapshot().joinToString { it.event.name },
+app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt:31:import dev.mwalab.mwa.evidence.MwaSessionEvidenceStore
+app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt:34:import dev.mwalab.protocol.ProtocolEvidenceStore
+app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt:68:    private val evidenceSink: MwaSessionEvidenceSink = MwaSessionEvidenceStore,
+app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt:69:    private val protocolEvidenceSink: ProtocolEvidenceSink = ProtocolEvidenceStore,
+app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt:1401:        evidenceSink.record(
+app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt:1420:        protocolEvidenceSink.record(
+app/src/main/java/dev/mwalab/mwa/evidence/MwaSessionEvidence.kt:65:object MwaSessionEvidenceStore : MwaSessionEvidenceSink {
+app/src/main/java/dev/mwalab/protocol/ProtocolEvidence.kt:32:object ProtocolEvidenceStore : ProtocolEvidenceSink {
+exit_code=0
+
+command=rg -n 'fun |class ' app/src/test app/src/androidTest demo-client/src/test demo-client/src/androidTest
+demo-client/src/androidTest/java/dev/mwalab/democlient/DemoClientCrossAppInstrumentedTest.kt:13:class DemoClientCrossAppInstrumentedTest {
+demo-client/src/androidTest/java/dev/mwalab/democlient/DemoClientCrossAppInstrumentedTest.kt:15:    fun canonicalSequenceIsRealCrossPackageAndRepeatable() {
+demo-client/src/test/java/dev/mwalab/democlient/DemoLegacyTransactionFactoryTest.kt:8:class DemoLegacyTransactionFactoryTest {
+demo-client/src/test/java/dev/mwalab/democlient/DemoLegacyTransactionFactoryTest.kt:10:    fun `memo transaction is canonical legacy shape`() {
+demo-client/src/test/java/dev/mwalab/democlient/DemoLegacyTransactionFactoryTest.kt:32:    fun `primary signature extraction rejects message mutation`() {
+demo-client/src/test/java/dev/mwalab/democlient/DemoLegacyTransactionFactoryTest.kt:51:    fun `memo program base58 decodes to public key length`() {
+app/src/test/java/dev/mwalab/identity/Ed25519IdentityMaterialTest.kt:8:class Ed25519IdentityMaterialTest {
+app/src/test/java/dev/mwalab/identity/Ed25519IdentityMaterialTest.kt:10:    fun generatedIdentityIsARealEd25519Keypair() {
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt:11:class ApprovalCoordinatorTest {
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt:13:    fun approvalIsBoundToRequestIdAndSingleFlight() = runBlocking {
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt:31:    fun concurrentApprovalIsBusyAndCannotStealDecision() = runBlocking {
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt:46:    fun cancellationClearsPendingAndNextRequestCanProceed() = runBlocking {
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt:63:    fun expiredApprovalClearsPendingState() = runBlocking {
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt:75:    fun duplicateAndStaleCompletionAttemptsFailClosed() = runBlocking {
+app/src/test/java/dev/mwalab/approval/ApprovalCoordinatorTest.kt:93:    private fun request(label: String) = ApprovalRequest(
+app/src/test/java/dev/mwalab/identity/Ed25519SigningTest.kt:8:class Ed25519SigningTest {
+app/src/test/java/dev/mwalab/identity/Ed25519SigningTest.kt:10:    fun signatureVerifiesAgainstGeneratedPublicKey() {
+app/src/test/java/dev/mwalab/ExampleUnitTest.kt:12:class ExampleUnitTest {
+app/src/test/java/dev/mwalab/ExampleUnitTest.kt:14:    fun addition_isCorrect() {
+app/src/test/java/dev/mwalab/rpc/DevnetSendOptionsTest.kt:7:class DevnetSendOptionsTest {
+app/src/test/java/dev/mwalab/rpc/DevnetSendOptionsTest.kt:9:    fun `accepts pinned protocol commitment values`() {
+app/src/test/java/dev/mwalab/rpc/DevnetSendOptionsTest.kt:24:    fun `rejects invalid numeric options and commitment`() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:8:class NetworkPolicyTest {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:10:    fun modernDevnetChainIsAllowed() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:19:    fun legacyDevnetClusterIsNormalizedAndAllowed() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:28:    fun productionChainIsRejected() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:37:    fun legacyMainnetClusterIsRejected() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:47:    fun testnetIsRejectedAsUnsupported() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:57:    fun missingAndMalformedValuesFailClosed() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:70:    fun unknownChainFailsClosed() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:79:    fun internalWhitespaceAndOverlongNetworkIdentifiersFailClosed() {
+app/src/test/java/dev/mwalab/security/NetworkPolicyTest.kt:95:    fun leadingAndTrailingWhitespaceRemainPhase1Normalized() {
+app/src/test/java/dev/mwalab/security/DiagnosticSanitizerTest.kt:7:class DiagnosticSanitizerTest {
+app/src/test/java/dev/mwalab/security/DiagnosticSanitizerTest.kt:9:    fun secretBearingFieldsAreRedacted() {
+app/src/test/java/dev/mwalab/security/DiagnosticSanitizerTest.kt:44:    fun fingerprintIsDeterministicWithoutPersistingPayload() {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:10:class SignAndSendSubmissionExecutorTest {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:12:    fun `successful mocked submit returns exact signatures`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:37:    fun `rpc transport rpc-error and malformed send failures map to not-submitted without retry`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:63:    fun `partial submission preserves successful signature and does not resubmit`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:87:    fun `unexpected rpc signature fails closed`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:110:    fun `requested commitment must succeed before successful response`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:128:    fun `requested commitment false and unavailable fail closed`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:156:    fun `wait-for-commitment gates next transaction`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:178:    fun `cancellation before first submission performs zero rpc sends`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:193:    fun `cancellation after first rpc completion stops remaining submissions and never resubmits`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:219:    fun `cancellation after commitment response prevents next transaction submission`() = runBlocking {
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:243:    private fun transaction(seed: Int): SignAndSendSubmission = SignAndSendSubmission(
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:248:    private fun options(
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:259:    private class FakeGateway(
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:273:        override suspend fun isBlockhashValid(
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:278:        override suspend fun sendTransaction(
+app/src/test/java/dev/mwalab/rpc/SignAndSendSubmissionExecutorTest.kt:289:        override suspend fun awaitCommitment(
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:8:class LegacyTransactionCodecTest {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:10:    fun `patches only requested signer slot and preserves message`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:37:    fun `rejects versioned message`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:49:    fun `rejects signer outside required signer region`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:60:    fun `rejects signature count mismatch`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:77:    fun `rejects transaction larger than Solana packet bound`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:88:    fun `rejects trailing bytes`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:98:    fun `rejects empty and truncated payloads`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:114:    fun `rejects non canonical shortvec and duplicate signer key`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:129:    fun `parsed transaction is bound to immutable snapshot of approved payload`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:146:    fun `signature patch rejects wrong signature length`() {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:157:    private fun transaction(
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:182:    private fun messageOffset(transaction: ByteArray): Int = 1 + ((transaction[0].toInt() and 0xff) * 64)
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:184:    private fun shortVec(value: Int): ByteArray {
+app/src/test/java/dev/mwalab/transaction/LegacyTransactionCodecTest.kt:197:    private fun assertRejected(
+app/src/androidTest/java/dev/mwalab/ExampleInstrumentedTest.kt:17:class ExampleInstrumentedTest {
+app/src/androidTest/java/dev/mwalab/ExampleInstrumentedTest.kt:19:    fun useAppContext() {
+app/src/test/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfileTest.kt:7:class MwaCapabilityProfileTest {
+app/src/test/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfileTest.kt:9:    fun snapshotMatchesPinnedPhase1Profile() {
+app/src/test/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfileTest.kt:22:    fun walletConfigMatchesSnapshot() {
+app/src/test/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfileTest.kt:44:    fun onlyExplicitSignTransactionsOptionalFeatureIsAdvertised() {
+app/src/test/java/dev/mwalab/transaction/SolanaTransactionMessageDetectorTest.kt:7:class SolanaTransactionMessageDetectorTest {
+app/src/test/java/dev/mwalab/transaction/SolanaTransactionMessageDetectorTest.kt:9:    fun arbitraryTextIsNotTransactionMessage() {
+app/src/test/java/dev/mwalab/transaction/SolanaTransactionMessageDetectorTest.kt:14:    fun minimalStructurallyValidLegacyMessageIsDetected() {
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:27:class MwaLocalAssociationInstrumentedTest {
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:29:    fun phase1AuthorizeCapabilitiesDeauthorizeAndRevocationFlow() {
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:230:    private fun awaitEvent(expected: MwaSessionEvent) {
+app/src/androidTest/java/dev/mwalab/mwa/MwaLocalAssociationInstrumentedTest.kt:234:    private fun awaitEventCount(
+app/src/androidTest/java/dev/mwalab/identity/LabSigningServiceInstrumentedTest.kt:15:class LabSigningServiceInstrumentedTest {
+app/src/androidTest/java/dev/mwalab/identity/LabSigningServiceInstrumentedTest.kt:17:    fun protectedSignerSurvivesRestartBoundaryAndVerifies() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:13:class LabAuthorizationPolicyTest {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:21:        override suspend fun getOrCreate(): TestEndpointIdentity = identity
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:22:        override suspend fun reset(): TestEndpointIdentity = identity
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:28:    fun devnetWithoutOptionalRequestsIsGranted() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:47:    fun mainnetFailsClosed() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:60:    fun optionalFeatureRequestFailsClosed() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:73:    fun signInPayloadFailsClosed() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:86:    fun unavailableRequestedAddressFailsClosed() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:99:    fun matchingRequestedProtocolAddressIsGranted() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:109:    fun missingTestnetAndUnknownChainsFailClosed() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:124:    fun malformedRequestedAddressFailsClosed() = runBlocking {
+app/src/test/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicyTest.kt:137:    fun authorizationScopeRejectsMutation() {
+app/src/androidTest/java/dev/mwalab/identity/AndroidKeystoreIdentityRepositoryInstrumentedTest.kt:15:class AndroidKeystoreIdentityRepositoryInstrumentedTest {
+app/src/androidTest/java/dev/mwalab/identity/AndroidKeystoreIdentityRepositoryInstrumentedTest.kt:17:    fun identityPersistsAcrossRepositoryRestartAndResetChangesAuthority() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:12:class SolanaDevnetRpcGatewayInstrumentedTest {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:14:    fun successfulMockedSubmitReturnsDecoded64ByteSignature() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:34:    fun dnsOrConnectionStyleIoFailureStaysClassifiedAsTransportIo() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:48:    fun timeoutStaysClassifiedAsTransportTimeout() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:62:    fun nonSuccessHttpStatusFailsClosed() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:76:    fun jsonRpcErrorCodeIsPreservedWithoutResponseBodyLeakage() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:94:    fun malformedMissingResultAndOversizedResponsesFailClosed() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:113:    fun malformedSignatureResultFailsClosed() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:127:    fun confirmedStatusSatisfiesConfirmedCommitment() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:143:    fun transactionErrorStatusIsNotConsideredCommittedSuccess() = runBlocking {
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:158:    private fun defaultOptions() = DevnetSendOptions(
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:166:    private fun jsonResult(value: String): ByteArray =
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:174:    private class QueueTransport(
+app/src/androidTest/java/dev/mwalab/rpc/SolanaDevnetRpcGatewayInstrumentedTest.kt:180:        override suspend fun post(body: ByteArray): DevnetHttpTransportResult {
+exit_code=0
+
+command=rg -n 'Room|phase2_static|3\.[0-9]|ProtocolRecorder|before' /home/abbaas/Downloads/MWA_LAB/MWA_LAB_PHASE_3_IMPLEMENTATION_PLAN_2026-09-28.md
+36:ProtocolRecorder
+45:Room / SQLite
+169:## 3.1 Process-local evidence only
+180:Phase 3 must persist session/event history in Room.
+182:## 3.2 No authoritative persistent session model
+198:## 3.3 Sequence ownership is too close to the host
+202:Long-term sequence authority should belong to `ProtocolRecorder`.
+204:## 3.4 Completion-time session lookup risk
+221:# 4. Phase 3.0 — Frozen Baseline Verification
+254:./scripts/phase2_static.sh
+263:  phase3-step3.0-baseline.txt
+264:  phase3-step3.0-source-digests.txt
+276:# 5. Phase 3.1 — Freeze the Domain Contract
+278:Do not start with Room.
+366:# 6. Phase 3.2 — `get_capabilities` Observability Hard Gate
+403:ProtocolRecorder
+444:# 7. Phase 3.3 — Introduce `ProtocolRecorder`
+451:ProtocolRecorder
+459:Room
+471:ProtocolRecorder.begin(...)
+490:ProtocolRecorder.complete(
+506:even if a new association replaces the active session before completion.
+510:# 8. Phase 3.4 — Move Sequence Authority Into the Recorder
+535:Move sequence authority from `MwaSessionHost` into `ProtocolRecorder`.
+554:# 9. Phase 3.5 — Freeze Sanitization Before Persistence
+567:ProtocolRecorder
+571:Room
+574:Room and DAOs must never receive raw secret-bearing wallet request objects.
+603:> sanitize before persistence, not redact only during export.
+607:# 10. Phase 3.6 — Room / SQLite Persistence
+609:After domain and recorder contracts are frozen, introduce Room.
+622:    ProtocolRecorder.kt
+749:Enable Room schema export and commit exported schemas.
+767:# 13. Phase 3.7 — SessionRepository
+799:Room
+812:# 14. Phase 3.8 — Wire Session Lifecycle
+877:introduce canonical recorder and Room
+894:ProtocolRecorder + Room
+901:# 16. Phase 3.9 — Migrate Supported Methods to the Recorder
+966:# 17. Phase 3.10 — Failure Source Classification Audit
+968:Review every supported failure path before persistence freezes semantics.
+1007:# 18. Phase 3.11 — dApp Identity Association
+1044:# 19. Phase 3.12 — Introduce ViewModels for Timeline UI
+1084:# 20. Phase 3.13 — Sessions Screen
+1133:# 21. Phase 3.14 — Session Detail Hero Timeline
+1269:# 24. Phase 3.15 — Recorder Unit Tests
+1305:# 25. Phase 3.16 — Room Persistence Tests
+1346:# 26. Phase 3.17 — Security Persistence Test
+1363:inspect persisted Room data / database representation
+1376:# 27. Phase 3.18 — Timeline Integrity Tests
+1406:# 28. Phase 3.19 — Hostile Session-Lifecycle Tests
+1453:If walletlib rejects a stale/revoked token internally before a callback is observable, do not fabricate an observed host callback.
+1524:# 32. Phase 3.20 — Static Verification Script
+1535:./scripts/phase2_static.sh
+1543:Room database exists
+1548:ProtocolRecorder exists
+1579:phase2_static
+1585:# 33. Phase 3.21 — Real Device / Emulator Acceptance
+1653:# 34. Phase 3.22 — Restart Acceptance
+1688:# 35. Phase 3.23 — Documentation Update
+1720:ProtocolRecorder
+1724:Room / SQLite
+1762:phase3-step3.0-baseline.txt
+1796:3.0
+1799:3.1
+1802:3.2
+1805:3.3
+1806:add Room dependencies + schema + DAOs
+1808:3.4
+1811:3.5
+1812:add ProtocolRecorder + immutable event handles
+1814:3.6
+1817:3.7
+1820:3.8
+1823:3.9
+1826:3.10
+1829:3.11
+1832:3.12
+1835:3.13
+1860:| Room persistence | PASS |
+1893:✓ request/response summaries are sanitized before persistence.
+1895:✓ no private/auth/association/signing secret enters Room.
+1897:✓ sessions persist in Room.
+1940:## 40.1 `ProtocolRecorder` becomes protocol-diagnostic authority
+1944:`ProtocolRecorder` owns:
+1955:Room and UI logic must not leak into the protocol host.
+1967:## 40.4 Sanitize before persistence
+exit_code=0
+
+command=rg -n 'Room|Phase 3 persistence|session generation|authorization gate|DiagnosticSanitizer' scripts/phase2_static.sh
+31:grep -Fq 'private val sessionGeneration = AtomicLong(0)' app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt || fail "session generation guard missing"
+32:grep -Fq 'private val activeAuthorizationGeneration = AtomicLong(NO_AUTHORIZATION_GENERATION)' app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt || fail "session-local active authorization gate missing"
+54:grep -Fq 'association_token' app/src/main/java/dev/mwalab/security/DiagnosticSanitizer.kt || fail "association-token sanitizer guard missing"
+55:grep -Fq 'authorization_token' app/src/main/java/dev/mwalab/security/DiagnosticSanitizer.kt || fail "authorization-token sanitizer guard missing"
+56:grep -Fq 'raw_message_payload' app/src/main/java/dev/mwalab/security/DiagnosticSanitizer.kt || fail "raw-message sanitizer guard missing"
+57:grep -Fq 'raw_transaction_payload' app/src/main/java/dev/mwalab/security/DiagnosticSanitizer.kt || fail "raw-transaction sanitizer guard missing"
+58:grep -Fq 'raw_signature' app/src/main/java/dev/mwalab/security/DiagnosticSanitizer.kt || fail "raw-signature sanitizer guard missing"
+108:if grep -RInE 'androidx\.room|Room\.databaseBuilder|@Entity|@Database' app/src/main demo-client/src/main; then
+109:  fail "Phase 3 persistence introduced before Phase 2 freeze"
+exit_code=0

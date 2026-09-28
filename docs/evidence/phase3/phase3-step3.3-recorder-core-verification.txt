@@ -1,0 +1,25 @@
+MWA Lab Phase 3 Step 3.3 ProtocolRecorder core verification after JUnit/handle repair
+timestamp=2026-09-28T11:46:07+06:30
+branch=phase3-protocol-recorder-timeline
+head=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+phase2_baseline=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+recorder_sha=b3fed1a21848682c68c3344cf9c19e4c839c5f00d190baa571bbc9cde0565d16
+handle_sha=db144e1160c6b02d26897fca43246e299a4fdf8a6b735e2d3d93d339770d73cb
+test_sha=f5ae353a0f2ee34e164b810af8d40b07b1cf1913316338fb79ba1d7a271b6377
+mwa_session_host_sha=8374398cb1912f1f7c8a1b30de9523d6cf2a41e224e1917dda22f5e64b621eb2
+handle_data_class_copy_surface=REMOVED
+reconstructed_handle_rejected=PASS_BY_FOCUSED_TEST
+host_wiring=NOT_STARTED
+get_capabilities=NOT_OBSERVABLE_THROUGH_PINNED_WALLETLIB
+room_regression_device=PASS
+recorder-tests=PASS
+domain-tests=PASS
+compile-debug=PASS
+phase1-static=PASS
+lint=PASS
+test=PASS
+assemble-debug=PASS
+androidtest-apks=PASS
+room-regression-device=PASS
+git_diff_check=PASS
+phase2_static_current_tree=NOT_RUN_BY_DESIGN_HISTORICAL_ROOM_ABSENCE_GATE

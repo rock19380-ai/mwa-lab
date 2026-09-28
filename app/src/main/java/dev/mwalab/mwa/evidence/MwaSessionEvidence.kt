@@ -43,6 +43,7 @@ enum class MwaSessionEvent {
     SIGN_AND_SEND_SUBMITTED,
     SIGN_AND_SEND_NOT_SUBMITTED,
     CLOSE_REQUESTED,
+    DIAGNOSTIC_PERSISTENCE_FAILED,
 }
 
 data class MwaSessionEvidence(

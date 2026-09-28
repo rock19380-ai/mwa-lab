@@ -1,0 +1,13 @@
+MWA Lab Phase 3 Step 3.5 authorization recorder apply
+timestamp=2026-09-28T15:05:36+06:30
+branch=phase3-protocol-recorder-timeline
+head=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+phase2_baseline=009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+migrated_methods=AUTHORIZE,REAUTHORIZE,DEAUTHORIZE
+canonical_session_binding=persistentSessionId_captured_by_association_callback
+event_begin=request_observation_before_identity_persistence
+get_capabilities=NOT_OBSERVABLE_THROUGH_PINNED_WALLETLIB
+get_capabilities_synthetic_event=NO
+legacy_protocol_evidence_store=TEMPORARY_COMPATIBILITY_ONLY
+signing_recorder_migration=NOT_STARTED
+protocol_decisions_changed=NO

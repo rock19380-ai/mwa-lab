@@ -1,0 +1,77 @@
+MWA Lab Phase 3 start audit
+created_utc=2026-09-28T03:10:41.394330+00:00
+
+command=git branch --show-current
+phase2-core-request-signing
+exit_code=0
+
+command=git rev-parse HEAD 'HEAD^{tree}' phase2-core-request-signing-2026-09-27 'phase2-core-request-signing-2026-09-27^{}'
+009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+b6240cea8499dca3b595583be8217a9be191cbd3
+3153308e409715453188771f6ba8a56ed9237a1a
+009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+exit_code=0
+
+command=git status --porcelain=v1 --untracked-files=all
+exit_code=0
+
+command=git diff --exit-code HEAD
+exit_code=0
+
+command=git diff --cached --exit-code
+exit_code=0
+
+command=git show-ref
+b4e7631a7e20bd4d032bb5478582684c998801ab refs/heads/main
+76aeab50c7202bd372d6986bd8ca266aff61f086 refs/heads/phase1-mwa-protocol-boundary
+009a849441b9d4db453b0162ae1fd9f5fdad8dc4 refs/heads/phase2-core-request-signing
+b4e7631a7e20bd4d032bb5478582684c998801ab refs/remotes/origin/main
+76aeab50c7202bd372d6986bd8ca266aff61f086 refs/remotes/origin/phase1-mwa-protocol-boundary
+009a849441b9d4db453b0162ae1fd9f5fdad8dc4 refs/remotes/origin/phase2-core-request-signing
+3651b38bcfb874aca5107e52f95df3fbf6ea734f refs/tags/phase0-android-baseline-2026-09-26
+b3d541ae331f760f0395e97c5f4405e65e675970 refs/tags/phase1-mwa-protocol-boundary-2026-09-26
+0725330f71d0ac955d55356ae576a629e426ae89 refs/tags/phase2-batch-a-sign-messages-2026-09-27
+3153308e409715453188771f6ba8a56ed9237a1a refs/tags/phase2-core-request-signing-2026-09-27
+exit_code=0
+
+command=git ls-remote --symref origin HEAD 'refs/heads/*' 'refs/tags/phase*'
+ref: refs/heads/main	HEAD
+b4e7631a7e20bd4d032bb5478582684c998801ab	HEAD
+b4e7631a7e20bd4d032bb5478582684c998801ab	refs/heads/main
+76aeab50c7202bd372d6986bd8ca266aff61f086	refs/heads/phase1-mwa-protocol-boundary
+009a849441b9d4db453b0162ae1fd9f5fdad8dc4	refs/heads/phase2-core-request-signing
+3651b38bcfb874aca5107e52f95df3fbf6ea734f	refs/tags/phase0-android-baseline-2026-09-26
+b4e7631a7e20bd4d032bb5478582684c998801ab	refs/tags/phase0-android-baseline-2026-09-26^{}
+b3d541ae331f760f0395e97c5f4405e65e675970	refs/tags/phase1-mwa-protocol-boundary-2026-09-26
+76aeab50c7202bd372d6986bd8ca266aff61f086	refs/tags/phase1-mwa-protocol-boundary-2026-09-26^{}
+0725330f71d0ac955d55356ae576a629e426ae89	refs/tags/phase2-batch-a-sign-messages-2026-09-27
+9d2dea7c17997c7b1d3f1275b7456ef77a1feab7	refs/tags/phase2-batch-a-sign-messages-2026-09-27^{}
+3153308e409715453188771f6ba8a56ed9237a1a	refs/tags/phase2-core-request-signing-2026-09-27
+009a849441b9d4db453b0162ae1fd9f5fdad8dc4	refs/tags/phase2-core-request-signing-2026-09-27^{}
+exit_code=0
+
+command=git cat-file -p refs/tags/phase2-core-request-signing-2026-09-27
+object 009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+type commit
+tag phase2-core-request-signing-2026-09-27
+tagger abbaas <rock19380@gmail.com> 1790508929 +0630
+
+MWA Lab Phase 2 — Complete Core Request / Signing Path
+
+Final closeout commit: 009a849441b9d4db453b0162ae1fd9f5fdad8dc4
+Implementation commit: 3d70dc62295937248fc456f738d93c460ee565b8
+Implementation CI run: 36315211028
+Closeout CI run: 36315789556
+Devnet only. Phase 2 verified and frozen on 2026-09-27.
+exit_code=0
+
+command=git log -5 '--format=%H %s'
+009a849441b9d4db453b0162ae1fd9f5fdad8dc4 chore(phase2): freeze verified core request signing path
+3d70dc62295937248fc456f738d93c460ee565b8 feat(phase2): complete core request signing path
+9d2dea7c17997c7b1d3f1275b7456ef77a1feab7 feat(phase2): add reauthorization approval and message signing
+76aeab50c7202bd372d6986bd8ca266aff61f086 chore(phase1): record freeze-candidate ci evidence
+ef1ae392e9685629775f4e9105600f0a2c168bbd chore(phase1): close verified protocol boundary
+exit_code=0
+
+command=bash -n scripts/phase0_gate.sh scripts/phase1_static.sh scripts/phase2_static.sh
+exit_code=0
