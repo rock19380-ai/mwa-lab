@@ -43,3 +43,19 @@ Repair: preserve first close summary with containsKey and assignment under the
 existing recorder mutex, using API 23-compatible map operations. No SDK raise,
 compatibility flag, lint suppression, baseline, or weakened assertion.
 Exact lint and recorder gates are rerun before resuming the complete gate.
+
+Final process-restart verifier capture failure:
+UI hierarchy parsing failed because uiautomator returned without creating its
+dump file during initial Home capture; adb cat emitted a missing-file string.
+Classification: verifier transient UI-capture defect.
+Repair: bounded retry requires a fresh dump success marker and a valid hierarchy.
+Product protocol/SQLite/UI assertions are unchanged; exhaustion still fails.
+Exact process-restart acceptance is rerun before final freeze.
+
+Process-restart verifier viewport failure:
+The #2 heading was present at [84,2337][484,2361], clipped at the bottom of the
+visible hierarchy, while the error/source below it had not entered the viewport.
+SQLite had already proved ERROR_NOT_SIGNED/-3 and OBSERVED_PROTOCOL correctly.
+Classification: verifier scroll-stop defect.
+Repair: continue scrolling until the heading AND required result/error/source
+are visible; retain exact label assertions afterward. No product/assertion change.

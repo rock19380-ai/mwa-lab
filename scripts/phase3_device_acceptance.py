@@ -32,8 +32,22 @@ def main():
         return result
 
     def ui():
-        adb("shell", "uiautomator", "dump", "/sdcard/mwa-phase3-acceptance.xml")
-        return ET.fromstring(adb("exec-out", "cat", "/sdcard/mwa-phase3-acceptance.xml").stdout)
+        # Android can return exit 0 without producing a dump while a window is
+        # settling. Require a fresh successful dump and valid hierarchy, retry
+        # transient capture failure, and keep all product assertions unchanged.
+        end = time.monotonic() + 30
+        while time.monotonic() < end:
+            dump = adb("shell", "uiautomator", "dump", "/sdcard/mwa-phase3-acceptance.xml", required=False)
+            if dump.returncode == 0 and b"dumped to" in dump.stdout:
+                content = adb("exec-out", "cat", "/sdcard/mwa-phase3-acceptance.xml", required=False)
+                try:
+                    tree = ET.fromstring(content.stdout)
+                    if content.returncode == 0 and tree.tag == "hierarchy":
+                        return tree
+                except ET.ParseError:
+                    pass
+            time.sleep(0.25)
+        raise AssertionError("Unable to capture a fresh valid UI hierarchy")
 
     def node(tree, text=None, resource=None):
         return next((n for n in tree.iter("node") if
@@ -151,7 +165,14 @@ def main():
         for _ in range(12):
             tree = ui()
             if node(tree, text="#2 SIGN_MESSAGES") is not None:
-                break
+                if status == "FAIL":
+                    visible = (node(tree, text="Protocol error: ERROR_NOT_SIGNED (-3)") is not None and
+                               node(tree, text="Failure source: OBSERVED_PROTOCOL") is not None)
+                else:
+                    outcome = "SUCCESS · "+str(max(timeline[1]["completed_at_ms"]-timeline[1]["started_at_ms"],0))+" ms"
+                    visible = node(tree, text=outcome) is not None
+                if visible:
+                    break
             adb("shell", "input", "swipe", "540", "1800", "540", "650", "250")
         else:
             raise AssertionError("Signing event absent from canonical detail timeline")
