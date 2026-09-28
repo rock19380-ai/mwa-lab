@@ -59,3 +59,17 @@ SQLite had already proved ERROR_NOT_SIGNED/-3 and OBSERVED_PROTOCOL correctly.
 Classification: verifier scroll-stop defect.
 Repair: continue scrolling until the heading AND required result/error/source
 are visible; retain exact label assertions afterward. No product/assertion change.
+
+Post-commit restart verifier overscroll:
+The large fast swipe flung beyond #2's heading; its correct SUCCESS result and
+request/response fields were visible while the heading was above the viewport.
+Classification: verifier capture/scroll defect, not product/timeline corruption.
+Repair: smaller slower scroll steps; still require heading plus exact result
+labels in the same viewport. Increase the bounded number of small steps to cover
+the existing screen extent. New final commit and exact-head CI are required.
+
+Superseded CI evidence:
+Android CI run 36409591886 completed SUCCESS for
+628009385e2363b078eea4f64e071357f7d3a642. That commit was not tagged because its
+post-commit restart verifier overscrolled. This successful older CI run is not
+freeze evidence for the repaired final commit; a new exact-head run is required.

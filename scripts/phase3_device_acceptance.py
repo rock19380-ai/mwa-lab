@@ -161,8 +161,9 @@ def main():
         else:
             raise AssertionError("Restart-loaded session absent from Sessions UI")
         wait_for(lambda tree: node(tree, text="SESSION "+status), "detail "+status)
-        # Search forward in canonical sequence for the signing event/error.
-        for _ in range(12):
+        # Small, slow steps avoid flinging past a heading/result pair between
+        # hierarchy captures. Require both in one viewport; never weaken labels.
+        for _ in range(24):
             tree = ui()
             if node(tree, text="#2 SIGN_MESSAGES") is not None:
                 if status == "FAIL":
@@ -173,7 +174,7 @@ def main():
                     visible = node(tree, text=outcome) is not None
                 if visible:
                     break
-            adb("shell", "input", "swipe", "540", "1800", "540", "650", "250")
+            adb("shell", "input", "swipe", "540", "1800", "540", "1400", "600")
         else:
             raise AssertionError("Signing event absent from canonical detail timeline")
         if status == "FAIL":

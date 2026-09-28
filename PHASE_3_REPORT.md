@@ -133,9 +133,9 @@ Commands, timestamps, exits, test cases, and log/XML hashes:
 [final local acceptance](docs/evidence/phase3/phase3-final-local-acceptance.json),
 [execution ledger](docs/evidence/phase3/phase3-executed-gates.jsonl), and
 [final source hashes](docs/evidence/phase3/phase3-final-source-sha256.txt).
-Final source/build/gate/CI fingerprint: `c28cf16abd29614d1d423a87cbdaa6d294b4061bb2efb09513ef3920257b39cd`.
+Final source/build/gate/CI fingerprint: `5ef058d370826c1fe90198de7bfc4818511e08421c98be4a09011c318d3f4eaf`.
 Build/unit/device gates below used identical final application/build/CI source;
-only the acceptance script gained bounded fresh-hierarchy retry and full-result viewport capture afterward.
+only the acceptance script gained bounded fresh-hierarchy retry and controlled full-result viewport capture afterward.
 The receipt mathematically verifies that sole verifier difference. All gates are
 repeated at the final commit before tagging; tag annotation records those results.
 
@@ -199,7 +199,7 @@ supplies current Phase 2 proof. No forbidden network or production secret scope.
 Failed ownership/close-time/API-23 checks were repaired narrowly; failures and
 classifications remain in [the repair receipt](docs/evidence/phase3/phase3-hostile-repair.txt)
 and ledger. Reserved-ID UI fixture, missing SQLite setup, and transient missing
-UI snapshot and clipped-result viewport failures were test/verifier repairs. Historical source-excerpt whitespace
+UI snapshot and clipped/overscrolled-result viewport failures were test/verifier repairs. Historical source-excerpt whitespace
 normalization has a separate digest receipt; old results were not rewritten.
 
 Persistence remains best effort during storage failure. Abrupt death can lose

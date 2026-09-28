@@ -1,7 +1,7 @@
 {
   "baseline": "009a849441b9d4db453b0162ae1fd9f5fdad8dc4",
   "branch": "phase3-protocol-recorder-timeline",
-  "codeFingerprint": "c28cf16abd29614d1d423a87cbdaa6d294b4061bb2efb09513ef3920257b39cd",
+  "codeFingerprint": "5ef058d370826c1fe90198de7bfc4818511e08421c98be4a09011c318d3f4eaf",
   "database": "mwa_lab.db",
   "finalGates": [
     {
@@ -999,13 +999,14 @@
       "verifiedExitCode": 0
     },
     {
-      "codeFingerprint": "c28cf16abd29614d1d423a87cbdaa6d294b4061bb2efb09513ef3920257b39cd",
+      "codeFingerprint": "5ef058d370826c1fe90198de7bfc4818511e08421c98be4a09011c318d3f4eaf",
       "command": "python3 scripts/phase3_device_acceptance.py --serial emulator-5554 --evidence docs/evidence/phase3/phase3-process-restart-ui-acceptance.json",
+      "commit": "628009385e2363b078eea4f64e071357f7d3a642",
       "exitCode": 0,
-      "finishedUtc": "2026-09-28T10:23:17.148850+00:00",
-      "label": "final-v4-process-restart",
-      "logSha256": "ba16afd8302bd9874ce10f3a751dabd70d0903d275e419c780010c0d304d181e",
-      "startedUtc": "2026-09-28T10:22:19.211132+00:00",
+      "finishedUtc": "2026-09-28T10:33:45.436705+00:00",
+      "label": "final-v5-process-restart",
+      "logSha256": "462ea28331647d1a31d38185c9e668cdbabbcb33257312dbed14a27e8fcf5ea7",
+      "startedUtc": "2026-09-28T10:32:44.485555+00:00",
       "verifiedExitCode": 0
     }
   ],
@@ -1023,7 +1024,7 @@
     "stagedMysteryChanges": false,
     "syntheticCapabilitiesEvent": false
   },
-  "onlyVerificationChangeAfterPriorGates": "scripts/phase3_device_acceptance.py: bounded fresh-hierarchy retry and full-result viewport capture",
+  "onlyVerificationChangeAfterPriorGates": "scripts/phase3_device_acceptance.py: bounded fresh-hierarchy retry and controlled full-result viewport capture",
   "priorGateCodeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
   "restartAcceptance": {
     "checks": [
@@ -1043,17 +1044,17 @@
         "eventCount": 3,
         "gate": "restart-loaded-FAIL-Sessions-and-Detail-UI",
         "result": "PASS",
-        "sessionId": "964cf1d0-886a-4b8e-beb5-da86ad5fb889",
-        "sessionSha256": "965ad74290193fe3adf127c9def54db83cf889123131085ee34339f6c070f522",
-        "timelineSha256": "b870d8c1242e4194154bc04e55a7707f08ab665f7b2975fec98101622a193a36"
+        "sessionId": "f64c684d-9cc8-4707-9f5d-cefa625e90ae",
+        "sessionSha256": "d29745f89fe7a2ebdefb3ee8c06b2c863a234bc5177810697bd02c61a99aa93d",
+        "timelineSha256": "7c8563b9fb595e08c056c418ce0b28200b17bc878ec4489f1506628cd664a8c5"
       },
       {
         "eventCount": 3,
         "gate": "restart-loaded-PASS-Sessions-and-Detail-UI",
         "result": "PASS",
-        "sessionId": "53ba94a8-8828-42ef-8c22-34d784f82262",
-        "sessionSha256": "9020c11666e4e96dff8a0fd085c2b7507104ec1a045c5ed0bcaa6081ed89a7db",
-        "timelineSha256": "54f0973c10b82833b1da28583902ca382e317f74798b0dfffaaf466c7d3686a4"
+        "sessionId": "a42d51fe-f176-4b69-8654-c60ff4ea8442",
+        "sessionSha256": "a476460882e5a72f2d243e3a3ef07d3cea5ca5cdfb2ddaf97c5475b28b5b91bb",
+        "timelineSha256": "aa8afe73e71660c5506020a2d0a5bcb116f7860b9c52d4fe41a8e9f9ff27bf45"
       }
     ],
     "database": "mwa_lab.db",
@@ -1063,5 +1064,5 @@
     "serial": "emulator-5554"
   },
   "schemaVersion": 1,
-  "verifiedUtc": "2026-09-28T10:23:31.069839+00:00"
+  "verifiedUtc": "2026-09-28T10:34:36.336991+00:00"
 }
