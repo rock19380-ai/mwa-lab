@@ -10,7 +10,7 @@ pinned_artifact_digest_matches_start_audit=PASS
 
 source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/association/LocalAssociationUri.java
 sha256=f328afed3b203b0604e0a4cf95f805e2f35af7160216c8bf414fca9c37bb467a
-36: 
+36:
 37:     @NonNull
 38:     @Override
 39:     public LocalWebSocketServerScenario createScenario(@NonNull Context context,
@@ -25,19 +25,19 @@ sha256=f328afed3b203b0604e0a4cf95f805e2f35af7160216c8bf414fca9c37bb467a
 48:             throw new IllegalArgumentException("callbacks must implement " + LocalScenario.Callbacks.class.getName());
 49:         }
 50:     }
-51: 
+51:
 
 source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/Scenario.java
 sha256=743334eb3fde9b5de1508f79c3469509c49339cba27337d02afba67c62ba378d
-15: 
+15:
 16:     byte[] getAssociationPublicKey();
 17:     List<SessionProperties.ProtocolVersion> getAssociationProtocolVersions();
-18: 
+18:
 19:     MessageReceiver createMessageReceiver();
-20: 
+20:
 21:     void start();
 22:     void close();
-23: 
+23:
 24:     interface Callbacks {
 25:         // Scenario state callbacks
 26:         void onScenarioReady();
@@ -46,14 +46,14 @@ sha256=743334eb3fde9b5de1508f79c3469509c49339cba27337d02afba67c62ba378d
 29:         void onScenarioComplete();
 30:         void onScenarioError();
 31:         void onScenarioTeardownComplete();
-32: 
+32:
 33:         // Request callbacks
 34:         void onAuthorizeRequest(@NonNull AuthorizeRequest request);
 35:         void onReauthorizeRequest(@NonNull ReauthorizeRequest request);
 36:         void onSignTransactionsRequest(@NonNull SignTransactionsRequest request);
 37:         void onSignMessagesRequest(@NonNull SignMessagesRequest request);
 38:         void onSignAndSendTransactionsRequest(@NonNull SignAndSendTransactionsRequest request);
-39: 
+39:
 40:         // Event callbacks
 41:         void onDeauthorizedEvent(@NonNull DeauthorizedEvent event);
 42:     }
@@ -61,7 +61,7 @@ sha256=743334eb3fde9b5de1508f79c3469509c49339cba27337d02afba67c62ba378d
 
 source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/scenario/LocalScenario.java
 sha256=c7f3850b940b575e9b0c5dd64dd069ce60d942927c2089a1569e25ca153800d2
-76: 
+76:
 77:     @Override
 78:     public MessageReceiver createMessageReceiver() {
 79:         return new MobileWalletAdapterSession(
@@ -72,7 +72,7 @@ sha256=c7f3850b940b575e9b0c5dd64dd069ce60d942927c2089a1569e25ca153800d2
 108:     private final MobileWalletAdapterSessionCommon.StateCallbacks mSessionStateCallbacks =
 109:             new MobileWalletAdapterSessionCommon.StateCallbacks() {
 110:                 private final AtomicInteger mClientCount = new AtomicInteger();
-111: 
+111:
 112:                 @Override
 113:                 public void onSessionEstablished() {
 114:                     Log.d(TAG, "MobileWalletAdapter session established");
@@ -82,7 +82,7 @@ sha256=c7f3850b940b575e9b0c5dd64dd069ce60d942927c2089a1569e25ca153800d2
 118:                         mIoHandler.post(mCallbacks::onScenarioServingClients);
 119:                     }
 120:                 }
-121: 
+121:
 122:                 @Override
 123:                 public void onSessionClosed() {
 124:                     Log.d(TAG, "MobileWalletAdapter session terminated");
@@ -95,7 +95,7 @@ sha256=c7f3850b940b575e9b0c5dd64dd069ce60d942927c2089a1569e25ca153800d2
 131:                         mIoHandler.post(mAuthRepository::stop);
 132:                     }
 133:                 }
-134: 
+134:
 135:                 @Override
 136:                 public void onSessionError() {
 137:                     Log.w(TAG, "MobileWalletAdapter session error");
@@ -109,7 +109,7 @@ sha256=c7f3850b940b575e9b0c5dd64dd069ce60d942927c2089a1569e25ca153800d2
 145:                     }
 146:                 }
 147:             };
-148: 
+148:
 149:     public interface Callbacks extends Scenario.Callbacks {
 150:         void onLowPowerAndNoConnection();
 151:     }
@@ -118,7 +118,7 @@ source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f968
 sha256=c48f5a059f6140d6477b345fba45234c56ab3b9e7f333f546df1c72c6a04f89c
 125:     @Override
 126:     public abstract void close();
-127: 
+127:
 128:     /*package*/ final MobileWalletAdapterServer.MethodHandlers mMethodHandlers =
 129:             new MobileWalletAdapterServer.MethodHandlers() {
 130:                 @Override
@@ -138,7 +138,7 @@ sha256=1ac832dc8ca7f5e55ce642974604b8c2fe230f183fdb0efe44f6602e8570ffcb
 98:             mCallbacks.onScenarioTeardownComplete();
 99:         });
 100:     }
-101: 
+101:
 102:     @NonNull
 103:     private final LocalWebSocketServer.Callbacks mWebSocketServerCallbacks =
 104:             new LocalWebSocketServer.Callbacks() {
@@ -146,13 +146,13 @@ sha256=1ac832dc8ca7f5e55ce642974604b8c2fe230f183fdb0efe44f6602e8570ffcb
 106:         public void onStarted() {
 107:             mIoHandler.post(mCallbacks::onScenarioReady);
 108:         }
-109: 
+109:
 110:         @Override
 111:         public void onFatalError() {
 112:             mIoHandler.post(mCallbacks::onScenarioError);
 113:         }
 114:     };
-115: 
+115:
 116:     private enum State {
 117:         NOT_STARTED, RUNNING, CLOSED
 118:     }
@@ -160,17 +160,17 @@ sha256=1ac832dc8ca7f5e55ce642974604b8c2fe230f183fdb0efe44f6602e8570ffcb
 
 source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/walletlib/src/main/java/com/solana/mobilewalletadapter/walletlib/protocol/MobileWalletAdapterServer.java
 sha256=6e6f42c735ff8abfd8154eb7dfeaa291553bb363614c5bd44b8518427371d720
-35: 
+35:
 36: public class MobileWalletAdapterServer extends JsonRpc20Server {
 37:     private static final String TAG = MobileWalletAdapterServer.class.getSimpleName();
-38: 
+38:
 39:     @NonNull
 40:     private final MobileWalletAdapterConfig mConfig;
 41:     @NonNull
 42:     private final Handler mHandler;
 43:     @NonNull
 44:     private final MethodHandlers mMethodHandlers;
-45: 
+45:
 46:     public interface MethodHandlers {
 47:         void authorize(@NonNull AuthorizeRequest request);
 48:         void deauthorize(@NonNull DeauthorizeRequest request);
@@ -178,7 +178,7 @@ sha256=6e6f42c735ff8abfd8154eb7dfeaa291553bb363614c5bd44b8518427371d720
 50:         void signMessages(@NonNull SignMessagesRequest request);
 51:         void signAndSendTransactions(@NonNull SignAndSendTransactionsRequest request);
 52:     }
-53: 
+53:
 54:     public MobileWalletAdapterServer(@NonNull MobileWalletAdapterConfig config,
 55:                                      @NonNull Looper ioLooper,
 56:                                      @NonNull MethodHandlers methodHandlers) {
@@ -186,7 +186,7 @@ sha256=6e6f42c735ff8abfd8154eb7dfeaa291553bb363614c5bd44b8518427371d720
 58:         mHandler = new Handler(ioLooper);
 59:         mMethodHandlers = methodHandlers;
 60:     }
-61: 
+61:
 62:     @Override
 63:     protected void dispatchRpc(@Nullable Object id,
 64:                                @NonNull String method,
@@ -227,22 +227,22 @@ sha256=6e6f42c735ff8abfd8154eb7dfeaa291553bb363614c5bd44b8518427371d720
 99:             Log.e(TAG, "Failed sending response for id=" + id, e);
 100:         }
 101:     }
-102: 
+102:
 103:     private static abstract class RequestFuture<T> extends NotifyingCompletableFuture<T> {
 104:         @Nullable
 105:         public final Object id;
-106: 
+106:
 492:     private void handleGetCapabilities(@Nullable Object id, @Nullable Object params) throws IOException {
 493:         if (!(params instanceof JSONObject)) {
 494:             handleRpcError(id, ERROR_INVALID_PARAMS, "params must be either a JSONObject", null);
 495:             return;
 496:         }
-497: 
+497:
 498:         final JSONObject o = (JSONObject) params;
 499:         if (o.keys().hasNext()) {
 500:             handleRpcError(id, ERROR_INVALID_PARAMS, "params expected to be empty", null);
 501:         }
-502: 
+502:
 503:         final JSONObject result = new JSONObject();
 504:         try {
 505:             result.put(ProtocolContract.RESULT_SUPPORTS_CLONE_AUTHORIZATION, false);
@@ -254,7 +254,7 @@ sha256=6e6f42c735ff8abfd8154eb7dfeaa291553bb363614c5bd44b8518427371d720
 511:             }
 512:             result.put(ProtocolContract.RESULT_SUPPORTED_TRANSACTION_VERSIONS, new JSONArray(mConfig.supportedTransactionVersions));
 513:             result.put(ProtocolContract.RESULT_SUPPORTED_FEATURES, new JSONArray(mConfig.optionalFeatures));
-514: 
+514:
 515:             // retained for backwards compatibility
 516:             result.put(ProtocolContract.RESULT_SUPPORTS_SIGN_AND_SEND_TRANSACTIONS, mConfig.supportsSignAndSendTransactions);
 517:         } catch (JSONException e) {
@@ -262,7 +262,7 @@ sha256=6e6f42c735ff8abfd8154eb7dfeaa291553bb363614c5bd44b8518427371d720
 519:         }
 520:         handleRpcResult(id, result);
 521:     }
-522: 
+522:
 523:     // =============================================================================================
 524:     // sign_* common
 525:     // =============================================================================================
@@ -278,14 +278,14 @@ sha256=a9cc9993c213e8c620781c8f5433c546c6623266d62baafcc0ea28f670c333f6
 121:             }
 122:             return;
 123:         }
-124: 
+124:
 125:         dispatchRpc(id, method, params);
 126:     }
-127: 
+127:
 128:     protected abstract void dispatchRpc(@Nullable Object id,
 129:                                         @NonNull String method,
 130:                                         @Nullable Object params);
-131: 
+131:
 132:     protected void handleRpcResult(@Nullable Object id,
 133:                                    @NonNull Object result)
 134:             throws IOException {
@@ -296,7 +296,7 @@ sha256=a9cc9993c213e8c620781c8f5433c546c6623266d62baafcc0ea28f670c333f6
 139:         Log.d(TAG, "Responding with result for id=" + id);
 140:         respondWithResult(result, id);
 141:     }
-142: 
+142:
 143:     protected void handleRpcError(@Nullable Object id,
 144:                                   int code,
 145:                                   @NonNull String message,
@@ -309,7 +309,7 @@ sha256=a9cc9993c213e8c620781c8f5433c546c6623266d62baafcc0ea28f670c333f6
 152:         Log.d(TAG, "Responding with error for id=" + id + " (code=" + code + ", message=" + message + ")");
 153:         respondWithError(code, message, data, id);
 154:     }
-155: 
+155:
 156:     // If non-null, data should be a type compatible with JSONObject.put(...)
 157:     private void respondWithError(int code,
 158:                                   @NonNull String message,
@@ -322,11 +322,11 @@ sha256=a9cc9993c213e8c620781c8f5433c546c6623266d62baafcc0ea28f670c333f6
 
 source_url=https://github.com/solana-mobile/mobile-wallet-adapter/blob/166c0f96868c45633253a0c0bcd61e828334b349/android/common/src/main/java/com/solana/mobilewalletadapter/common/protocol/MobileWalletAdapterSessionCommon.java
 sha256=4a9859c82a9d1dbfc19a9a15daa2ed67be5678823fe66c9d5ff56613253ca723
-46: 
+46:
 47:     @NonNull
 48:     private final MessageReceiver mDecryptedPayloadReceiver;
 49:     private final StateCallbacks mStateCallbacks;
-50: 
+50:
 51:     protected MessageSender mMessageSender;
 52:     @NonNull
 53:     private State mState = State.WAITING_FOR_CONNECTION;
@@ -334,14 +334,14 @@ sha256=4a9859c82a9d1dbfc19a9a15daa2ed67be5678823fe66c9d5ff56613253ca723
 55:     private SecretKey mCachedEncryptionKey;
 56:     private int mSeqNumberTx;
 57:     private int mSeqNumberRx;
-58: 
+58:
 59:     protected MobileWalletAdapterSessionCommon(@NonNull MessageReceiver decryptedPayloadReceiver,
 60:                                                @Nullable StateCallbacks stateCallbacks) {
 61:         mDecryptedPayloadReceiver = decryptedPayloadReceiver;
 62:         mStateCallbacks = stateCallbacks;
 63:     }
 148:             throws SessionMessageException;
-149: 
+149:
 150:     private void handleEncryptedSessionPayload(@NonNull byte[] encryptedPayload)
 151:             throws SessionMessageException {
 152:         Log.v(TAG, "handleEncryptedSessionMessage");

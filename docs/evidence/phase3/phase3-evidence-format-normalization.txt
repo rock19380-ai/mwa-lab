@@ -1,0 +1,8 @@
+Evidence-only formatting correction, 2026-09-28
+File: docs/evidence/phase3/phase3-step3.2-walletlib-source-observation.txt
+Original SHA-256: f56249be8a27b9a1de1258d93ea15d1e85de7ace2b5a670efd3db42d70eaf717
+Normalized SHA-256: 5372e5883ea7537344139e56d00395d0d268d09e0b173521f135b5bf5d20fc51
+Only trailing whitespace on numbered blank excerpt lines was removed.
+Source excerpts, source digests, observations, and historical results are unchanged.
+The initial worktree diff check excluded this previously untracked file.
+The staged check identified it; a separate correction retains commit history.
