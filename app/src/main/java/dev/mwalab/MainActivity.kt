@@ -2,99 +2,76 @@ package dev.mwalab
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mwalab.app.MwaLabComposition
-import dev.mwalab.identity.IdentityRepository
-import dev.mwalab.identity.TestEndpointIdentity
+import dev.mwalab.ui.sessions.*
 import dev.mwalab.ui.theme.MWALabTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        val identityRepository = MwaLabComposition.identityRepository(applicationContext)
-
-        setContent {
-            MWALabTheme {
-                MwaLabHome(identityRepository)
+        val repository = MwaLabComposition.sessionRepository(applicationContext)
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val model = when (modelClass) {
+                    HomeViewModel::class.java -> HomeViewModel(MwaLabComposition.identityRepository(applicationContext), repository)
+                    SessionsViewModel::class.java -> SessionsViewModel(repository)
+                    SessionDetailViewModel::class.java -> SessionDetailViewModel(repository)
+                    else -> error("Unknown screen model")
+                }
+                @Suppress("UNCHECKED_CAST")
+                return model as T
             }
         }
-    }
-}
-
-private sealed interface IdentityUiState {
-    data object Loading : IdentityUiState
-    data class Ready(val identity: TestEndpointIdentity) : IdentityUiState
-    data object Unavailable : IdentityUiState
-}
-
-@Composable
-private fun MwaLabHome(identityRepository: IdentityRepository) {
-    var identityState by remember { mutableStateOf<IdentityUiState>(IdentityUiState.Loading) }
-
-    LaunchedEffect(identityRepository) {
-        identityState = try {
-            IdentityUiState.Ready(identityRepository.getOrCreate())
-        } catch (_: Throwable) {
-            // Deliberately do not surface exception details to the UI. Storage failures
-            // remain fail-closed and must never become secret-bearing diagnostics.
-            IdentityUiState.Unavailable
-        }
-    }
-
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = "MWA LAB TEST ENDPOINT",
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            Text(
-                text = "SOLANA DEVNET",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = "NO REAL FUNDS",
-                style = MaterialTheme.typography.titleMedium,
-            )
-
-            when (val state = identityState) {
-                IdentityUiState.Loading -> Text("Preparing protected Devnet test identity…")
-                IdentityUiState.Unavailable -> Text(
-                    "Lab identity unavailable. Protocol requests must fail closed.",
-                )
-                is IdentityUiState.Ready -> {
-                    Text(
-                        text = "DEVNET TEST IDENTITY",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = state.identity.displayAddress,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Text("Identity secrets are protected and are never shown or exported.")
+        val provider = ViewModelProvider(this, factory)
+        val home = provider[HomeViewModel::class.java]
+        val sessions = provider[SessionsViewModel::class.java]
+        val detail = provider[SessionDetailViewModel::class.java]
+        setContent {
+            MWALabTheme {
+                var screen by rememberSaveable { mutableStateOf("Home") }
+                var selectedSession by rememberSaveable { mutableStateOf<String?>(null) }
+                val homeState by home.state.collectAsStateWithLifecycle()
+                val sessionsState by sessions.state.collectAsStateWithLifecycle()
+                val detailState by detail.state.collectAsStateWithLifecycle()
+                LaunchedEffect(selectedSession) { selectedSession?.let(detail::selectSession) }
+                val openSession: (String) -> Unit = { selectedSession = it; detail.selectSession(it); screen = "Detail" }
+                BackHandler(enabled = screen != "Home") {
+                    screen = if (screen == "Detail") "Sessions" else "Home"
+                }
+                Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
+                    Column(Modifier.fillMaxSize().padding(padding).semantics { testTagsAsResourceId = true }) {
+                        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                            Text("MWA LAB TEST ENDPOINT", style = MaterialTheme.typography.titleLarge)
+                            Text("SOLANA DEVNET · NO REAL FUNDS", style = MaterialTheme.typography.labelLarge)
+                            Row {
+                                TextButton(onClick = { screen = "Home" }) { Text("Home") }
+                                TextButton(onClick = { screen = "Sessions" }) { Text("Sessions") }
+                            }
+                        }
+                        HorizontalDivider()
+                        Box(Modifier.weight(1f)) {
+                            when (screen) {
+                                "Sessions" -> SessionsScreen(sessionsState, openSession, sessions::retry)
+                                "Detail" -> SessionDetailScreen(detailState, { screen = "Sessions" }, detail::retry)
+                                else -> HomeScreen(homeState, { screen = "Sessions" }, openSession, home::retry)
+                            }
+                        }
+                    }
                 }
             }
         }

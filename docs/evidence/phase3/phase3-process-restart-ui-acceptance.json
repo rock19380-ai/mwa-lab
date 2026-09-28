@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "gate": "cross-package-SIGN_MESSAGE_APPROVE",
+      "result": "PASS"
+    },
+    {
+      "gate": "cross-package-SIGN_MESSAGE_REJECT",
+      "result": "PASS"
+    },
+    {
+      "gate": "force-stop-relaunch-sqlite-equality",
+      "result": "PASS"
+    },
+    {
+      "eventCount": 3,
+      "gate": "restart-loaded-FAIL-Sessions-and-Detail-UI",
+      "result": "PASS",
+      "sessionId": "c6434861-42d1-4ed3-b870-66c1c70fb887",
+      "sessionSha256": "c78e537c2ccb588b3aaf4a3027ee22108c02d830ba529a2ec2329f36a41b2657",
+      "timelineSha256": "e057f20f97d0a39e4cdbcd9e36b69f769a8bb26d85a3c7293a6b09e647534323"
+    },
+    {
+      "eventCount": 3,
+      "gate": "restart-loaded-PASS-Sessions-and-Detail-UI",
+      "result": "PASS",
+      "sessionId": "007f99bb-b660-4abe-a9b3-51c8029d0f8d",
+      "sessionSha256": "4d2933034f08a3a7595e298dcc523624f90ff40b559e6325b6e37b80bda2d1e9",
+      "timelineSha256": "ec97866dc2064ae45687051448e563945c1ee6033edc0b42e0c35b40f9b532ba"
+    }
+  ],
+  "database": "mwa_lab.db",
+  "getCapabilitiesObserved": false,
+  "phase4Started": false,
+  "schemaVersion": 1,
+  "serial": "emulator-5554"
+}
