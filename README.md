@@ -92,7 +92,27 @@ Pinned walletlib 2.0.7 requires `sign_transactions` to be advertised as an
 optional feature for that method to be callable; Phase 2 advertises exactly that
 verified feature and no SIWS feature.
 
-## What Phase 2 deliberately does not implement
+## Phase 3 persistent debugger
+
+Home, Sessions, and Session Detail read structured Room history through
+repository Flows and ViewModels. Inspect request-start sequence, timestamps,
+duration, outcomes, protocol error numbers/names, failure sources, and bounded
+sanitized request/response summaries. Successful and failed sessions remain
+available after app restart. Open rows mean recorded-open history with unknown
+connection liveness.
+
+The persistent recorder covers actual host callbacks for AUTHORIZE, REAUTHORIZE,
+DEAUTHORIZE, SIGN_MESSAGES, SIGN_TRANSACTIONS, and SIGN_AND_SEND_TRANSACTIONS.
+GET_CAPABILITIES is **NOT OBSERVABLE THROUGH PINNED WALLETLIB**; configured
+capabilities never create an event. Compatibility evidence stores remain only
+for predecessor tests.
+
+See [PHASE_3_REPORT.md](PHASE_3_REPORT.md) and
+[Phase 3 evidence](docs/evidence/phase3/) for executed acceptance and freeze
+provenance. Phase 4 is not started: capability snapshots, transaction inspector,
+simulation, fault engine, and report export remain deferred.
+
+## Historical Phase 2 exclusions
 
 Phase 2 does **not** include the Phase 3 product recorder/timeline:
 
@@ -114,12 +134,16 @@ protocol boundary.
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
-./scripts/phase2_static.sh
+./scripts/phase3_static.sh
 ```
 
 GitHub Actions runs deterministic non-device gates. Real Android association,
-interactive approval, and live Devnet acceptance are recorded separately under
-`docs/evidence/phase2/`.
+interactive approval, and restart/UI acceptance are recorded separately under
+`docs/evidence/phase3/`. Historical live Devnet evidence remains in
+`docs/evidence/phase2/`; it is not relabelled as a fresh Phase 3 network run.
+The historical `phase2_static.sh` remains unchanged and retains its intentional
+pre-Room scope assertion. The Phase 3 gate verifies its hash and 28 unchanged
+predecessor source boundaries, alongside current behavioral regressions.
 
 ## Modules
 

@@ -1,6 +1,6 @@
 # Phase 3 domain and protocol recorder contract
 
-Status: domain contract, Room persistence, recorder core, and persistent session lifecycle wiring implemented through detailed plan step 3.4.
+Status: Phase 3 implementation delivered; final verification and freeze provenance are recorded in PHASE_3_REPORT.md and the annotated freeze tag.
 Date: 2026-09-28.
 Baseline: `009a849441b9d4db453b0162ae1fd9f5fdad8dc4`, annotated tag
 `phase2-core-request-signing-2026-09-27`.
@@ -11,7 +11,7 @@ Authority: `MWA_LAB_MASTER_IMPLEMENTATION_PLAN_v1.1_2026-09-26.md` and
 `/home/abbaas/Downloads/MWA_LAB/`, plus [the start audit](phase3-start-audit.md).
 The detailed step labels are used here; the plan's condensed checkpoint list
 uses different numbering. Room persistence is now present and verified, and the
-recorder core and session-lifecycle host integration are implemented. Protocol-method recorder migration, UI, fault behavior, and capability snapshots remain deferred.
+recorder core and session-lifecycle host integration are implemented. All six observable methods and the Home/Sessions/Detail UI are implemented. Earlier checkpoint sections below retain their stage-specific context; the final addendum controls current behavior. Fault behavior and capability snapshots remain deferred.
 
 ## 1. One event representation
 
@@ -444,3 +444,38 @@ The process-local `ProtocolEvidenceStore` mirror is still retained temporarily
 for frozen Phase 2 regression instrumentation. It is not product authority and
 may be retired only after a later Phase 3 predecessor-compatibility gate replaces
 that dependency explicitly.
+
+## Final continuation addendum
+
+Hostile tests demonstrated and repaired two ownership defects: response metadata
+must validate before pending-handle removal, and close must await already-claimed
+event writes. Claimed writes use NonCancellable settlement so caller cancellation
+cannot strand persistence barriers. Close marks the session retired under the
+allocator mutex; a callback beginning across that race is immediately settled
+CANCELLED in its original session. Completed handles never generate another write.
+The first terminal result wins; AlreadyCompleted can describe an in-flight claim,
+so it is not independently proof of storage success. Closure awaits its barrier.
+
+First close cause and observed epoch time are now stored atomically before
+settlement. Duplicate closes reuse them even if a later callback's write finishes
+first. Session end denotes close observation/initialization; event cancellation
+settlement may finish later. START_FAILED metadata precedes candidate cleanup.
+
+SafeSummary normalizes arbitrary external chain/commitment values to approved
+constants or <unsupported>, so approved keys cannot smuggle raw external strings.
+DiagnosticSanitizer itself remains byte-for-byte unchanged. Approved fixed reason,
+boolean, count, hash, and validated public-account values retain their provenance
+contract. dApp labels remain bounded display claims, not authenticity guarantees.
+
+Home/Sessions/Detail ViewModels use repository Flows, StateFlow, lifecycle-aware
+Compose collection, and saved selection/back state. Session status uses the exact
+priority already frozen above. Active rows explicitly report unknown liveness.
+Timeline cards sort by recorder sequence and expose numeric errors, known pinned
+names, failure sources, timestamps/duration, and safe summaries. Capability
+limitation is context, never an event. No full capability snapshot is implemented.
+
+The predecessor process-local stores remain compatibility mirrors. Product
+screens do not consume them. Tests and actual force-stop/relaunch acceptance
+prove persistent Room authority. Ordinary database failures preserve protocol
+responses; history may be incomplete during such failures or abrupt process
+death. No fictional completion or recovery timestamp is generated.

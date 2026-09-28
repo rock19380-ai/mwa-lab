@@ -1,7 +1,7 @@
 # Protocol Support
 
 This file records **implemented and exercised** MWA behavior for the current
-Phase 2 repository state.
+Phase 2 protocol baseline, preserved by the current Phase 3 observability layer.
 
 Protocol authority is pinned walletlib/clientlib `2.0.7` plus the corresponding
 official `v2.0.7` source. Current upstream `main` is not substituted when its API
@@ -98,3 +98,23 @@ Phase 2 proof uses pinned official Android MWA libraries and the deterministic
 MWA Lab Demo Client.
 
 No production-wallet compatibility claim is made by Phase 2.
+
+## Phase 3 observation coverage
+
+| Method | Persistent timeline status |
+|---|---|
+| authorize | OBSERVED when host callback occurs |
+| reauthorize | OBSERVED when host callback occurs; internal token rejections are absent |
+| deauthorize | OBSERVED when host deauthorized callback occurs |
+| sign_messages | OBSERVED when host callback occurs |
+| sign_transactions | OBSERVED when host callback occurs |
+| sign_and_send_transactions | OBSERVED when host callback occurs |
+| get_capabilities | NOT OBSERVABLE THROUGH PINNED WALLETLIB |
+| MwaCapabilityProfile | CONFIGURED CONTEXT ONLY; not request observation |
+
+The six observable callbacks use the canonical persistent recorder. Requests
+rejected internally by walletlib before callbacks are not fabricated. Outcomes
+describe host completion/diagnostic settlement, not proof of response delivery
+or chain execution. Diagnostic storage failure has no protocol authority.
+No pinned library, transport observer, protocol error mapping, or network policy
+was changed to expand observation coverage.

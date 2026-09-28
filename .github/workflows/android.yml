@@ -6,6 +6,7 @@ on:
       - main
       - phase1-mwa-protocol-boundary
       - phase2-core-request-signing
+      - phase3-protocol-recorder-timeline
   pull_request:
 
 permissions:
@@ -32,10 +33,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle executable
-        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh
+        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh
 
       - name: Validate shell gate syntax
-        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh
+        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh
 
       - name: Lint
         run: ./gradlew lint
@@ -58,5 +59,10 @@ jobs:
       - name: Phase 1 deterministic static gate
         run: ./scripts/phase1_static.sh
 
-      - name: Phase 2 final deterministic static gate
+      - name: Phase 2 historical scope gate
+        if: ${{ hashFiles('app/schemas/dev.mwalab.storage.MwaLabDatabase/1.json') == '' }}
         run: ./scripts/phase2_static.sh
+
+      - name: Phase 3 persistent timeline and predecessor gate
+        if: ${{ hashFiles('app/schemas/dev.mwalab.storage.MwaLabDatabase/1.json') != '' }}
+        run: ./scripts/phase3_static.sh

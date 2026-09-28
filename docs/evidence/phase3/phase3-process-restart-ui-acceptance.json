@@ -16,17 +16,17 @@
       "eventCount": 3,
       "gate": "restart-loaded-FAIL-Sessions-and-Detail-UI",
       "result": "PASS",
-      "sessionId": "c6434861-42d1-4ed3-b870-66c1c70fb887",
-      "sessionSha256": "c78e537c2ccb588b3aaf4a3027ee22108c02d830ba529a2ec2329f36a41b2657",
-      "timelineSha256": "e057f20f97d0a39e4cdbcd9e36b69f769a8bb26d85a3c7293a6b09e647534323"
+      "sessionId": "964cf1d0-886a-4b8e-beb5-da86ad5fb889",
+      "sessionSha256": "965ad74290193fe3adf127c9def54db83cf889123131085ee34339f6c070f522",
+      "timelineSha256": "b870d8c1242e4194154bc04e55a7707f08ab665f7b2975fec98101622a193a36"
     },
     {
       "eventCount": 3,
       "gate": "restart-loaded-PASS-Sessions-and-Detail-UI",
       "result": "PASS",
-      "sessionId": "007f99bb-b660-4abe-a9b3-51c8029d0f8d",
-      "sessionSha256": "4d2933034f08a3a7595e298dcc523624f90ff40b559e6325b6e37b80bda2d1e9",
-      "timelineSha256": "ec97866dc2064ae45687051448e563945c1ee6033edc0b42e0c35b40f9b532ba"
+      "sessionId": "53ba94a8-8828-42ef-8c22-34d784f82262",
+      "sessionSha256": "9020c11666e4e96dff8a0fd085c2b7507104ec1a045c5ed0bcaa6081ed89a7db",
+      "timelineSha256": "54f0973c10b82833b1da28583902ca382e317f74798b0dfffaaf466c7d3686a4"
     }
   ],
   "database": "mwa_lab.db",

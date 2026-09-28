@@ -173,7 +173,7 @@ Synthetic/injected failure behavior belongs to later phases.
 Phase 2 does not present injected failures as naturally observed wallet or RPC
 failures.
 
-## S11 — Phase boundary
+## S11 — Historical Phase 2 boundary
 
 Phase 2 intentionally does not add:
 
@@ -183,3 +183,30 @@ Phase 2 intentionally does not add:
 - deterministic fault engine.
 
 Those later features must preserve all invariants above.
+
+## S12 — Phase 3 persistence and UI boundary
+
+Diagnostic Room storage contains only session metadata and bounded sanitized
+summaries. Request builders provide counts, lengths, SHA-256, enum/reason strings,
+booleans, and public metadata. The recorder enforces approved keys, defensive
+copies, and known chain/commitment values or an unsupported marker. The existing
+DiagnosticSanitizer remains unchanged and runs before storage; UI re-applies it
+before summary rendering. Neither Room entities nor ViewModels accept wallet
+request objects, private keys, seeds, mnemonics, raw auth/association tokens,
+raw payloads/signatures, encrypted transport material, raw RPC bodies, or exception
+text. dApp labels are trimmed, bounded, control-free display claims, not verified
+identities or a general-purpose secret detector. URI/icon/query fields are absent.
+
+SQLite/WAL byte scans include positive controls, sensitive-key sentinels, and
+actual wire auth tokens, raw/signed messages, signatures, and identity URI values
+from representative protocol flows. Scope is diagnostic `mwa_lab.db` and its WAL,
+not walletlib-owned authorization storage or Android Keystore.
+
+Injected repository failures are test seams only. They do not introduce a product
+fault engine or relabel successful wallet responses as organic failures.
+Persistence is best effort during storage failure; missing diagnostic writes
+cannot establish a complete protocol history. No raw exception text is exposed.
+Abrupt process death can leave an open session and lose unfinished in-memory
+handles; the UI preserves that uncertainty without invented terminal events.
+
+Mainnet remains disabled. No production-wallet import or server signing was added.

@@ -10,13 +10,13 @@ GitHub Actions runs deterministic, non-device gates:
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
-./scripts/phase2_static.sh
+./scripts/phase3_static.sh
 ```
 
 The workflow retains Gradle wrapper validation and verifies both primary and
 demo-client debug APKs exist.
 
-`phase2_static.sh` also enforces the pinned walletlib version, frozen Phase 1
+The historical `phase2_static.sh` enforced the pinned walletlib version, frozen Phase 1
 issuer/scope compatibility, Devnet-only RPC authority, signing limits,
 authorization guards, hostile-test anchors, sanitizer guards, documentation
 truth markers, and Phase 2 closeout evidence.
@@ -172,3 +172,51 @@ Phase 2 does not test or claim:
 - full diagnostic export;
 - deterministic fault injection;
 - production-wallet compatibility.
+
+## Phase 3 verification
+
+The frozen Phase 2 script is byte-for-byte preserved, including Room absence.
+The Phase 3 gate runs Phase 1 and checks the historical script/predecessor source
+hashes, schema constraints, recorder/UI boundaries, and scope. CI selects the
+current gate when the exported Room schema is present. It does not execute the
+historical Room-absence gate on Phase 3. Existing protocol behavioral tests remain
+required; source checks supplement them rather than replacing them.
+
+JVM suites cover domain status, request-start ordering, immutable session binding,
+duplicates, reverse completion, safe metadata, diagnostic failure isolation,
+claimed-write/close races, and first close-time authority. Deterministic ViewModel
+tests cover loading/empty/active/pass/fail/interrupted/error/retry states, ordered
+errors and summaries, selection isolation, newly loaded history, and public identity.
+
+Device suites include all five predecessor/Step 3.6 classes, Room hostile reopen,
+foreign keys/uniqueness, 32 concurrent close/completion rounds, real walletlib
+replacement at preparation/approval/signing, pending host close, injected storage
+failures, actual SQLite/WAL secret scans, and six focused Compose tests.
+
+Run instrumentation classes separately. This local AGP/runner path executed only
+the first class from comma-separated filters; XML must prove each requested class,
+nonzero test counts, zero failures, and zero skipped cases. APK assembly alone
+is not execution evidence. The acceptance JSONL records failures and repairs as
+well as subsequent green runs; use the final successful records for closeout.
+
+For full process restart and real cross-package UI acceptance, install debug APKs
+with `adb install -r` and run:
+
+```bash
+python3 scripts/phase3_device_acceptance.py --serial emulator-5554 \
+  --evidence docs/evidence/phase3/phase3-process-restart-ui-acceptance.json
+```
+
+This uses the existing demo client's approved and rejected message flows through
+actual controls, verifies exact protocol results, force-stops/relaunches MWA Lab,
+compares SQLite session/event records, and inspects both Sessions/Detail timelines.
+It never deletes session history or substitutes logs for product state. The
+connected harness can remove its target app at teardown; the script initializes
+Home before copying and validates actual SQLite headers. Screenshots/database
+copies remain in `/tmp`, while only safe structured results are committed.
+
+The six observable method tests preserve GET_CAPABILITIES absence. Reverse and
+concurrent recorder tests use repository seams because clientlib 2.0.7 allows
+only one outstanding live request per association. Live Devnet submission evidence
+from Phase 2 stays historical; Phase 3 deterministic regression includes existing
+submission ordering, failure, commitment, and no-resubmission tests.

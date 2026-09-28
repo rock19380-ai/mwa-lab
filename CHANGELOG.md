@@ -4,6 +4,13 @@
 
 ### Added
 
+- Canonical persistent protocol recorder with request-start sequence and immutable session handles.
+- Room version 1 session/event history, exported schema, restart persistence, and safe summaries.
+- Home, Sessions, and Session Detail with structured timing, outcomes, errors, and failure sources.
+- Hostile recorder/lifecycle/SQLite security tests, deterministic state tests, and Compose acceptance.
+- Cross-package approval/rejection and force-stop/relaunch acceptance using the actual product UI.
+- Phase 3 static/CI gate preserving the historical Phase 2 script and protected source hashes.
+
 - Initial Android/Kotlin/Jetpack Compose project baseline.
 - Devnet-only MWA Lab product and security documentation.
 - Real wallet-side Mobile Wallet Adapter association using pinned walletlib 2.0.7.

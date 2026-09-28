@@ -1,0 +1,1067 @@
+{
+  "baseline": "009a849441b9d4db453b0162ae1fd9f5fdad8dc4",
+  "branch": "phase3-protocol-recorder-timeline",
+  "codeFingerprint": "c28cf16abd29614d1d423a87cbdaa6d294b4061bb2efb09513ef3920257b39cd",
+  "database": "mwa_lab.db",
+  "finalGates": [
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:compileDebugKotlin",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:10.436287+00:00",
+      "label": "final-v2-compile",
+      "logSha256": "c2c11d859ee947a9aab1938725b5afd5965b84a63dfbe0a90ce7eb308631902b",
+      "startedUtc": "2026-09-28T10:07:08.756485+00:00",
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:compileDebugAndroidTestKotlin",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:13.380388+00:00",
+      "label": "final-v2-compile-androidtest",
+      "logSha256": "08bd4d3554c748edb8f5717e55aa2b50a8cb04daee9a06255d43951a6eb1e82e",
+      "startedUtc": "2026-09-28T10:07:10.479034+00:00",
+      "unitSuites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.ui.sessions.SessionViewModelsTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "0.293",
+          "timestamp": "2026-09-28T10:00:15.196Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.democlient.DemoLegacyTransactionFactoryTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.272",
+          "timestamp": "2026-09-28T09:09:11.388Z"
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:testDebugUnitTest --tests dev.mwalab.protocol.recorder.PersistentProtocolRecorderTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:16.604819+00:00",
+      "label": "final-v2-recorder-unit",
+      "logSha256": "a4f869303eba2b14b80c7792659c804bcf63b9d9ccbf2f6b616b4312cdaac177",
+      "startedUtc": "2026-09-28T10:07:13.475006+00:00",
+      "unitSuites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.protocol.recorder.PersistentProtocolRecorderTest",
+          "skipped": "0",
+          "tests": "17",
+          "time": "0.192",
+          "timestamp": "2026-09-28T10:07:16.258Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.democlient.DemoLegacyTransactionFactoryTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.272",
+          "timestamp": "2026-09-28T09:09:11.388Z"
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:testDebugUnitTest --tests dev.mwalab.session.SessionLifecycleCoordinatorTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:21.815931+00:00",
+      "label": "final-v2-lifecycle-unit",
+      "logSha256": "e74490260cbfec087d5b9d4d77c52035c7dbaef493f97f5c628a22600cfa681d",
+      "startedUtc": "2026-09-28T10:07:16.675928+00:00",
+      "unitSuites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.session.SessionLifecycleCoordinatorTest",
+          "skipped": "0",
+          "tests": "6",
+          "time": "0.528",
+          "timestamp": "2026-09-28T10:07:20.846Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.democlient.DemoLegacyTransactionFactoryTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.272",
+          "timestamp": "2026-09-28T09:09:11.388Z"
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:testDebugUnitTest --tests dev.mwalab.protocol.ProtocolEventTest --tests dev.mwalab.session.SessionDomainTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:31.311985+00:00",
+      "label": "final-v2-domain-unit",
+      "logSha256": "e7b5204a8557b34dcb78a7e11bbaf4d62b9de29b23195125874e3e1856efe7ff",
+      "startedUtc": "2026-09-28T10:07:22.057096+00:00",
+      "unitSuites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.protocol.ProtocolEventTest",
+          "skipped": "0",
+          "tests": "5",
+          "time": "0.144",
+          "timestamp": "2026-09-28T10:07:30.687Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.session.SessionDomainTest",
+          "skipped": "0",
+          "tests": "12",
+          "time": "0.093",
+          "timestamp": "2026-09-28T10:07:30.852Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.democlient.DemoLegacyTransactionFactoryTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.272",
+          "timestamp": "2026-09-28T09:09:11.388Z"
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:testDebugUnitTest --tests dev.mwalab.ui.sessions.SessionViewModelsTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:40.928531+00:00",
+      "label": "final-v2-ui-unit",
+      "logSha256": "c0d220e2e34b4ddb054459d4df8bb725fcaf2b6e7834f9d2d5f377aa4a3f24f6",
+      "startedUtc": "2026-09-28T10:07:31.513952+00:00",
+      "unitSuites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.ui.sessions.SessionViewModelsTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "1.168",
+          "timestamp": "2026-09-28T10:07:39.322Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.democlient.DemoLegacyTransactionFactoryTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.272",
+          "timestamp": "2026-09-28T09:09:11.388Z"
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "bash ./scripts/phase1_static.sh",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:41.384247+00:00",
+      "label": "final-v2-phase1",
+      "logSha256": "80927dc976fba92687620a86c32f304e3fe60434488fa8b790413beff83e87aa",
+      "startedUtc": "2026-09-28T10:07:41.124894+00:00",
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew lint",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:07:48.475954+00:00",
+      "label": "final-v2-lint",
+      "logSha256": "0608759fa82e3ba34d8877e5f111593eea9d164cd8882db49f5d173cbf7181a3",
+      "startedUtc": "2026-09-28T10:07:41.572565+00:00",
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew test --rerun-tasks",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:08:45.927308+00:00",
+      "label": "final-v2-full-unit",
+      "logSha256": "6af11e0991cbe388b6e53e8a90d66f0db64ed8e25b88cc24781a01feadfa391d",
+      "startedUtc": "2026-09-28T10:07:48.745928+00:00",
+      "unitSuites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.approval.ApprovalCoordinatorTest",
+          "skipped": "0",
+          "tests": "5",
+          "time": "0.154",
+          "timestamp": "2026-09-28T10:08:44.251Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.mwa.authorization.LabAuthorizationPolicyTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "0.023",
+          "timestamp": "2026-09-28T10:08:44.843Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.protocol.recorder.PersistentProtocolRecorderTest",
+          "skipped": "0",
+          "tests": "17",
+          "time": "0.084",
+          "timestamp": "2026-09-28T10:08:44.906Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.security.NetworkPolicyTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "0.008",
+          "timestamp": "2026-09-28T10:08:45.112Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.mwa.capabilities.MwaCapabilityProfileTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.008",
+          "timestamp": "2026-09-28T10:08:44.871Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.identity.Ed25519SigningTest",
+          "skipped": "0",
+          "tests": "1",
+          "time": "0.011",
+          "timestamp": "2026-09-28T10:08:44.823Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.session.SessionLifecycleCoordinatorTest",
+          "skipped": "0",
+          "tests": "6",
+          "time": "0.03",
+          "timestamp": "2026-09-28T10:08:45.152Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.ExampleUnitTest",
+          "skipped": "0",
+          "tests": "1",
+          "time": "0.009",
+          "timestamp": "2026-09-28T10:08:44.237Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.protocol.ProtocolEventTest",
+          "skipped": "0",
+          "tests": "5",
+          "time": "0.011",
+          "timestamp": "2026-09-28T10:08:44.886Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.session.SessionDomainTest",
+          "skipped": "0",
+          "tests": "12",
+          "time": "0.023",
+          "timestamp": "2026-09-28T10:08:45.126Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.identity.Ed25519IdentityMaterialTest",
+          "skipped": "0",
+          "tests": "1",
+          "time": "0.412",
+          "timestamp": "2026-09-28T10:08:44.408Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.transaction.SolanaTransactionMessageDetectorTest",
+          "skipped": "0",
+          "tests": "2",
+          "time": "0.004",
+          "timestamp": "2026-09-28T10:08:45.282Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.rpc.SignAndSendSubmissionExecutorTest",
+          "skipped": "0",
+          "tests": "10",
+          "time": "0.075",
+          "timestamp": "2026-09-28T10:08:45.021Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.ui.sessions.SessionViewModelsTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "0.339",
+          "timestamp": "2026-09-28T10:08:45.297Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.transaction.LegacyTransactionCodecTest",
+          "skipped": "0",
+          "tests": "10",
+          "time": "0.079",
+          "timestamp": "2026-09-28T10:08:45.201Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.rpc.DevnetSendOptionsTest",
+          "skipped": "0",
+          "tests": "2",
+          "time": "0.006",
+          "timestamp": "2026-09-28T10:08:44.997Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.security.DiagnosticSanitizerTest",
+          "skipped": "0",
+          "tests": "2",
+          "time": "0.006",
+          "timestamp": "2026-09-28T10:08:45.099Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.democlient.DemoLegacyTransactionFactoryTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.134",
+          "timestamp": "2026-09-28T10:08:32.780Z"
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew assembleDebug",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:08:57.797330+00:00",
+      "label": "final-v2-debug",
+      "logSha256": "663c338eff02f6fc0f1c5d2947416141c47c3fe555ca1b96ab289bdcb1af444a",
+      "startedUtc": "2026-09-28T10:08:46.025687+00:00",
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:09:24.915126+00:00",
+      "label": "final-v2-androidtest-apks",
+      "logSha256": "2056fc71bec61e53b2e33df016283d0d9e2cf1e0ee46e9f8fbc91395610e679c",
+      "startedUtc": "2026-09-28T10:08:58.057394+00:00",
+      "unitSuites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.approval.ApprovalCoordinatorTest",
+          "skipped": "0",
+          "tests": "5",
+          "time": "0.154",
+          "timestamp": "2026-09-28T10:08:44.251Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.mwa.authorization.LabAuthorizationPolicyTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "0.023",
+          "timestamp": "2026-09-28T10:08:44.843Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.protocol.recorder.PersistentProtocolRecorderTest",
+          "skipped": "0",
+          "tests": "17",
+          "time": "0.084",
+          "timestamp": "2026-09-28T10:08:44.906Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.security.NetworkPolicyTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "0.008",
+          "timestamp": "2026-09-28T10:08:45.112Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.mwa.capabilities.MwaCapabilityProfileTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.008",
+          "timestamp": "2026-09-28T10:08:44.871Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.identity.Ed25519SigningTest",
+          "skipped": "0",
+          "tests": "1",
+          "time": "0.011",
+          "timestamp": "2026-09-28T10:08:44.823Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.session.SessionLifecycleCoordinatorTest",
+          "skipped": "0",
+          "tests": "6",
+          "time": "0.03",
+          "timestamp": "2026-09-28T10:08:45.152Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.ExampleUnitTest",
+          "skipped": "0",
+          "tests": "1",
+          "time": "0.009",
+          "timestamp": "2026-09-28T10:08:44.237Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.protocol.ProtocolEventTest",
+          "skipped": "0",
+          "tests": "5",
+          "time": "0.011",
+          "timestamp": "2026-09-28T10:08:44.886Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.session.SessionDomainTest",
+          "skipped": "0",
+          "tests": "12",
+          "time": "0.023",
+          "timestamp": "2026-09-28T10:08:45.126Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.identity.Ed25519IdentityMaterialTest",
+          "skipped": "0",
+          "tests": "1",
+          "time": "0.412",
+          "timestamp": "2026-09-28T10:08:44.408Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.transaction.SolanaTransactionMessageDetectorTest",
+          "skipped": "0",
+          "tests": "2",
+          "time": "0.004",
+          "timestamp": "2026-09-28T10:08:45.282Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.rpc.SignAndSendSubmissionExecutorTest",
+          "skipped": "0",
+          "tests": "10",
+          "time": "0.075",
+          "timestamp": "2026-09-28T10:08:45.021Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.ui.sessions.SessionViewModelsTest",
+          "skipped": "0",
+          "tests": "9",
+          "time": "0.339",
+          "timestamp": "2026-09-28T10:08:45.297Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.transaction.LegacyTransactionCodecTest",
+          "skipped": "0",
+          "tests": "10",
+          "time": "0.079",
+          "timestamp": "2026-09-28T10:08:45.201Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.rpc.DevnetSendOptionsTest",
+          "skipped": "0",
+          "tests": "2",
+          "time": "0.006",
+          "timestamp": "2026-09-28T10:08:44.997Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.security.DiagnosticSanitizerTest",
+          "skipped": "0",
+          "tests": "2",
+          "time": "0.006",
+          "timestamp": "2026-09-28T10:08:45.099Z"
+        },
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "abbaas-HP-Laptop-15s-du1xxx",
+          "name": "dev.mwalab.democlient.DemoLegacyTransactionFactoryTest",
+          "skipped": "0",
+          "tests": "3",
+          "time": "0.134",
+          "timestamp": "2026-09-28T10:08:32.780Z"
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "bash ./scripts/phase3_static.sh",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:09:25.646022+00:00",
+      "label": "final-v2-phase3",
+      "logSha256": "6a7fe247e5b65f352df461087a90997d362be73c9c9a06168a47f4c4d35ea84c",
+      "startedUtc": "2026-09-28T10:09:25.236694+00:00",
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.mwa.MwaSigningRecorderInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:10:26.808553+00:00",
+      "label": "final-v2-device-signing",
+      "logSha256": "72acc256eacf970cab0652047e8c6becc08a5da3535c5a38ffa42e32f0fa23e0",
+      "startedUtc": "2026-09-28T10:09:25.956590+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "d723332ba4e834d9fa23cc380ed55e14430d1e0ddd5379effa246b7b65d84125"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.mwa.MwaSigningRecorderInstrumentedTest",
+          "failed": false,
+          "name": "signingFamilyPersistsCanonicalOrderedEventsWithoutRawPayloads",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.mwa.MwaAuthorizationRecorderInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:11:01.764824+00:00",
+      "label": "final-v2-device-authorization",
+      "logSha256": "d8ef32652814804694e2490f51fe4bf3f2377e809579a4a62720efb532f99aa9",
+      "startedUtc": "2026-09-28T10:10:27.056875+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "05956530ad95560a717d62ab5effee7ea65ab34973652fad25e4d6e4561ab89b"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.mwa.MwaAuthorizationRecorderInstrumentedTest",
+          "failed": false,
+          "name": "authorizationFamilyPersistsCanonicalOrderedEventsWithoutCapabilitiesFabrication",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.mwa.MwaLocalAssociationInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:11:13.128169+00:00",
+      "label": "final-v2-device-association",
+      "logSha256": "5a72c4a60b9129115a4ca2f10526cc4f1965e5cf874947a2a9e9867cc4a0254c",
+      "startedUtc": "2026-09-28T10:11:01.921473+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "919aa11a0a8a92f46a77c8872804e3bff256a5d7656a8ece083b3e1dc5938375"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.mwa.MwaLocalAssociationInstrumentedTest",
+          "failed": false,
+          "name": "phase1AuthorizeCapabilitiesDeauthorizeAndRevocationFlow",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.mwa.MwaSessionLifecycleInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:11:26.455032+00:00",
+      "label": "final-v2-device-lifecycle",
+      "logSha256": "9eafcc527ffd43f9cd3ad2a6a8ccabf0a92009ee62d8f3409ab7260d4c24c328",
+      "startedUtc": "2026-09-28T10:11:13.220066+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "5f72259995dbcffdb29b76f0f1b3e99c17ed250cee21b62b7cf32f4d1370bc68"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.mwa.MwaSessionLifecycleInstrumentedTest",
+          "failed": false,
+          "name": "validAssociationPersistsIdentityAndServingCompleteAcrossActivityTeardown",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.mwa.MwaSessionLifecycleInstrumentedTest",
+          "failed": false,
+          "name": "invalidAssociationDoesNotCreatePersistentProductSession",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.storage.RoomSessionRepositoryInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:11:35.418789+00:00",
+      "label": "final-v2-device-room",
+      "logSha256": "41fed6977abcb34249e9516c7a72df350059d9ce4ee2685a43caee78c3b18458",
+      "startedUtc": "2026-09-28T10:11:26.760266+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "554a7ace06994a69dc8eee0bb49f0e0bf6026d6765be77f06d06a1de058e83a6"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.storage.RoomSessionRepositoryInstrumentedTest",
+          "failed": false,
+          "name": "sensitiveSummaryValuesDoNotReachDatabaseFiles",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.storage.RoomSessionRepositoryInstrumentedTest",
+          "failed": false,
+          "name": "unknownSessionReturnsNull",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.storage.RoomSessionRepositoryInstrumentedTest",
+          "failed": false,
+          "name": "sessionsAreObservedNewestFirst",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.storage.RoomSessionRepositoryInstrumentedTest",
+          "failed": false,
+          "name": "successfulAndFailedSessionsSurviveDatabaseReopen",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.storage.RoomSessionRepositoryInstrumentedTest",
+          "failed": false,
+          "name": "sessionAndOrderedEventsRoundTrip",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.storage.RoomTimelineHostileInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:11:44.474537+00:00",
+      "label": "final-v2-device-hostile-room",
+      "logSha256": "a2475b3e187fcae256dc4c188f414720b401cdeee61e1a85d78580d5bcbb9f2f",
+      "startedUtc": "2026-09-28T10:11:35.519813+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "5caca914fa2db763c58b91fdf5aa2b3dea37edfdf9588dd10db29eada12dd868"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.storage.RoomTimelineHostileInstrumentedTest",
+          "failed": false,
+          "name": "concurrentCloseAndDuplicateCompletionNeverDuplicateOrMigrateEvents",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.storage.RoomTimelineHostileInstrumentedTest",
+          "failed": false,
+          "name": "databaseAndWalBytesContainOnlySanitizedMetadata",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.storage.RoomTimelineHostileInstrumentedTest",
+          "failed": false,
+          "name": "databaseEnforcesForeignKeyAndSessionSequenceUniqueness",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.storage.RoomTimelineHostileInstrumentedTest",
+          "failed": false,
+          "name": "reverseCompletionReplacementAndSummariesSurviveReopen",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.mwa.MwaHostileRecorderInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:12:00.995438+00:00",
+      "label": "final-v2-device-hostile-host",
+      "logSha256": "060055194ceb0aa664f0f2fbcc0118366bafc3a9a97f31ea189770e415d2da80",
+      "startedUtc": "2026-09-28T10:11:44.606347+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "f01a2c740685551daf0ed1bd98e72687f168df94214a45cf00ae9621f87ad3f9"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.mwa.MwaHostileRecorderInstrumentedTest",
+          "failed": false,
+          "name": "realAuthorizationAndSigningSecretsAreAbsentFromActualSQLiteAndWalBytes",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.mwa.MwaHostileRecorderInstrumentedTest",
+          "failed": false,
+          "name": "injectedStorageFailureNeverChangesSuccessfulWalletResponses",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.mwa.MwaHostileRecorderInstrumentedTest",
+          "failed": false,
+          "name": "replacementAtPreparationApprovalAndSigningKeepsOldEventsInOldSession",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.ui.sessions.SessionsUiInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:12:23.218660+00:00",
+      "label": "final-v2-device-ui-compose",
+      "logSha256": "d3b936d85d47a172b0304eee38d2247393b3f51662c80075ddd7b4c537ad25b9",
+      "startedUtc": "2026-09-28T10:12:01.095178+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "77b0ea31aaa62caecce38a154319e0f0fb605c3e32f7399cf9ec864d2d1869fd"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.ui.sessions.SessionsUiInstrumentedTest",
+          "failed": false,
+          "name": "historyReadErrorSupportsRetryWithoutExceptionText",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.ui.sessions.SessionsUiInstrumentedTest",
+          "failed": false,
+          "name": "timelineRendersErrorOriginTimingAndOnlySanitizedSummaries",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.ui.sessions.SessionsUiInstrumentedTest",
+          "failed": false,
+          "name": "emptyStateExplainsHowToStartRecording",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.ui.sessions.SessionsUiInstrumentedTest",
+          "failed": false,
+          "name": "databaseReopenLoadsHistoryThroughViewModelAndNavigationUsesPersistentTimeline",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.ui.sessions.SessionsUiInstrumentedTest",
+          "failed": false,
+          "name": "unknownErrorIsRenderedNumericallyAndCapabilitiesAreNotTimelineEvents",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.ui.sessions.SessionsUiInstrumentedTest",
+          "failed": false,
+          "name": "activeSuccessfulFailedAndInterruptedSessionsRenderStructuredState",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:13:02.187886+00:00",
+      "label": "final-v2-device-rpc-regression",
+      "logSha256": "02558bbe868557301af3ddd164e323f3c8dd12fb5489dac4e8fd7e5effa40bef",
+      "startedUtc": "2026-09-28T10:12:23.324481+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "0f0e155f4753b163946f428c0ba694ab5e3e35532aedafa679b2200f1d2adeba"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "transactionErrorStatusIsNotConsideredCommittedSuccess",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "successfulMockedSubmitReturnsDecoded64ByteSignature",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "timeoutStaysClassifiedAsTransportTimeout",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "malformedMissingResultAndOversizedResponsesFailClosed",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "jsonRpcErrorCodeIsPreservedWithoutResponseBodyLeakage",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "malformedSignatureResultFailsClosed",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "dnsOrConnectionStyleIoFailureStaysClassifiedAsTransportIo",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "confirmedStatusSatisfiesConfirmedCommitment",
+          "skipped": false
+        },
+        {
+          "class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest",
+          "failed": false,
+          "name": "nonSuccessHttpStatusFailsClosed",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.identity.AndroidKeystoreIdentityRepositoryInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:15:01.113870+00:00",
+      "label": "final-v2-device-identity",
+      "logSha256": "e6156f90a4cd62e6c2d401594874e7b245625057bc917c2881c43d91ff562c0f",
+      "startedUtc": "2026-09-28T10:14:32.111034+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "11b2e114f9770965697fff1aeb511f24ffa6a9edfc7c3c4242fb64110e6cb76d"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.identity.AndroidKeystoreIdentityRepositoryInstrumentedTest",
+          "failed": false,
+          "name": "identityPersistsAcrossRepositoryRestartAndResetChangesAuthority",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.identity.LabSigningServiceInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:15:19.699331+00:00",
+      "label": "final-v2-device-lab-signing",
+      "logSha256": "9605a12bf5815bed2190c70aa25bf13c41254f6a30f6eb16ad5578339b88dd74",
+      "startedUtc": "2026-09-28T10:15:01.235292+00:00",
+      "testResultsSha256": {
+        "app/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "85cdaed4c1e01d5cf367615de996c970691dc1842ccd2e7b5742696099e62831"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.identity.LabSigningServiceInstrumentedTest",
+          "failed": false,
+          "name": "protectedSignerSurvivesRestartBoundaryAndVerifies",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+      "command": "./gradlew :demo-client:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:15:42.433766+00:00",
+      "label": "final-v2-device-cross-app",
+      "logSha256": "2f14ce3a07fb81742bbae21217fd60629fef794fb095d5b3a7d4b7ae6f430fa7",
+      "startedUtc": "2026-09-28T10:15:20.692798+00:00",
+      "testResultsSha256": {
+        "demo-client/build/outputs/androidTest-results/connected/debug/TEST-MWA_Lab_API_36(AVD) - 16.xml": "b5895f20d3f1203b86731a00aeaf7e6c105439a5de713d04cd5b8775db3872ad"
+      },
+      "tests": [
+        {
+          "class": "dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest",
+          "failed": false,
+          "name": "canonicalSequenceIsRealCrossPackageAndRepeatable",
+          "skipped": false
+        }
+      ],
+      "verifiedExitCode": 0
+    },
+    {
+      "codeFingerprint": "c28cf16abd29614d1d423a87cbdaa6d294b4061bb2efb09513ef3920257b39cd",
+      "command": "python3 scripts/phase3_device_acceptance.py --serial emulator-5554 --evidence docs/evidence/phase3/phase3-process-restart-ui-acceptance.json",
+      "exitCode": 0,
+      "finishedUtc": "2026-09-28T10:23:17.148850+00:00",
+      "label": "final-v4-process-restart",
+      "logSha256": "ba16afd8302bd9874ce10f3a751dabd70d0903d275e419c780010c0d304d181e",
+      "startedUtc": "2026-09-28T10:22:19.211132+00:00",
+      "verifiedExitCode": 0
+    }
+  ],
+  "hardAudit": {
+    "databaseSecretScansPassed": true,
+    "deletedPredecessorFiles": false,
+    "diffCheckClean": true,
+    "expectedAncestry": true,
+    "mainnetDisabled": true,
+    "phase2StaticUnchanged": true,
+    "phase4Started": false,
+    "productionSecretSupportAdded": false,
+    "recorderRaceAndIsolationTestsPassed": true,
+    "repositoryUiAndRestartTestsPassed": true,
+    "stagedMysteryChanges": false,
+    "syntheticCapabilitiesEvent": false
+  },
+  "onlyVerificationChangeAfterPriorGates": "scripts/phase3_device_acceptance.py: bounded fresh-hierarchy retry and full-result viewport capture",
+  "priorGateCodeFingerprint": "49b5289eff4f7733a0ddfe1161689c0df16ff934836b357ac02c87f5a2b8e5c4",
+  "restartAcceptance": {
+    "checks": [
+      {
+        "gate": "cross-package-SIGN_MESSAGE_APPROVE",
+        "result": "PASS"
+      },
+      {
+        "gate": "cross-package-SIGN_MESSAGE_REJECT",
+        "result": "PASS"
+      },
+      {
+        "gate": "force-stop-relaunch-sqlite-equality",
+        "result": "PASS"
+      },
+      {
+        "eventCount": 3,
+        "gate": "restart-loaded-FAIL-Sessions-and-Detail-UI",
+        "result": "PASS",
+        "sessionId": "964cf1d0-886a-4b8e-beb5-da86ad5fb889",
+        "sessionSha256": "965ad74290193fe3adf127c9def54db83cf889123131085ee34339f6c070f522",
+        "timelineSha256": "b870d8c1242e4194154bc04e55a7707f08ab665f7b2975fec98101622a193a36"
+      },
+      {
+        "eventCount": 3,
+        "gate": "restart-loaded-PASS-Sessions-and-Detail-UI",
+        "result": "PASS",
+        "sessionId": "53ba94a8-8828-42ef-8c22-34d784f82262",
+        "sessionSha256": "9020c11666e4e96dff8a0fd085c2b7507104ec1a045c5ed0bcaa6081ed89a7db",
+        "timelineSha256": "54f0973c10b82833b1da28583902ca382e317f74798b0dfffaaf466c7d3686a4"
+      }
+    ],
+    "database": "mwa_lab.db",
+    "getCapabilitiesObserved": false,
+    "phase4Started": false,
+    "schemaVersion": 1,
+    "serial": "emulator-5554"
+  },
+  "schemaVersion": 1,
+  "verifiedUtc": "2026-09-28T10:23:31.069839+00:00"
+}

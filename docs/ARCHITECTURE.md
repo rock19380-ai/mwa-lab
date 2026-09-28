@@ -130,7 +130,7 @@ cancellation/no-resubmission behavior.
 `MwaCapabilityProfile` supplies explicit Phase 2 request limits, legacy
 transaction support, and the pinned-walletlib `sign_transactions` feature.
 
-### Evidence
+### Historical Phase 2 evidence
 
 `ProtocolEvidenceStore` remains process-local and sanitized in Phase 2.
 
@@ -151,3 +151,36 @@ deterministic fault engine.
 9. Stale association callbacks cannot terminate or authorize a replacement session.
 10. Production-wallet behavior is compatibility evidence, not protocol authority.
 11. Phase 3 must extend this verified boundary rather than replace it.
+
+## Phase 3 persistent product authority
+
+```text
+MWA callback -> MwaSessionHost -> ProtocolRecorder.begin -> immutable handle
+-> unchanged Phase 2 operation/response -> ProtocolRecorder.complete
+-> SessionRepository -> Room/SQLite -> Flow/StateFlow -> ViewModels -> Compose
+```
+
+`SessionLifecycleCoordinator` creates metadata after a real scenario candidate
+exists, records bounded dApp display claims, settles pending requests, and
+finalizes sessions. First close cause and epoch time are bound atomically;
+duplicate callbacks reuse them. START_FAILED is recorded before cleanup.
+Request handles capture session, sequence, identity, start time, and safe metadata
+at begin. Completion never uses mutable active-session state. Claimed writes are
+settled despite caller cancellation; close waits for in-flight writes.
+
+Room `mwa_lab.db` version 1 exports its schema under `app/schemas/`. Events have
+stable primary keys, a session foreign key, and unique(session_id, sequence).
+There is no destructive migration fallback. Session status and duration are
+derived from terminal events and lifecycle metadata, not mutable status columns.
+Open rows survive process death as unfinished evidence with unknown liveness.
+
+`HomeViewModel`, `SessionsViewModel`, and `SessionDetailViewModel` expose state
+from the repository. Compose collects StateFlow with lifecycle awareness;
+selection/back navigation is saved across configuration changes. Screens never
+query DAOs, sign, authorize, submit, or parse text logs. Numeric unknown protocol
+errors retain their value without a fabricated name. Details render safe summaries.
+
+`ProtocolEvidenceStore` and `MwaSessionEvidenceStore` remain compatibility seams
+for frozen predecessor tests. They are absent from the product UI authority.
+Pinned walletlib handles get_capabilities internally: no synthetic event is
+recorded. Capability snapshots and transaction diagnostics are Phase 4 work.

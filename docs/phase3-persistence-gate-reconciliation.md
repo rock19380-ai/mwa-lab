@@ -36,3 +36,20 @@ Phase 2 script remains historical evidence of the Phase 2 boundary.
 
 This reconciliation does not permit changes to Phase 2 authorization, signing,
 submission, error mapping, Devnet-only policy, or walletlib version semantics.
+
+## Final Phase 3 plan reconciliation
+
+The external detailed plan's section 32 asks Phase 3 static verification to call
+Phase 2 static first. This conflicts with that frozen script's intentional Room
+absence and old callback-signature assertions. The explicit continuation request
+requires its exact contents remain unchanged. The narrow resolution is to run
+Phase 1, verify the historical script hash and 28 untouched Phase 2 source
+boundaries, then validate Phase 3 schema/recorder/UI scope and run current
+behavioral/device regressions. No historical acceptance result is reclassified.
+CI selects the historical gate only when the exported Phase 3 schema is absent.
+
+Detailed plan numbering and its condensed checkpoints differ; this continuation
+completed remaining product outcomes without restarting verified steps 3.0–3.6.
+The master plan's eventual hero-screen examples include synthetic faults,
+simulation, transaction interpretation, and export. Its explicit Phase 3 scope
+and detailed exclusions defer those to their later phases. Phase 4 is not started.
