@@ -22,7 +22,10 @@ import dev.mwalab.transaction.TransactionInspectionLimits.MAX_SHORTVEC_BYTES
  * https://github.com/anza-xyz/solana-sdk/blob/master/message/src/versions/v0/mod.rs
  */
 class SolanaWireTransactionParser {
-    fun parse(transaction: ByteArray): TransactionSummary {
+    fun parse(transaction: ByteArray): TransactionSummary = parse(transaction, null)
+
+    /** Decode after complete structural validation, using the same owned bytes as the fingerprint. */
+    internal fun parse(transaction: ByteArray, decoders: ProgramDecoderRegistry?): TransactionSummary {
         // Own accepted input before both hashing and reading. Oversized input is
         // hashed without copying/allocating a transaction-sized diagnostic buffer.
         val bytes = if (transaction.size <= MAX_TRANSACTION_BYTES) transaction.copyOf() else transaction
@@ -83,8 +86,9 @@ class SolanaWireTransactionParser {
                 }
                 val dataLength = reader.shortVec()
                 if (dataLength > MAX_INSTRUCTION_DATA_BYTES) reader.fail(INSTRUCTION_DATA_TOO_LARGE)
+                val dataOffset = reader.offset
                 val dataHash = reader.dataHash(dataLength)
-                DraftInstruction(index, programIndex, references, dataLength, dataHash)
+                DraftInstruction(index, programIndex, references, dataLength, dataHash, dataOffset)
             }
 
             var totalAccounts = accountCount
@@ -110,11 +114,18 @@ class SolanaWireTransactionParser {
             }
 
             val instructions = drafts.map { draft ->
-                InstructionSummary(draft.index, draft.programIndex, accounts[draft.programIndex].publicKey,
+                val structural = InstructionSummary(draft.index, draft.programIndex, accounts[draft.programIndex].publicKey,
                     draft.references.map { InstructionAccountReference(it, accounts.getOrNull(it)) },
                     draft.dataLength, draft.dataHash)
+                val decoding = decoders?.decode(structural,
+                    bytes.copyOfRange(draft.dataOffset, draft.dataOffset + draft.dataLength))
+                structural.withDecoding(decoding?.decodedInstruction ?: DecodedInstruction.Unknown)
             }
-            val limitations = baseLimitations + if (version == TransactionVersion.V0) {
+            val semanticLimitations = if (instructions.any { it.programName != null }) {
+                baseLimitations.filterNot { it == TransactionInspectionLimitation.SEMANTIC_DECODING_NOT_IMPLEMENTED } +
+                    TransactionInspectionLimitation.LIMITED_PROGRAM_DECODING
+            } else baseLimitations
+            val limitations = semanticLimitations + if (version == TransactionVersion.V0) {
                 listOf(TransactionInspectionLimitation.VERSIONED_INSPECTION_PARTIAL) +
                     if (lookups.isEmpty()) emptyList() else listOf(TransactionInspectionLimitation.LOOKUP_ADDRESSES_UNRESOLVED)
             } else emptyList()
@@ -137,12 +148,14 @@ class SolanaWireTransactionParser {
         val references: List<Int>,
         val dataLength: Int,
         val dataHash: String,
+        val dataOffset: Int,
     )
 
     private class ParseFailure(val reason: TransactionInspectionFailure, val offset: Int) : Exception()
 
     private class Reader(private val bytes: ByteArray) {
         private var cursor = 0
+        val offset: Int get() = cursor
         val remaining: Int get() = bytes.size - cursor
 
         fun fail(reason: TransactionInspectionFailure): Nothing = throw ParseFailure(reason, cursor)
