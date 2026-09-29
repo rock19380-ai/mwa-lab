@@ -4,6 +4,9 @@ import android.content.Context
 import dev.mwalab.approval.ApprovalCoordinator
 import dev.mwalab.transaction.TransactionInspection
 import dev.mwalab.transaction.TransactionInspector
+import dev.mwalab.transaction.TransactionDiagnosticRepository
+import dev.mwalab.transaction.TransactionDiagnosticSettlement
+import dev.mwalab.storage.RoomTransactionDiagnosticRepository
 import dev.mwalab.capabilities.CapabilitySnapshotRepository
 import dev.mwalab.identity.AndroidKeystoreIdentityRepository
 import dev.mwalab.identity.IdentityRepository
@@ -36,6 +39,12 @@ object MwaLabComposition {
 
     @Volatile
     private var capabilitySnapshotRepositoryInstance: CapabilitySnapshotRepository? = null
+
+    @Volatile
+    private var transactionDiagnosticRepositoryInstance: TransactionDiagnosticRepository? = null
+
+    @Volatile
+    private var transactionDiagnosticSettlementInstance: TransactionDiagnosticSettlement? = null
 
     @Volatile
     private var protocolRecorderInstance: ProtocolRecorder? = null
@@ -92,6 +101,20 @@ object MwaLabComposition {
             capabilitySnapshotRepositoryInstance ?: RoomCapabilitySnapshotRepository(
                 database(context).capabilitySnapshotDao(),
             ).also { capabilitySnapshotRepositoryInstance = it }
+        }
+
+    fun transactionDiagnosticRepository(context: Context): TransactionDiagnosticRepository =
+        transactionDiagnosticRepositoryInstance ?: synchronized(this) {
+            transactionDiagnosticRepositoryInstance ?: RoomTransactionDiagnosticRepository(
+                database(context).transactionDiagnosticDao(),
+            ).also { transactionDiagnosticRepositoryInstance = it }
+        }
+
+    fun transactionDiagnosticSettlement(context: Context): TransactionDiagnosticSettlement =
+        transactionDiagnosticSettlementInstance ?: synchronized(this) {
+            transactionDiagnosticSettlementInstance ?: TransactionDiagnosticSettlement(
+                sessionRepository(context), transactionDiagnosticRepository(context),
+            ).also { transactionDiagnosticSettlementInstance = it }
         }
 
     fun protocolRecorder(context: Context): ProtocolRecorder =

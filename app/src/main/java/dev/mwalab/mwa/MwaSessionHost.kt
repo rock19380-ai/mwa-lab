@@ -55,6 +55,7 @@ import dev.mwalab.signing.LabSigningService
 import dev.mwalab.transaction.PreApprovalTransactionInspection
 import dev.mwalab.transaction.TransactionApprovalDiagnostics
 import dev.mwalab.transaction.TransactionInspection
+import dev.mwalab.transaction.TransactionDiagnosticSettlement
 import dev.mwalab.transaction.LegacyTransactionCodec
 import dev.mwalab.transaction.SolanaTransactionMessageDetector
 import kotlinx.coroutines.CancellationException
@@ -85,6 +86,8 @@ class MwaSessionHost(
     private val capabilitySnapshotRepository: CapabilitySnapshotRepository =
         MwaLabComposition.capabilitySnapshotRepository(context.applicationContext),
     transactionInspector: TransactionInspection = MwaLabComposition.transactionInspector(),
+    private val transactionDiagnosticSettlement: TransactionDiagnosticSettlement =
+        MwaLabComposition.transactionDiagnosticSettlement(context.applicationContext),
     private val onSessionFinished: () -> Unit = {},
 ) : AutoCloseable {
     private val appContext = context.applicationContext
@@ -550,16 +553,24 @@ class MwaSessionHost(
             record(MwaSessionEvent.SIGN_TRANSACTIONS_REQUEST)
             authorizationScope.launch {
                 val diagnostics = transactionInspection.inspect(payloads, persistentSessionId, protocolHandle?.eventId)
-                handleSignTransactions(
-                    request = request,
-                    payloads = payloads,
-                    diagnostics = diagnostics,
-                    startedAt = startedAt,
-                    generation = generation,
-                    sessionId = persistentSessionId,
-                    protocolHandle = protocolHandle,
-                    requestSummary = requestSummary,
-                )
+                val diagnosticContext = transactionDiagnosticSettlement.begin(protocolHandle, diagnostics) {
+                    record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "transaction_diagnostics")
+                }
+                try {
+                    handleSignTransactions(
+                        request = request,
+                        payloads = payloads,
+                        diagnostics = diagnostics,
+                        startedAt = startedAt,
+                        generation = generation,
+                        sessionId = persistentSessionId,
+                        protocolHandle = protocolHandle,
+                        requestSummary = requestSummary,
+                    )
+                } finally {
+                    // Independent diagnostic work survives cancellation of this session's authorization scope.
+                    transactionDiagnosticSettlement.finish(diagnosticContext)
+                }
             }
         }
 
@@ -625,16 +636,24 @@ class MwaSessionHost(
             record(MwaSessionEvent.SIGN_AND_SEND_REQUEST)
             authorizationScope.launch {
                 val diagnostics = transactionInspection.inspect(payloads, persistentSessionId, protocolHandle?.eventId)
-                handleSignAndSendTransactions(
-                    request = request,
-                    payloads = payloads,
-                    diagnostics = diagnostics,
-                    startedAt = startedAt,
-                    generation = generation,
-                    sessionId = persistentSessionId,
-                    protocolHandle = protocolHandle,
-                    requestSummary = requestSummary,
-                )
+                val diagnosticContext = transactionDiagnosticSettlement.begin(protocolHandle, diagnostics) {
+                    record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "transaction_diagnostics")
+                }
+                try {
+                    handleSignAndSendTransactions(
+                        request = request,
+                        payloads = payloads,
+                        diagnostics = diagnostics,
+                        startedAt = startedAt,
+                        generation = generation,
+                        sessionId = persistentSessionId,
+                        protocolHandle = protocolHandle,
+                        requestSummary = requestSummary,
+                    )
+                } finally {
+                    // Independent diagnostic work survives cancellation of this session's authorization scope.
+                    transactionDiagnosticSettlement.finish(diagnosticContext)
+                }
             }
         }
 
@@ -1746,6 +1765,7 @@ class MwaSessionHost(
             )
             return
         }
+        transactionDiagnosticSettlement.completed(result)
         if (result is ProtocolRecorder.CompletionResult.PersistenceFailed) {
             record(
                 MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED,

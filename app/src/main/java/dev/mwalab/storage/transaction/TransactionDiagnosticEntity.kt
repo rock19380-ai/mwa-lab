@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 import dev.mwalab.storage.protocol.ProtocolEventEntity
 import dev.mwalab.storage.session.SessionEntity
 
-/** Schema-v2 reservation only. No transaction diagnostic writer exists in Step 4.2. */
+/** Sanitized child metadata for an already persisted terminal protocol event. */
 @Entity(
     tableName = "transaction_diagnostics",
     foreignKeys = [

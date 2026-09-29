@@ -16,6 +16,8 @@ import com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario
 import dev.mwalab.app.MwaLabComposition
 import dev.mwalab.approval.*
 import dev.mwalab.identity.TestEndpointIdentity
+import dev.mwalab.mwa.evidence.MwaSessionEvidence
+import dev.mwalab.mwa.evidence.MwaSessionEvent
 import dev.mwalab.mwa.association.AssociationOpenResult
 import dev.mwalab.protocol.*
 import dev.mwalab.protocol.recorder.*
@@ -26,10 +28,18 @@ import dev.mwalab.signing.LabSigningService
 import dev.mwalab.storage.*
 import dev.mwalab.transaction.*
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.bouncycastle.math.ec.rfc8032.Ed25519
@@ -63,7 +73,8 @@ class MwaTransactionApprovalInstrumentedTest {
             signed.forEachIndexed { index, bytes -> f.verifySigned(payloads[index], bytes) }
             f.assertEvent(ProtocolMethod.SIGN_TRANSACTIONS, ProtocolOutcome.SUCCESS, null, "signed")
             assertTrue(f.submitted.isEmpty())
-            f.assertNoDiagnosticWrites()
+            f.assertDiagnosticRowCount(2)
+            f.assertNoAuthTokensInStorage()
         }
     }
 
@@ -87,7 +98,8 @@ class MwaTransactionApprovalInstrumentedTest {
                 f.order.filter { it == "send" || it.startsWith("commitment:") })
             assertTrue(f.options.all { it == DevnetSendOptions(17, "confirmed", false, 2, true) })
             f.assertEvent(ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS, ProtocolOutcome.SUCCESS, null, "submitted")
-            f.assertNoDiagnosticWrites()
+            f.assertDiagnosticRowCount(2)
+            f.assertNoAuthTokensInStorage()
         }
     }
 
@@ -218,6 +230,46 @@ class MwaTransactionApprovalInstrumentedTest {
         }
     }
 
+    @Test
+    fun diagnosticDaoFailureCannotChangeSigningSubmissionRejectionOrMalformedWireResults() {
+        Fixture().use { f ->
+            f.failDiagnosticInserts()
+            for (send in listOf(false, true)) {
+                val approved = f.sign(send, arrayOf(f.transaction()))
+                assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+                assertNotNull(approved.get(10, TimeUnit.SECONDS))
+                f.assertEvent(method(send), ProtocolOutcome.SUCCESS, null, if (send) "submitted" else "signed")
+                val rejected = f.sign(send, arrayOf(f.transaction()))
+                assertTrue(f.approvals.reject(f.awaitApproval().request.requestId))
+                assertRemoteError(rejected, ProtocolContract.ERROR_NOT_SIGNED)
+                f.assertEvent(method(send), ProtocolOutcome.FAILURE, ProtocolContract.ERROR_NOT_SIGNED, "rejected")
+                assertRemoteError(f.sign(send, arrayOf(byteArrayOf(1))), ProtocolContract.ERROR_INVALID_PAYLOADS)
+                f.assertEvent(method(send), ProtocolOutcome.FAILURE, ProtocolContract.ERROR_INVALID_PAYLOADS, "invalid_legacy_transaction")
+            }
+            f.awaitFailures("transaction_diagnostics", 6)
+            assertEquals(2, f.signCount); assertEquals(1, f.submitted.size)
+            f.assertNoDiagnosticWrites()
+            f.assertNoAuthTokensInStorage()
+        }
+    }
+
+    @Test
+    fun canonicalEventWriteFailurePreservesWireResultsAndNeverCreatesOrphanDiagnostics() {
+        Fixture().use { f ->
+            f.failTransactionEventInserts()
+            for (send in listOf(false, true)) {
+                val pending = f.sign(send, arrayOf(f.transaction()))
+                assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+                assertNotNull(pending.get(10, TimeUnit.SECONDS))
+                f.awaitFailures("protocol_complete_" + method(send).wireName, 1)
+            }
+            f.assertOnlyAuthorizationPersisted()
+            f.assertNoDiagnosticWrites()
+            assertFalse(f.evidence.any { it.detail == "transaction_diagnostics" })
+            assertEquals(2, f.signCount); assertEquals(1, f.submitted.size)
+        }
+    }
+
     private fun method(send: Boolean) = if (send) ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS else ProtocolMethod.SIGN_TRANSACTIONS
 
     private fun assertRemoteError(future: Future<*>, code: Int) {
@@ -239,11 +291,16 @@ class MwaTransactionApprovalInstrumentedTest {
         private val name = "phase48-approval-" + UUID.randomUUID() + ".db"
         private val db = Room.databaseBuilder(context, MwaLabDatabase::class.java, name).build()
         private val repo = RoomSessionRepository(db.sessionDao(), db.protocolEventDao())
+        private val sessionFinished = CountDownLatch(1)
+        private val diagnosticWorkerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         val approvals = ApprovalCoordinator()
         val order = CopyOnWriteArrayList<String>()
         val inspected = CopyOnWriteArrayList<TransactionSummary>()
         val submitted = CopyOnWriteArrayList<ByteArray>()
         val options = CopyOnWriteArrayList<DevnetSendOptions>()
+        val evidence = CopyOnWriteArrayList<MwaSessionEvidence>()
+        private val authTokens = CopyOnWriteArrayList<String>()
+        private var diagnosticWritesFail = false
         @Volatile var signCount = 0
         @Volatile var blockhashValid = true
         private val signer = MwaLabComposition.signingService(context)
@@ -278,15 +335,16 @@ class MwaTransactionApprovalInstrumentedTest {
             }
         }
         private val host = MwaSessionHost(context, signingService = countingSigner, approvalCoordinator = approvals,
-            rpcGateway = rpc, evidenceSink = {}, protocolEvidenceSink = {}, protocolRecorder = recorder,
+            rpcGateway = rpc, evidenceSink = { evidence += it }, protocolEvidenceSink = {}, protocolRecorder = recorder,
             sessionLifecycleCoordinator = SessionLifecycleCoordinator(repo, recorder),
             capabilitySnapshotRepository = RoomCapabilitySnapshotRepository(db.capabilitySnapshotDao()),
+            transactionDiagnosticSettlement = TransactionDiagnosticSettlement(repo, RoomTransactionDiagnosticRepository(db.transactionDiagnosticDao()), diagnosticWorkerScope),
             transactionInspector = object : TransactionInspection {
                 override fun inspect(transaction: ByteArray, payloadIndex: Int, binding: TransactionDiagnosticBinding?): TransactionSummary {
                     order += "inspect:" + payloadIndex
                     return inspector.inspect(transaction, payloadIndex, binding).also { inspected += it }
                 }
-            })
+            }, onSessionFinished = { sessionFinished.countDown() })
         private val association = LocalAssociationScenario(Scenario.DEFAULT_CLIENT_TIMEOUT_MS)
         val client: MobileWalletAdapterClient
         lateinit var publicKey: ByteArray
@@ -301,6 +359,7 @@ class MwaTransactionApprovalInstrumentedTest {
                 "Phase 4.8 approval fixture", ProtocolContract.CHAIN_SOLANA_DEVNET,
                 null, null, null, null).get(10, TimeUnit.SECONDS)
             publicKey = authorization.accounts.single().publicKey
+            authTokens += authorization.authToken
         }
         /** Clientlib is single-flight. Exercise the real frozen revocation callback while its wire request is pending. */
         fun revokeThroughPinnedWalletlibCallback(sessionId: String) {
@@ -341,6 +400,16 @@ class MwaTransactionApprovalInstrumentedTest {
             assertEquals(outcome, event.outcome); assertEquals(code, event.protocolErrorCode)
             source?.let { assertEquals(it, event.failureSource) }
             assertFalse(event.requestSummary.values.any { it.contains("RAW_DIAGNOSTIC_EXCEPTION") })
+            val expected = inspected.filter { it.eventId == event.eventId }
+            if (expected.isNotEmpty() && !diagnosticWritesFail) {
+                val stored = await {
+                    runBlocking { RoomTransactionDiagnosticRepository(db.transactionDiagnosticDao())
+                        .getForEvent(event.sessionId, event.eventId) }.takeIf { it.size == expected.size }
+                }
+                assertEquals(expected, stored)
+                assertEquals(event, runBlocking { repo.getSession(event.sessionId) }!!.events.single { it.eventId == event.eventId })
+            }
+
         }
         fun assertOrderedEvents(methods: List<ProtocolMethod>) {
             val events = await { runBlocking { repo.observeSessions().first() }.single().events.takeIf { it.size == methods.size } }
@@ -354,6 +423,44 @@ class MwaTransactionApprovalInstrumentedTest {
             val message = signed.copyOfRange(65, signed.size)
             assertTrue(Ed25519.verify(signed.copyOfRange(1, 65), 0, publicKey, 0, message, 0, message.size))
         }
+        fun assertDiagnosticRowCount(expected: Int) {
+            val count = await {
+                db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM transaction_diagnostics").use {
+                    assertTrue(it.moveToFirst()); it.getInt(0).takeIf { value -> value == expected }
+                }
+            }
+            assertEquals(expected, count)
+        }
+        fun failDiagnosticInserts() {
+            diagnosticWritesFail = true
+            db.openHelper.writableDatabase.execSQL("CREATE TRIGGER fail_diagnostics BEFORE INSERT ON transaction_diagnostics " +
+                "BEGIN SELECT RAISE(ABORT, 'controlled diagnostic failure'); END")
+        }
+        fun failTransactionEventInserts() {
+            db.openHelper.writableDatabase.execSQL("CREATE TRIGGER fail_transaction_events BEFORE INSERT ON protocol_events " +
+                "WHEN NEW.method IN ('SIGN_TRANSACTIONS', 'SIGN_AND_SEND_TRANSACTIONS') " +
+                "BEGIN SELECT RAISE(ABORT, 'controlled parent failure'); END")
+        }
+        fun awaitFailures(detail: String, count: Int) {
+            await { evidence.count { it.event == MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED && it.detail == detail }
+                .takeIf { it >= count } }
+            assertTrue(evidence.filter { it.event == MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED }
+                .all { it.detail == "transaction_diagnostics" || it.detail!!.startsWith("protocol_complete_") })
+        }
+        fun assertOnlyAuthorizationPersisted() {
+            assertEquals(listOf(ProtocolMethod.AUTHORIZE), runBlocking { repo.observeSessions().first() }.single().events.map { it.method })
+        }
+        fun assertNoAuthTokensInStorage() {
+            assertTrue(authTokens.all { it.isNotBlank() })
+            db.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").use { while (it.moveToNext()) {} }
+            listOf("", "-wal", "-shm").forEach { suffix ->
+                val file = context.getDatabasePath(name + suffix)
+                if (file.exists()) {
+                    val text = file.readBytes().toString(Charsets.ISO_8859_1)
+                    authTokens.forEach { assertFalse(text.contains(it)) }
+                }
+            }
+        }
         fun assertNoDiagnosticWrites() {
             db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM transaction_diagnostics").use {
                 assertTrue(it.moveToFirst()); assertEquals(0, it.getInt(0))
@@ -366,7 +473,19 @@ class MwaTransactionApprovalInstrumentedTest {
         }
         override fun close() {
             runCatching { association.close().get(10, TimeUnit.SECONDS) }
+            assertTrue("Natural walletlib teardown did not finish", sessionFinished.await(10, TimeUnit.SECONDS))
             host.close()
+            // Drain handler-finally and diagnostic jobs before closing their disposable Room database.
+            // A visible committed row does not prove its background coroutine has returned yet.
+            val field = MwaSessionHost::class.java.getDeclaredField("authorizationScope").also { it.isAccessible = true }
+            val authorizationScope = field.get(host) as CoroutineScope
+            runBlocking {
+                withTimeout(7_000) {
+                    authorizationScope.coroutineContext[Job]!!.join()
+                    diagnosticWorkerScope.coroutineContext[Job]!!.children.toList().joinAll()
+                }
+            }
+            diagnosticWorkerScope.cancel()
             db.close()
             context.deleteDatabase(name)
         }

@@ -27,6 +27,7 @@ import dev.mwalab.storage.MwaLabDatabase
 import dev.mwalab.storage.RoomCapabilitySnapshotRepository
 import dev.mwalab.storage.RoomSessionRepository
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
@@ -131,7 +132,8 @@ class MwaCapabilityCaptureInstrumentedTest {
                         error("SECRET_CAPABILITY_FAILURE")
                     }
                 }
-                val host = f.host(throwing, failCapabilityLog = failure == "logging")
+                val finished = CountDownLatch(1)
+                val host = f.host(throwing, failCapabilityLog = failure == "logging", onFinished = { finished.countDown() })
                 val association = LocalAssociationScenario(Scenario.DEFAULT_CLIENT_TIMEOUT_MS)
                 try {
                     val client = f.connect(host, association)
@@ -169,6 +171,8 @@ class MwaCapabilityCaptureInstrumentedTest {
                 } finally {
                     // Initiate client close before server close to avoid pinned clientlib's cleanup lock inversion.
                     runCatching { association.close().get(10, TimeUnit.SECONDS) }
+                    // Walletlib completion callbacks must finish using this disposable database before it closes.
+                    assertTrue("Natural walletlib teardown did not finish", finished.await(10, TimeUnit.SECONDS))
                     host.close()
                 }
             }
@@ -226,7 +230,8 @@ class MwaCapabilityCaptureInstrumentedTest {
         val approvals = ApprovalCoordinator()
         val evidence = CopyOnWriteArrayList<MwaSessionEvidence>()
         fun host(capabilityRepository: CapabilitySnapshotRepository,
-            sessionRepository: SessionRepository = sessions, failCapabilityLog: Boolean = false): MwaSessionHost {
+            sessionRepository: SessionRepository = sessions, failCapabilityLog: Boolean = false,
+            onFinished: () -> Unit = {}): MwaSessionHost {
             val recorder = PersistentProtocolRecorder(sessionRepository)
             return MwaSessionHost(context, approvalCoordinator = approvals,
                 evidenceSink = {
@@ -234,7 +239,7 @@ class MwaCapabilityCaptureInstrumentedTest {
                     if (failCapabilityLog && it.detail == "capability_snapshot") error("SECRET_LOG_FAILURE")
                 }, protocolEvidenceSink = {}, protocolRecorder = recorder,
                 sessionLifecycleCoordinator = SessionLifecycleCoordinator(sessionRepository, recorder),
-                capabilitySnapshotRepository = capabilityRepository)
+                capabilitySnapshotRepository = capabilityRepository, onSessionFinished = onFinished)
         }
         fun connect(host: MwaSessionHost, association: LocalAssociationScenario): MobileWalletAdapterClient {
             val uri = LocalAssociationIntentCreator.createAssociationIntent(null, association.port, association.session).data
