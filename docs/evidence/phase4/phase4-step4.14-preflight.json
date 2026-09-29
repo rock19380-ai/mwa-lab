@@ -1,0 +1,8 @@
+{
+  "baseCommit": "e1529dcdc990f0f08b34127fd8eb953ec7877b84",
+  "phase": "4.14",
+  "phase3StaticSha256": "1de48365d68aa940dba18a8535495154eaf7c0549b64582066110242e72070e6",
+  "phase3TagTarget": "913642d30c4445602b5ff7f72995e826a196938b",
+  "recordedAtUtc": "2026-09-29T10:17:10.815300+00:00",
+  "scope": "Documentation/static gate/CI only; no Phase 4 final freeze or exact-head CI claim."
+}

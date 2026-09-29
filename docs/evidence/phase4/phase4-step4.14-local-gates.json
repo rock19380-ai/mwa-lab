@@ -1,0 +1,61 @@
+{
+  "baseCommit": "e1529dcdc990f0f08b34127fd8eb953ec7877b84",
+  "checkedAtUtc": "2026-09-29T10:40:02.509442+00:00",
+  "checks": [
+    {
+      "command": "python3 scripts/phase4_static.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 scripts/generate_phase4_transaction_vectors.py --check",
+      "result": "PASS"
+    },
+    {
+      "command": "bash -n scripts/phase4_static.sh",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew lint",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew test --rerun-tasks",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew assembleDebug",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest",
+      "result": "PASS"
+    },
+    {
+      "command": "./scripts/phase4_static.sh",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "jvmResults": {
+    "app": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 224
+    },
+    "demo-client": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 6
+    }
+  },
+  "note": "Step 4.14 is deterministic local documentation/static/CI closeout. Device acceptance remains the separately recorded Step 4.11 evidence; final hostile audit, exact-head remote CI and freeze tag are not claimed here.",
+  "phase": "4.14",
+  "phase3StaticSha256": "1de48365d68aa940dba18a8535495154eaf7c0549b64582066110242e72070e6",
+  "schemaVersion": 2,
+  "status": "PASS"
+}

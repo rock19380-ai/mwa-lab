@@ -184,3 +184,49 @@ errors retain their value without a fabricated name. Details render safe summari
 for frozen predecessor tests. They are absent from the product UI authority.
 Pinned walletlib handles get_capabilities internally: no synthetic event is
 recorded. Capability snapshots and transaction diagnostics are Phase 4 work.
+
+## Phase 4 capability and transaction diagnostic authority
+
+Phase 4 preserves the Phase 3 recorder and the Phase 2 signing authorities while
+adding two diagnostic branches:
+
+```text
+MwaCapabilityProfile
+  -> walletlib MobileWalletAdapterConfig
+  -> CapabilitySnapshotFactory
+  -> capability_snapshots (Room)
+
+transaction callback
+  -> ProtocolRecorder.begin
+  -> TransactionInspector / SolanaWireTransactionParser   [diagnostic only]
+  -> ApprovalRequest presentation
+  -> LegacyTransactionCodec / LabSigningService           [authoritative]
+  -> ProtocolRecorder.complete
+  -> TransactionDiagnosticSettlement
+  -> transaction_diagnostics (Room)
+  -> Session Detail inspector
+```
+
+Room `mwa_lab.db` is schema version 2. Migration `1 -> 2` creates only the
+`capability_snapshots` and `transaction_diagnostics` structures/indexes; it does
+not rewrite historical sessions/events or backfill historical capability state.
+Existing Phase 3 table definitions remain unchanged.
+
+`CapabilitySnapshotSource.CONFIGURED_WALLETLIB_PROFILE` is deliberately explicit:
+the snapshot records the capability profile configured for that session. Pinned
+walletlib 2.0.7 handles `get_capabilities` internally, so this configured context
+is never relabelled as an observed callback and no synthetic timeline event is
+created.
+
+`TransactionInspector` and the decoder registry are read-only diagnostics. They
+can detect legacy/v0 structure, derive header privileges, fingerprint payloads,
+and decode the verified System/Memo/SPL subset, but they cannot authorize,
+approve, sign, or submit. `ApprovalCoordinator` remains decision authority and
+`LegacyTransactionCodec` remains legacy signing/validation authority. Diagnostic
+persistence failure is isolated from the MWA protocol result.
+
+Persistent transaction diagnostics contain structured public metadata and hashes,
+not raw transaction payloads or raw unknown instruction bytes. v0 lookup-table
+addresses are not resolved over RPC in Phase 4; partial diagnostics state the
+limitation and v0 signing remains unsupported. Simulation, fault injection, and
+report export are not part of this architecture phase.

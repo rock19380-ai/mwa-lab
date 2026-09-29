@@ -10,7 +10,7 @@ GitHub Actions runs deterministic, non-device gates:
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
-./scripts/phase3_static.sh
+./scripts/phase4_static.sh
 ```
 
 The workflow retains Gradle wrapper validation and verifies both primary and
@@ -220,3 +220,47 @@ concurrent recorder tests use repository seams because clientlib 2.0.7 allows
 only one outstanding live request per association. Live Devnet submission evidence
 from Phase 2 stays historical; Phase 3 deterministic regression includes existing
 submission ordering, failure, commitment, and no-resubmission tests.
+
+## Phase 4 verification
+
+Phase 4 adds deterministic parser/decoder, storage, UI, and cross-app acceptance
+without re-running historical gates whose frozen scope intentionally prohibited
+future phases. `scripts/phase3_static.sh` is byte-for-byte preserved; CI selects
+`phase4_static.sh` when exported schema v2 exists. The Phase 4 gate runs the still
+applicable Phase 1 gate, validates current schema/migration/source authority
+contracts, and checks deterministic Phase 4 transaction vectors.
+
+JVM coverage includes capability-profile parity, schema migration/persistence,
+bounded legacy/v0 parsing, account privilege derivation, malformed/hostile input,
+System Transfer, Memo, SPL Token Transfer/TransferChecked, unknown-program
+truthfulness, SHA-256 fingerprints, pre-approval presentation, settlement, and
+diagnostic failure isolation.
+
+The Step 4.11 local gate evidence records 224 app JVM tests and 6 demo-client JVM
+tests with zero errors/failures/skips, plus lint, debug APK assembly, AndroidTest
+APK assembly, installation, and targeted connected tests. The recorded connected
+classes contain 10 app instrumentation tests and 1 demo-client instrumentation
+test, all passing. These counts describe that recorded checkpoint; later closeout
+runs must record their own results rather than reuse counts blindly.
+
+Real Android emulator acceptance uses:
+
+```bash
+python3 scripts/phase4_diagnostic_acceptance.py --serial emulator-5554 \
+  --evidence-dir docs/evidence/phase4
+```
+
+The recorded Android 16 (`sdk_gphone64_x86_64`, API 36) run exercises:
+
+- System Program Transfer inspection before approval;
+- Unknown Program rendering without invented semantics;
+- v0 partial inspection followed by the unchanged authoritative legacy-signing
+  rejection;
+- absence of a synthetic `GET_CAPABILITIES` protocol event;
+- force-stop/restart equality for `sessions`, `protocol_events`,
+  `capability_snapshots`, and `transaction_diagnostics`;
+- product inspector rendering again after restart.
+
+Phase 4 does not claim simulation, fault injection, report export, ALT RPC
+resolution, v0 signing, or production-wallet compatibility. Those remain outside
+this phase's acceptance matrix.

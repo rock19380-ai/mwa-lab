@@ -118,3 +118,42 @@ describe host completion/diagnostic settlement, not proof of response delivery
 or chain execution. Diagnostic storage failure has no protocol authority.
 No pinned library, transport observer, protocol error mapping, or network policy
 was changed to expand observation coverage.
+
+## Phase 4 protocol and diagnostics truth table
+
+The table below separates observable host callbacks, configured capability context,
+and diagnostic feature scope. Status text is intentionally machine-checked by the
+Phase 4 gate.
+
+| Capability | Phase 4 status |
+|---|---|
+| authorize | observed |
+| reauthorize | observed |
+| deauthorize | observed |
+| sign_messages | observed |
+| sign_transactions | observed + diagnostics |
+| sign_and_send_transactions | observed + diagnostics |
+| get_capabilities request | not observable through pinned walletlib |
+| configured capability profile | session snapshot persisted |
+| legacy inspection | supported |
+| v0 detection | supported |
+| v0 full ALT resolution | not supported |
+| v0 signing | not supported |
+| System Transfer | supported |
+| Memo | supported |
+| SPL Token | narrow verified subset |
+| unknown program | explicit unknown |
+| simulation | not implemented / Phase 5 |
+| fault injection | not implemented / Phase 6 |
+| report export | not implemented / Phase 7 |
+
+Configured capability snapshots are captured per new Phase 4 session from
+`MwaCapabilityProfile`; historical Phase 3 sessions are not backfilled. The v0
+diagnostic path can preserve static accounts, lookups, and partial instruction
+metadata without resolving ALT-loaded addresses; this diagnostic visibility does
+not alter `LegacyTransactionCodec`'s versioned-transaction rejection.
+
+Program decoding is deliberately limited to verified semantics. Unknown program
+or unsupported instruction semantics are shown as unknown/unavailable with public
+program/account metadata plus bounded data length/SHA-256 rather than fabricated
+meaning. No production-wallet compatibility claim is made by Phase 4.

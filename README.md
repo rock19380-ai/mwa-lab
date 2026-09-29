@@ -109,8 +109,36 @@ for predecessor tests.
 
 See [PHASE_3_REPORT.md](PHASE_3_REPORT.md) and
 [Phase 3 evidence](docs/evidence/phase3/) for executed acceptance and freeze
-provenance. Phase 4 is not started: capability snapshots, transaction inspector,
-simulation, fault engine, and report export remain deferred.
+provenance.
+
+## Phase 4 capability and transaction diagnostics
+
+Phase 4 adds session-scoped configured capability snapshots and a read-only
+transaction diagnostic layer without changing the frozen signing/authorization
+authorities. `MwaCapabilityProfile` remains the capability source of truth;
+walletlib 2.0.7 still handles `get_capabilities` internally, so MWA Lab does not
+fabricate a `GET_CAPABILITIES` timeline event.
+
+For transaction signing requests, MWA Lab now records sanitized structured
+diagnostics including transaction version, fee payer, signer/account privileges,
+recent blockhash, program IDs, bounded instruction metadata, SHA-256 fingerprints,
+and the verified decoder subset. The current decoder scope is System Program
+Transfer, bounded Memo display, and the narrow SPL Token Transfer /
+TransferChecked subset. Unknown semantics remain explicitly unknown.
+
+Versioned v0 transactions are detected and represented as partial diagnostics
+when lookup-table addresses are unresolved. This does **not** expand the signing
+contract: `LegacyTransactionCodec` remains legacy-only signing authority and v0
+signing remains rejected. Raw transaction payloads and raw unknown instruction
+bytes are not persisted.
+
+Phase 4 device acceptance exercised System Transfer, Unknown Program, and v0
+authoritative rejection through the real cross-package path, then verified all
+four diagnostic tables across force-stop/restart. See
+[PHASE_4_REPORT.md](PHASE_4_REPORT.md) and
+[Phase 4 evidence](docs/evidence/phase4/). Simulation, deterministic fault
+injection, and diagnostic report export remain Phase 5, Phase 6, and Phase 7
+work respectively.
 
 ## Historical Phase 2 exclusions
 
@@ -134,16 +162,16 @@ protocol boundary.
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
-./scripts/phase3_static.sh
+./scripts/phase4_static.sh
 ```
 
-GitHub Actions runs deterministic non-device gates. Real Android association,
-interactive approval, and restart/UI acceptance are recorded separately under
-`docs/evidence/phase3/`. Historical live Devnet evidence remains in
-`docs/evidence/phase2/`; it is not relabelled as a fresh Phase 3 network run.
-The historical `phase2_static.sh` remains unchanged and retains its intentional
-pre-Room scope assertion. The Phase 3 gate verifies its hash and 28 unchanged
-predecessor source boundaries, alongside current behavioral regressions.
+GitHub Actions runs deterministic non-device gates and routes the current Phase 4
+schema to `phase4_static.sh`. The historical Phase 2 and Phase 3 gates remain
+unchanged evidence for their frozen scopes; Phase 4 does not execute the obsolete
+Phase 3 assertion that future transaction diagnostics must be absent. Real Android
+association, approval, transaction inspection, and restart/UI acceptance are
+recorded separately under `docs/evidence/phase4/`. Historical live Devnet evidence
+from Phase 2 is not relabelled as fresh Phase 4 network evidence.
 
 ## Modules
 

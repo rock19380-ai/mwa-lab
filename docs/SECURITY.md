@@ -210,3 +210,28 @@ Abrupt process death can leave an open session and lose unfinished in-memory
 handles; the UI preserves that uncertainty without invented terminal events.
 
 Mainnet remains disabled. No production-wallet import or server signing was added.
+
+## S13 — Phase 4 diagnostic authority and persistence boundary
+
+Phase 4 transaction parsing is observational. `TransactionInspector`, the wire
+parser, and program decoders have no authorization, approval, signing, submission,
+or RPC authority. `ApprovalCoordinator`, `LegacyTransactionCodec`,
+`LabSigningService`, and the fixed Devnet RPC boundary keep their predecessor
+roles. A diagnostic parse success cannot make an otherwise invalid request
+signable, and diagnostic persistence failure cannot change the MWA result.
+
+Capability snapshots are session-scoped configured context sourced from
+`MwaCapabilityProfile`. They are not evidence that MWA Lab observed a
+`get_capabilities` callback. Historical Phase 3 sessions are not backfilled with
+current capability values.
+
+Schema version 2 persists only sanitized transaction metadata: SHA-256 fingerprint,
+wire length, version/status, public account/program metadata, bounded decoded
+fields, and for unknown instruction data only length plus SHA-256. It does not
+persist raw transactions, raw unknown instruction bytes, private keys, seeds,
+raw authorization/association tokens, encryption secrets, or raw signatures.
+
+Versioned v0 inspection is deliberately non-authoritative and partial when lookup
+table addresses are unresolved. It does not enable v0 signing. Phase 4 introduces
+no mainnet path, transaction simulation, synthetic fault engine, report exporter,
+or Android share-sheet diagnostic export.
