@@ -6,6 +6,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.mwalab.capabilities.CapabilitySnapshot
+import dev.mwalab.capabilities.CapabilitySnapshotSource
 import dev.mwalab.protocol.*
 import dev.mwalab.session.*
 import dev.mwalab.storage.*
@@ -69,7 +71,8 @@ class SessionsUiInstrumentedTest {
         val summary = SessionSummary(MwaSession("unknown-error", 100, 200,
             closeReason = SessionCloseReason.SCENARIO_COMPLETE), listOf(event))
         compose.setContent { MWALabTheme { SessionDetailScreen(SessionDetailUiState.Ready(summary), {}, {}) } }
-        compose.onNodeWithText("GET_CAPABILITIES: NOT OBSERVABLE THROUGH PINNED WALLETLIB").assertExists()
+        compose.onNodeWithText("Capability snapshot was not recorded for this session.").assertExists()
+        compose.onNodeWithText("walletlib 2.0.7 handles get_capabilities internally.", substring = true).assertExists()
         compose.onAllNodesWithText("#2 GET_CAPABILITIES").assertCountEquals(0)
         compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 SIGN_MESSAGES"))
         compose.onNodeWithText("Protocol error: -12345 (Unknown protocol error)").assertExists()
@@ -96,25 +99,30 @@ class SessionsUiInstrumentedTest {
                 failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL))
             repo.recordProtocolEvent(event("persisted-ui", 1).copy(method = ProtocolMethod.AUTHORIZE))
             repo.finishSession("persisted-ui", 200, SessionCloseReason.SERVING_COMPLETE)
+            RoomCapabilitySnapshotRepository(db.capabilitySnapshotDao()).recordSnapshot(archivedSnapshot("persisted-ui"))
         }
         db.close()
         val reopened = Room.databaseBuilder(context, MwaLabDatabase::class.java, name).build()
         try {
             val repo = RoomSessionRepository(reopened.sessionDao(), reopened.protocolEventDao())
             val sessions = SessionsViewModel(repo)
-            val detail = SessionDetailViewModel(repo)
+            val detail = SessionDetailViewModel(repo, RoomCapabilitySnapshotRepository(reopened.capabilitySnapshotDao()))
             compose.setContent {
                 MWALabTheme {
                     var selected by remember { mutableStateOf(false) }
                     val listState by sessions.state.collectAsState()
                     val detailState by detail.state.collectAsState()
-                    if (selected) SessionDetailScreen(detailState, { selected = false }, detail::retry)
+                    if (selected) SessionDetailScreen(detailState, { selected = false }, detail::retry, detail::retryCapabilities)
                     else SessionsScreen(listState, { detail.selectSession(it); selected = true }, sessions::retry)
                 }
             }
             compose.waitUntil(10_000) { compose.onAllNodesWithText("Restart-loaded dApp").fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText("Restart-loaded dApp").performClick()
             compose.waitUntil(10_000) { compose.onAllNodesWithText("SESSION FAIL").fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("CAPABILITY SNAPSHOT"))
+            compose.onNodeWithText("Max transactions/request: 3").assertExists()
+            compose.onNodeWithText("Transaction versions: legacy, future").assertExists()
+            compose.onNodeWithText("Optional features: solana:archived_feature").assertExists()
             compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 AUTHORIZE"))
             compose.onNodeWithText("#1 AUTHORIZE").assertExists()
             compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#2 SIGN_MESSAGES"))
@@ -122,6 +130,53 @@ class SessionsUiInstrumentedTest {
             compose.onNodeWithText("Failure source: OBSERVED_PROTOCOL").assertExists()
         } finally { reopened.close(); context.deleteDatabase(name) }
     }
+
+    @Test
+    fun capabilitiesRenderPersistedValuesWithConfiguredProvenanceAndNoObservedClaim() {
+        compose.setContent { MWALabTheme {
+            SessionDetailScreen(SessionDetailUiState.Ready(summary("archived"),
+                SessionCapabilityUiState.Recorded(archivedSnapshot("archived"))), {}, {})
+        } }
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("CAPABILITY SNAPSHOT"))
+        compose.onNodeWithText("Source: Configured MWA Lab walletlib profile").assertExists()
+        compose.onNodeWithText("Max transactions/request: 3").assertExists()
+        compose.onNodeWithText("Max messages/request: 4").assertExists()
+        compose.onNodeWithText("Transaction versions: legacy, future").assertExists()
+        compose.onNodeWithText("Optional features: solana:archived_feature").assertExists()
+        compose.onNodeWithText("These values are the configured capability profile for this session.").assertExists()
+        compose.onNodeWithText("No synthetic GET_CAPABILITIES timeline event was created.", substring = true).assertExists()
+        compose.onAllNodesWithText("#2 GET_CAPABILITIES").assertCountEquals(0)
+    }
+
+    @Test
+    fun capabilityErrorSupportsSeparateRetryWhileTimelineRemainsVisible() {
+        var retries = 0
+        compose.setContent { MWALabTheme {
+            SessionDetailScreen(SessionDetailUiState.Ready(summary("a"), SessionCapabilityUiState.Unavailable),
+                {}, { error("Timeline retry must not be used") }, { retries++ })
+        } }
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("Retry capability snapshot"))
+        compose.onNodeWithText("Retry capability snapshot").performClick()
+        compose.runOnIdle { assertEquals(1, retries) }
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 SIGN_MESSAGES"))
+        compose.onNodeWithText("#1 SIGN_MESSAGES").assertExists()
+    }
+
+    @Test
+    fun capabilityLoadingDoesNotHideTimelineOrInventProfileValues() {
+        compose.setContent { MWALabTheme {
+            SessionDetailScreen(SessionDetailUiState.Ready(summary("a"), SessionCapabilityUiState.Loading), {}, {})
+        } }
+        compose.onNodeWithText("Loading recorded capability snapshot…").assertExists()
+        compose.onAllNodesWithText("Max transactions/request:", substring = true).assertCountEquals(0)
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 SIGN_MESSAGES"))
+        compose.onNodeWithText("#1 SIGN_MESSAGES").assertExists()
+    }
+
+    // An archived record can differ from today's configured authority.
+    private fun archivedSnapshot(id: String) = CapabilitySnapshot(id, 100,
+        CapabilitySnapshotSource.CONFIGURED_WALLETLIB_PROFILE, 3, 4,
+        listOf("legacy", "future"), listOf("solana:archived_feature"))
 
     private fun summary(id: String, reason: SessionCloseReason? = null, outcome: ProtocolOutcome = ProtocolOutcome.SUCCESS) =
         SessionSummary(MwaSession(id, 100, if (reason == null) null else 200, "Test dApp $id", reason), listOf(event(id, 1, outcome)))

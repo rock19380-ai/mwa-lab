@@ -2,6 +2,7 @@ package dev.mwalab.app
 
 import android.content.Context
 import dev.mwalab.approval.ApprovalCoordinator
+import dev.mwalab.capabilities.CapabilitySnapshotRepository
 import dev.mwalab.identity.AndroidKeystoreIdentityRepository
 import dev.mwalab.identity.IdentityRepository
 import dev.mwalab.protocol.recorder.PersistentProtocolRecorder
@@ -12,6 +13,7 @@ import dev.mwalab.rpc.SolanaDevnetRpcGateway
 import dev.mwalab.session.SessionLifecycleCoordinator
 import dev.mwalab.session.SessionRepository
 import dev.mwalab.storage.MwaLabDatabase
+import dev.mwalab.storage.RoomCapabilitySnapshotRepository
 import dev.mwalab.storage.RoomSessionRepository
 
 object MwaLabComposition {
@@ -29,6 +31,9 @@ object MwaLabComposition {
 
     @Volatile
     private var sessionRepositoryInstance: SessionRepository? = null
+
+    @Volatile
+    private var capabilitySnapshotRepositoryInstance: CapabilitySnapshotRepository? = null
 
     @Volatile
     private var protocolRecorderInstance: ProtocolRecorder? = null
@@ -76,6 +81,13 @@ object MwaLabComposition {
                     protocolEventDao = database.protocolEventDao(),
                 )
             }.also { sessionRepositoryInstance = it }
+        }
+
+    fun capabilitySnapshotRepository(context: Context): CapabilitySnapshotRepository =
+        capabilitySnapshotRepositoryInstance ?: synchronized(this) {
+            capabilitySnapshotRepositoryInstance ?: RoomCapabilitySnapshotRepository(
+                database(context).capabilitySnapshotDao(),
+            ).also { capabilitySnapshotRepositoryInstance = it }
         }
 
     fun protocolRecorder(context: Context): ProtocolRecorder =

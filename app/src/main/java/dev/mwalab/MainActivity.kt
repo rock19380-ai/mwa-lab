@@ -30,7 +30,9 @@ class MainActivity : ComponentActivity() {
                 val model = when (modelClass) {
                     HomeViewModel::class.java -> HomeViewModel(MwaLabComposition.identityRepository(applicationContext), repository)
                     SessionsViewModel::class.java -> SessionsViewModel(repository)
-                    SessionDetailViewModel::class.java -> SessionDetailViewModel(repository)
+                    SessionDetailViewModel::class.java -> SessionDetailViewModel(
+                        repository, MwaLabComposition.capabilitySnapshotRepository(applicationContext),
+                    )
                     else -> error("Unknown screen model")
                 }
                 @Suppress("UNCHECKED_CAST")
@@ -67,7 +69,9 @@ class MainActivity : ComponentActivity() {
                         Box(Modifier.weight(1f)) {
                             when (screen) {
                                 "Sessions" -> SessionsScreen(sessionsState, openSession, sessions::retry)
-                                "Detail" -> SessionDetailScreen(detailState, { screen = "Sessions" }, detail::retry)
+                                "Detail" -> SessionDetailScreen(
+                                    detailState, { screen = "Sessions" }, detail::retry, detail::retryCapabilities,
+                                )
                                 else -> HomeScreen(homeState, { screen = "Sessions" }, openSession, home::retry)
                             }
                         }

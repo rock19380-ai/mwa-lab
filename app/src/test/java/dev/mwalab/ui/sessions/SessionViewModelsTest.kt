@@ -1,5 +1,9 @@
 package dev.mwalab.ui.sessions
 
+import dev.mwalab.capabilities.CapabilitySnapshot
+import dev.mwalab.capabilities.CapabilitySnapshotRepository
+import dev.mwalab.capabilities.snapshotForSession
+import dev.mwalab.mwa.capabilities.MwaCapabilityProfile
 import dev.mwalab.identity.IdentityRepository
 import dev.mwalab.identity.TestEndpointIdentity
 import dev.mwalab.protocol.*
@@ -58,7 +62,7 @@ class SessionViewModelsTest {
             rows.value = listOf(SessionSummary(MwaSession("a", 100, 500,
                 closeReason = SessionCloseReason.SCENARIO_COMPLETE), listOf(second, first)))
         }
-        val model = SessionDetailViewModel(repo, backgroundScope)
+        val model = SessionDetailViewModel(repo, Capabilities(), backgroundScope)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
         model.selectSession("a")
         runCurrent()
@@ -74,7 +78,7 @@ class SessionViewModelsTest {
     @Test
     fun selectingReplacementSessionRejectsLateOldHistoryUpdates() = runTest {
         val repo = Repository().apply { rows.value = listOf(summary("a"), summary("b")) }
-        val model = SessionDetailViewModel(repo, backgroundScope)
+        val model = SessionDetailViewModel(repo, Capabilities(), backgroundScope)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
         model.selectSession("a")
         runCurrent()
@@ -89,7 +93,7 @@ class SessionViewModelsTest {
     @Test
     fun missingAndUnavailableDetailsAreDistinct() = runTest {
         val repo = Repository()
-        val model = SessionDetailViewModel(repo, backgroundScope)
+        val model = SessionDetailViewModel(repo, Capabilities(), backgroundScope)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
         model.selectSession("missing")
         runCurrent()
@@ -156,6 +160,134 @@ class SessionViewModelsTest {
         assertEquals("1970-01-01 00:00:00.000 UTC", timestampText(0))
     }
 
+    @Test
+    fun capabilityReadsUsePersistedSessionDataAndLeaveCanonicalTimelineUnchanged() = runTest {
+        val row = summary("a")
+        val repo = Repository().apply { rows.value = listOf(row) }
+        val persisted = snapshot("a", 123)
+        val capabilities = Capabilities().apply { rows.value = mapOf("a" to persisted) }
+        val model = SessionDetailViewModel(repo, capabilities, backgroundScope)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
+        model.selectSession("a")
+        runCurrent()
+        val ready = model.state.value as SessionDetailUiState.Ready
+        assertSame(row, ready.summary)
+        assertSame(persisted, (ready.capabilities as SessionCapabilityUiState.Recorded).snapshot)
+        assertEquals(listOf("a"), capabilities.readIds)
+        assertEquals(listOf(1L), ready.summary.events.map { it.sequence })
+        assertFalse(ready.summary.events.any { it.method == ProtocolMethod.GET_CAPABILITIES })
+    }
+
+    @Test
+    fun historicalMissingSnapshotStaysMissingWithoutAnyCaptureOrWrite() = runTest {
+        val repo = Repository().apply { rows.value = listOf(summary("historical")) }
+        val capabilities = Capabilities()
+        val model = SessionDetailViewModel(repo, capabilities, backgroundScope)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
+        model.selectSession("historical")
+        runCurrent()
+        assertEquals(SessionCapabilityUiState.Missing,
+            (model.state.value as SessionDetailUiState.Ready).capabilities)
+        model.retryCapabilities()
+        runCurrent()
+        assertEquals(SessionCapabilityUiState.Missing,
+            (model.state.value as SessionDetailUiState.Ready).capabilities)
+        assertEquals(listOf("historical", "historical"), capabilities.readIds)
+    }
+
+    @Test
+    fun capabilityLoadingDoesNotDelayTimelineAndLaterRecordedValueUpdatesOnlyDiagnostics() = runTest {
+        val repo = Repository().apply { rows.value = listOf(summary("a")) }
+        val capabilities = Capabilities().apply { holdReads = true }
+        val model = SessionDetailViewModel(repo, capabilities, backgroundScope)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
+        model.selectSession("a")
+        runCurrent()
+        val initial = model.state.value as SessionDetailUiState.Ready
+        assertEquals(SessionCapabilityUiState.Loading, initial.capabilities)
+        assertEquals(1, initial.summary.eventCount)
+        capabilities.releaseReads.value = true
+        capabilities.rows.value = mapOf("a" to snapshot("a", 234))
+        runCurrent()
+        val loaded = model.state.value as SessionDetailUiState.Ready
+        assertSame(initial.summary, loaded.summary)
+        assertTrue(loaded.capabilities is SessionCapabilityUiState.Recorded)
+    }
+
+    @Test
+    fun capabilityReadFailureIsGenericAndIndependentRetryDoesNotRestartTimeline() = runTest {
+        val repo = Repository().apply { rows.value = listOf(summary("a")) }
+        val capabilities = Capabilities().apply { failReads = true }
+        val model = SessionDetailViewModel(repo, capabilities, backgroundScope)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
+        model.selectSession("a")
+        runCurrent()
+        val ready = model.state.value as SessionDetailUiState.Ready
+        assertEquals(SessionCapabilityUiState.Unavailable, ready.capabilities)
+        assertFalse(ready.toString().contains("SECRET_CAPABILITY_EXCEPTION"))
+        assertEquals(1, repo.detailSubscriptions)
+        capabilities.failReads = false
+        capabilities.rows.value = mapOf("a" to snapshot("a", 345))
+        model.retryCapabilities()
+        runCurrent()
+        assertTrue((model.state.value as SessionDetailUiState.Ready).capabilities is SessionCapabilityUiState.Recorded)
+        assertEquals(1, repo.detailSubscriptions)
+    }
+
+    @Test
+    fun selectingAnotherSessionCannotReuseOrReceiveLateOldSnapshot() = runTest {
+        val repo = Repository().apply { rows.value = listOf(summary("a"), summary("b")) }
+        val capabilities = Capabilities().apply { rows.value = mapOf("a" to snapshot("a", 100)) }
+        val model = SessionDetailViewModel(repo, capabilities, backgroundScope)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
+        model.selectSession("a")
+        runCurrent()
+        model.selectSession("b")
+        runCurrent()
+        assertEquals(SessionCapabilityUiState.Missing,
+            (model.state.value as SessionDetailUiState.Ready).capabilities)
+        capabilities.rows.value = mapOf("a" to snapshot("a", 999), "b" to snapshot("b", 200))
+        runCurrent()
+        val ready = model.state.value as SessionDetailUiState.Ready
+        assertEquals("b", ready.summary.session.id)
+        assertEquals("b", (ready.capabilities as SessionCapabilityUiState.Recorded).snapshot.sessionId)
+        assertEquals(200L, ready.capabilities.snapshot.capturedAtEpochMillis)
+    }
+
+    @Test
+    fun mismatchedStoredSessionBindingMakesCapabilitiesUnavailableWithoutHidingHistory() = runTest {
+        val repo = Repository().apply { rows.value = listOf(summary("a")) }
+        val capabilities = Capabilities().apply { rows.value = mapOf("a" to snapshot("b", 100)) }
+        val model = SessionDetailViewModel(repo, capabilities, backgroundScope)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.state.collect() }
+        model.selectSession("a")
+        runCurrent()
+        val ready = model.state.value as SessionDetailUiState.Ready
+        assertEquals("a", ready.summary.session.id)
+        assertEquals(SessionCapabilityUiState.Unavailable, ready.capabilities)
+    }
+
+    private fun snapshot(id: String, at: Long) = MwaCapabilityProfile.snapshotForSession(
+        id, at, MwaCapabilityProfile.createWalletConfig())
+
+    private class Capabilities : CapabilitySnapshotRepository {
+        val rows = MutableStateFlow<Map<String, CapabilitySnapshot>>(emptyMap())
+        val releaseReads = MutableStateFlow(false)
+        val readIds = mutableListOf<String>()
+        var failReads = false
+        var holdReads = false
+        override fun observeSnapshot(sessionId: SessionId): Flow<CapabilitySnapshot?> = flow {
+            readIds += sessionId
+            if (failReads) error("SECRET_CAPABILITY_EXCEPTION")
+            if (holdReads) releaseReads.first { it }
+            emitAll(rows.map { it[sessionId] })
+        }
+        override suspend fun getSnapshot(sessionId: SessionId): CapabilitySnapshot? =
+            error("UI must use the observed persisted snapshot")
+        override suspend fun recordSnapshot(snapshot: CapabilitySnapshot) =
+            error("UI must never capture or write capabilities")
+    }
+
     private fun summary(id: String, reason: SessionCloseReason? = null, outcome: ProtocolOutcome = ProtocolOutcome.SUCCESS) =
         SessionSummary(MwaSession(id, 100, if (reason == null) null else 200,
             dappIdentityName = "Test dApp $id", closeReason = reason), listOf(event(id, 1, outcome)))
@@ -166,12 +298,14 @@ class SessionViewModelsTest {
     private class Repository : SessionRepository {
         val rows = MutableStateFlow<List<SessionSummary>>(emptyList())
         var failReads = false
+        var detailSubscriptions = 0
         override fun observeSessions(): Flow<List<SessionSummary>> = flow {
             if (failReads) error("SECRET_REPOSITORY_EXCEPTION")
             emitAll(rows)
         }
-        override fun observeSession(sessionId: SessionId): Flow<SessionSummary?> = observeSessions().map {
-            it.firstOrNull { row -> row.session.id == sessionId }
+        override fun observeSession(sessionId: SessionId): Flow<SessionSummary?> = flow {
+            detailSubscriptions++
+            emitAll(observeSessions().map { it.firstOrNull { row -> row.session.id == sessionId } })
         }
         override suspend fun getSession(sessionId: SessionId) = rows.value.firstOrNull { it.session.id == sessionId }
         override suspend fun createSession(session: MwaSession) = error("UI must not write history")

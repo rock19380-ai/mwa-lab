@@ -1,5 +1,6 @@
 package dev.mwalab.ui.sessions
 
+import dev.mwalab.capabilities.CapabilitySnapshot
 import dev.mwalab.session.SessionSummary
 
 sealed interface SessionsUiState {
@@ -12,8 +13,18 @@ sealed interface SessionsUiState {
 sealed interface SessionDetailUiState {
     data object Loading : SessionDetailUiState
     data object Missing : SessionDetailUiState
-    data class Ready(val summary: SessionSummary) : SessionDetailUiState
+    data class Ready(
+        val summary: SessionSummary,
+        val capabilities: SessionCapabilityUiState = SessionCapabilityUiState.Missing,
+    ) : SessionDetailUiState
     data object Error : SessionDetailUiState
+}
+
+sealed interface SessionCapabilityUiState {
+    data object Loading : SessionCapabilityUiState
+    data object Missing : SessionCapabilityUiState
+    data class Recorded(val snapshot: CapabilitySnapshot) : SessionCapabilityUiState
+    data object Unavailable : SessionCapabilityUiState
 }
 
 sealed interface IdentityUiState {

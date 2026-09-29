@@ -20,6 +20,8 @@ import dev.mwalab.app.MwaLabComposition
 import dev.mwalab.approval.ApprovalCoordinator
 import dev.mwalab.approval.ApprovalDecision
 import dev.mwalab.approval.ApprovalRequest
+import dev.mwalab.capabilities.CapabilitySnapshotRepository
+import dev.mwalab.capabilities.snapshotForSession
 import dev.mwalab.identity.IdentityRepository
 import dev.mwalab.mwa.association.AssociationOpenResult
 import dev.mwalab.mwa.authorization.LabAuthorizationDecision
@@ -77,6 +79,8 @@ class MwaSessionHost(
         MwaLabComposition.protocolRecorder(context.applicationContext),
     private val sessionLifecycleCoordinator: SessionLifecycleCoordinator =
         MwaLabComposition.sessionLifecycleCoordinator(context.applicationContext),
+    private val capabilitySnapshotRepository: CapabilitySnapshotRepository =
+        MwaLabComposition.capabilitySnapshotRepository(context.applicationContext),
     private val onSessionFinished: () -> Unit = {},
 ) : AutoCloseable {
     private val appContext = context.applicationContext
@@ -158,7 +162,11 @@ class MwaSessionHost(
         }
 
         val persistentSessionId = activeSessionId
-        createPersistentSession(persistentSessionId)
+        if (createPersistentSession(persistentSessionId) is
+            SessionLifecycleCoordinator.PersistenceResult.Persisted
+        ) {
+            captureSessionCapabilities(persistentSessionId)
+        }
         activePersistentSessionId = persistentSessionId
 
         synchronized(lock) {
@@ -1746,12 +1754,33 @@ class MwaSessionHost(
         }
     }
 
-    private fun createPersistentSession(sessionId: String) {
+    private fun createPersistentSession(sessionId: String): SessionLifecycleCoordinator.PersistenceResult {
         val result = runBlocking(Dispatchers.IO) {
             sessionLifecycleCoordinator.createSession(sessionId)
         }
         if (result is SessionLifecycleCoordinator.PersistenceResult.PersistenceFailed) {
             record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "session_create")
+        }
+        return result
+    }
+
+    private fun captureSessionCapabilities(sessionId: String) {
+        try {
+            runBlocking(Dispatchers.IO) {
+                capabilitySnapshotRepository.recordSnapshot(
+                    MwaCapabilityProfile.snapshotForSession(
+                        sessionId = sessionId,
+                        capturedAtEpochMillis = System.currentTimeMillis().coerceAtLeast(0L),
+                        walletConfig = walletConfig,
+                    ),
+                )
+            }
+        } catch (_: Exception) {
+            // This synchronous diagnostic boundary must not change scenario start,
+            // authorization, or signing. Never log exception text or configuration.
+            runCatching {
+                record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "capability_snapshot")
+            }
         }
     }
 

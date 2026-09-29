@@ -24,6 +24,7 @@ import dev.mwalab.protocol.recorder.PersistentProtocolRecorder
 import dev.mwalab.session.*
 import dev.mwalab.signing.LabSigningService
 import dev.mwalab.storage.MwaLabDatabase
+import dev.mwalab.storage.RoomCapabilitySnapshotRepository
 import dev.mwalab.storage.RoomSessionRepository
 import java.io.File
 import java.util.UUID
@@ -196,7 +197,8 @@ class MwaHostileRecorderInstrumentedTest {
             val recorder = PersistentProtocolRecorder(repository)
             return MwaSessionHost(context, signingService = signer, approvalCoordinator = approvals,
                 evidenceSink = { evidence += it }, protocolEvidenceSink = {}, protocolRecorder = recorder,
-                sessionLifecycleCoordinator = SessionLifecycleCoordinator(repository, recorder))
+                sessionLifecycleCoordinator = SessionLifecycleCoordinator(repository, recorder),
+                capabilitySnapshotRepository = RoomCapabilitySnapshotRepository(db.capabilitySnapshotDao()))
         }
         fun connect(host: MwaSessionHost, association: LocalAssociationScenario): MobileWalletAdapterClient {
             val uri = LocalAssociationIntentCreator.createAssociationIntent(null, association.port, association.session).data

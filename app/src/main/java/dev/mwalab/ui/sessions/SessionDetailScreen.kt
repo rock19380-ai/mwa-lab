@@ -9,11 +9,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import dev.mwalab.capabilities.CapabilitySnapshotSource
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.security.DiagnosticSanitizer
 
 @Composable
-fun SessionDetailScreen(state: SessionDetailUiState, onBack: () -> Unit, onRetry: () -> Unit) {
+fun SessionDetailScreen(
+    state: SessionDetailUiState,
+    onBack: () -> Unit,
+    onRetry: () -> Unit,
+    onRetryCapabilities: () -> Unit = onRetry,
+) {
     LazyColumn(Modifier.fillMaxSize().testTag("protocol-timeline"), contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { TextButton(onClick = onBack) { Text("Back to sessions") } }
@@ -39,12 +45,43 @@ fun SessionDetailScreen(state: SessionDetailUiState, onBack: () -> Unit, onRetry
                     }
                 }
                 item {
-                    Text("GET_CAPABILITIES: NOT OBSERVABLE THROUGH PINNED WALLETLIB", style = MaterialTheme.typography.labelLarge)
-                    Text("Configured capability profile is context only. Requests handled internally by walletlib are absent from this timeline.")
+                    CapabilitySnapshotSection(state.capabilities, onRetryCapabilities)
                 }
                 if (summary.events.isEmpty()) item { Text("No observed protocol methods in this session.") }
                 items(summary.events, key = { it.eventId }) { event -> ProtocolEventCard(event) }
             }
+        }
+    }
+}
+
+@Composable
+private fun CapabilitySnapshotSection(state: SessionCapabilityUiState, onRetry: () -> Unit) {
+    Card(Modifier.fillMaxWidth().testTag("capability-snapshot")) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("CAPABILITY SNAPSHOT", style = MaterialTheme.typography.titleMedium)
+            when (state) {
+                SessionCapabilityUiState.Loading -> Text("Loading recorded capability snapshot…")
+                SessionCapabilityUiState.Missing -> Text("Capability snapshot was not recorded for this session.")
+                SessionCapabilityUiState.Unavailable -> {
+                    Text("Recorded capability snapshot unavailable. The protocol timeline remains separate.")
+                    OutlinedButton(onClick = onRetry) { Text("Retry capability snapshot") }
+                }
+                is SessionCapabilityUiState.Recorded -> {
+                    val snapshot = state.snapshot
+                    val source = when (snapshot.source) {
+                        CapabilitySnapshotSource.CONFIGURED_WALLETLIB_PROFILE -> "Configured MWA Lab walletlib profile"
+                    }
+                    Text("Source: $source")
+                    Text("Captured ${timestampText(snapshot.capturedAtEpochMillis)}")
+                    Text("Max transactions/request: ${snapshot.maxTransactionsPerSigningRequest}")
+                    Text("Max messages/request: ${snapshot.maxMessagesPerSigningRequest}")
+                    Text("Transaction versions: ${snapshot.supportedTransactionVersions.joinToString()}")
+                    Text("Optional features: ${snapshot.optionalFeatures.joinToString().ifEmpty { "None configured" }}")
+                    Text("These values are the configured capability profile for this session.")
+                }
+            }
+            Text("Observation note", style = MaterialTheme.typography.titleSmall)
+            Text("walletlib 2.0.7 handles get_capabilities internally. No synthetic GET_CAPABILITIES timeline event was created.")
         }
     }
 }
