@@ -34,6 +34,9 @@ android {
     buildFeatures {
         compose = true
     }
+    sourceSets {
+        getByName("androidTest").assets.directories.add("$projectDir/schemas")
+    }
     packaging {
         resources {
             excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
@@ -66,6 +69,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.solana.mobile.clientlib)
     androidTestImplementation(libs.androidx.room.testing)
+    // Room migration-test serializers need the 1.8 JVM default-method ABI.
+    // AGP aligns instrumentation dependencies to the target debug runtime.
+    debugImplementation(libs.kotlinx.serialization.core)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
