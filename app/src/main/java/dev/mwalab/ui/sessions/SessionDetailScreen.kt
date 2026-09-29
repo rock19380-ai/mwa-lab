@@ -2,15 +2,18 @@ package dev.mwalab.ui.sessions
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.mwalab.capabilities.CapabilitySnapshotSource
 import dev.mwalab.protocol.ProtocolEvent
+import dev.mwalab.protocol.ProtocolMethod
+import dev.mwalab.ui.transaction.transactionInspectorContent
 import dev.mwalab.security.DiagnosticSanitizer
 
 @Composable
@@ -19,7 +22,9 @@ fun SessionDetailScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onRetryCapabilities: () -> Unit = onRetry,
+    onRetryTransactions: (String) -> Unit = { onRetry() },
 ) {
+    var expandedTransactions by rememberSaveable { mutableStateOf(emptyList<String>()) }
     LazyColumn(Modifier.fillMaxSize().testTag("protocol-timeline"), contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { TextButton(onClick = onBack) { Text("Back to sessions") } }
@@ -48,7 +53,22 @@ fun SessionDetailScreen(
                     CapabilitySnapshotSection(state.capabilities, onRetryCapabilities)
                 }
                 if (summary.events.isEmpty()) item { Text("No observed protocol methods in this session.") }
-                items(summary.events, key = { it.eventId }) { event -> ProtocolEventCard(event) }
+                if (summary.events.none { it.method == ProtocolMethod.SIGN_TRANSACTIONS ||
+                    it.method == ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS }) {
+                    item { Text("Transaction diagnostics were not recorded for this session.") }
+                }
+                summary.events.forEach { event ->
+                    item(key = "event-${event.eventId}") { ProtocolEventCard(event) }
+                    if (event.method == ProtocolMethod.SIGN_TRANSACTIONS ||
+                        event.method == ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS) {
+                        transactionEventDiagnostics(event,
+                            state.transactions[event.eventId] ?: SessionTransactionUiState.Missing,
+                            expandedTransactions, { key ->
+                                expandedTransactions = if (key in expandedTransactions) expandedTransactions - key
+                                    else expandedTransactions + key
+                            }, { onRetryTransactions(event.eventId) })
+                    }
+                }
             }
         }
     }
@@ -113,5 +133,34 @@ private fun SafeSummary(label: String, fields: Map<String, String>) {
     if (fields.isEmpty()) Text("No summary recorded")
     else DiagnosticSanitizer.sanitizeFields(fields).toSortedMap().forEach { (key, value) ->
         Text("$key: $value", style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+private fun LazyListScope.transactionEventDiagnostics(
+    event: ProtocolEvent,
+    state: SessionTransactionUiState,
+    expanded: List<String>,
+    onToggle: (String) -> Unit,
+    onRetry: () -> Unit,
+) {
+    item(key = "diagnostics-${event.eventId}") {
+        Card(Modifier.fillMaxWidth().padding(start = 12.dp).testTag("diagnostics-${event.eventId}")) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("TRANSACTION DIAGNOSTICS · event #${event.sequence}", style = MaterialTheme.typography.titleSmall)
+                when (state) {
+                    SessionTransactionUiState.Loading -> Text("Loading recorded transaction diagnostics…")
+                    SessionTransactionUiState.Missing -> Text("Transaction diagnostics were not recorded for this event.")
+                    SessionTransactionUiState.Unavailable -> {
+                        Text("Recorded transaction diagnostics unavailable. The protocol timeline remains separate.")
+                        OutlinedButton(onClick = onRetry) { Text("Retry transaction diagnostics") }
+                    }
+                    is SessionTransactionUiState.Recorded -> Text("${state.summaries.size} recorded payloads · read-only diagnostics")
+                }
+            }
+        }
+    }
+    if (state is SessionTransactionUiState.Recorded) state.summaries.forEach { summary ->
+        val key = "transaction-${event.eventId}-${summary.payloadIndex}"
+        transactionInspectorContent(summary, key in expanded) { onToggle(key) }
     }
 }

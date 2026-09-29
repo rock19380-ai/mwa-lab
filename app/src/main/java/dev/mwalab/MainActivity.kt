@@ -32,6 +32,7 @@ class MainActivity : ComponentActivity() {
                     SessionsViewModel::class.java -> SessionsViewModel(repository)
                     SessionDetailViewModel::class.java -> SessionDetailViewModel(
                         repository, MwaLabComposition.capabilitySnapshotRepository(applicationContext),
+                        transactionRepository = MwaLabComposition.transactionDiagnosticRepository(applicationContext),
                     )
                     else -> error("Unknown screen model")
                 }
@@ -71,6 +72,7 @@ class MainActivity : ComponentActivity() {
                                 "Sessions" -> SessionsScreen(sessionsState, openSession, sessions::retry)
                                 "Detail" -> SessionDetailScreen(
                                     detailState, { screen = "Sessions" }, detail::retry, detail::retryCapabilities,
+                                    detail::retryTransactions,
                                 )
                                 else -> HomeScreen(homeState, { screen = "Sessions" }, openSession, home::retry)
                             }
