@@ -2,6 +2,8 @@ package dev.mwalab.app
 
 import android.content.Context
 import dev.mwalab.approval.ApprovalCoordinator
+import dev.mwalab.transaction.TransactionInspection
+import dev.mwalab.transaction.TransactionInspector
 import dev.mwalab.capabilities.CapabilitySnapshotRepository
 import dev.mwalab.identity.AndroidKeystoreIdentityRepository
 import dev.mwalab.identity.IdentityRepository
@@ -51,6 +53,8 @@ object MwaLabComposition {
     fun identityRepository(context: Context): IdentityRepository = identityService(context)
 
     fun signingService(context: Context): LabSigningService = identityService(context)
+
+    fun transactionInspector(): TransactionInspection = TransactionInspector()
 
     fun approvalCoordinator(): ApprovalCoordinator =
         approvalCoordinatorInstance ?: synchronized(this) {

@@ -52,6 +52,9 @@ import dev.mwalab.security.DiagnosticSanitizer
 import dev.mwalab.security.NetworkDecision
 import dev.mwalab.security.NetworkPolicy
 import dev.mwalab.signing.LabSigningService
+import dev.mwalab.transaction.PreApprovalTransactionInspection
+import dev.mwalab.transaction.TransactionApprovalDiagnostics
+import dev.mwalab.transaction.TransactionInspection
 import dev.mwalab.transaction.LegacyTransactionCodec
 import dev.mwalab.transaction.SolanaTransactionMessageDetector
 import kotlinx.coroutines.CancellationException
@@ -81,6 +84,7 @@ class MwaSessionHost(
         MwaLabComposition.sessionLifecycleCoordinator(context.applicationContext),
     private val capabilitySnapshotRepository: CapabilitySnapshotRepository =
         MwaLabComposition.capabilitySnapshotRepository(context.applicationContext),
+    transactionInspector: TransactionInspection = MwaLabComposition.transactionInspector(),
     private val onSessionFinished: () -> Unit = {},
 ) : AutoCloseable {
     private val appContext = context.applicationContext
@@ -98,6 +102,10 @@ class MwaSessionHost(
     @Volatile
     private var activePersistentSessionId: String? = null
     private val protocolSequence = AtomicLong(0)
+
+    private val transactionInspection = PreApprovalTransactionInspection(
+        transactionInspector, MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST,
+    )
 
     private val walletConfig = MwaCapabilityProfile.createWalletConfig()
     private val authIssuerConfig = AuthIssuerConfig(AUTH_ISSUER_NAME)
@@ -526,9 +534,10 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
+            val payloads = transactionInspection.ownPayloads(request.payloads)
             val requestSummary = signingRequestSummary(
                 method = ProtocolMethod.SIGN_TRANSACTIONS,
-                payloads = request.payloads,
+                payloads = payloads,
                 addressCount = request.authorizedAccounts.size,
                 chain = request.chain,
             )
@@ -540,8 +549,11 @@ class MwaSessionHost(
             updatePersistentDappIdentity(persistentSessionId, request.identityName)
             record(MwaSessionEvent.SIGN_TRANSACTIONS_REQUEST)
             authorizationScope.launch {
+                val diagnostics = transactionInspection.inspect(payloads, persistentSessionId, protocolHandle?.eventId)
                 handleSignTransactions(
                     request = request,
+                    payloads = payloads,
+                    diagnostics = diagnostics,
                     startedAt = startedAt,
                     generation = generation,
                     sessionId = persistentSessionId,
@@ -590,9 +602,10 @@ class MwaSessionHost(
                 return
             }
             val startedAt = System.currentTimeMillis()
+            val payloads = transactionInspection.ownPayloads(request.payloads)
             val requestSummary = signingRequestSummary(
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
-                payloads = request.payloads,
+                payloads = payloads,
                 addressCount = request.authorizedAccounts.size,
                 chain = request.chain,
             ) + mapOf(
@@ -611,8 +624,11 @@ class MwaSessionHost(
             updatePersistentDappIdentity(persistentSessionId, request.identityName)
             record(MwaSessionEvent.SIGN_AND_SEND_REQUEST)
             authorizationScope.launch {
+                val diagnostics = transactionInspection.inspect(payloads, persistentSessionId, protocolHandle?.eventId)
                 handleSignAndSendTransactions(
                     request = request,
+                    payloads = payloads,
+                    diagnostics = diagnostics,
                     startedAt = startedAt,
                     generation = generation,
                     sessionId = persistentSessionId,
@@ -773,6 +789,8 @@ class MwaSessionHost(
 
     private suspend fun handleSignTransactions(
         request: SignTransactionsRequest,
+        payloads: Array<ByteArray>,
+        diagnostics: TransactionApprovalDiagnostics,
         startedAt: Long,
         generation: Long,
         sessionId: String,
@@ -802,8 +820,6 @@ class MwaSessionHost(
             )
             return
         }
-
-        val payloads = request.payloads
 
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
@@ -922,6 +938,7 @@ class MwaSessionHost(
                 chain = request.chain,
                 payloadFingerprints = payloads.map { DiagnosticSanitizer.sha256(it) },
                 payloadLengths = payloads.map { it.size },
+                transactionSummaries = diagnostics,
             ),
         )
         if (!isCurrentGeneration(generation)) {
@@ -1026,6 +1043,8 @@ class MwaSessionHost(
 
     private suspend fun handleSignAndSendTransactions(
         request: SignAndSendTransactionsRequest,
+        payloads: Array<ByteArray>,
+        diagnostics: TransactionApprovalDiagnostics,
         startedAt: Long,
         generation: Long,
         sessionId: String,
@@ -1055,8 +1074,6 @@ class MwaSessionHost(
             )
             return
         }
-
-        val payloads = request.payloads
 
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
@@ -1197,6 +1214,7 @@ class MwaSessionHost(
                 chain = request.chain,
                 payloadFingerprints = payloads.map { DiagnosticSanitizer.sha256(it) },
                 payloadLengths = payloads.map { it.size },
+                transactionSummaries = diagnostics,
             ),
         )
         if (!isCurrentGeneration(generation)) {

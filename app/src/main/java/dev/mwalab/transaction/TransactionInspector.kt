@@ -4,10 +4,10 @@ package dev.mwalab.transaction
 class TransactionInspector(
     private val parser: SolanaWireTransactionParser = SolanaWireTransactionParser(),
     private val decoders: ProgramDecoderRegistry = ProgramDecoderRegistry(),
-) {
-    fun inspect(
+) : TransactionInspection {
+    override fun inspect(
         transaction: ByteArray,
-        payloadIndex: Int = 0,
-        binding: TransactionDiagnosticBinding? = null,
+        payloadIndex: Int,
+        binding: TransactionDiagnosticBinding?,
     ): TransactionSummary = parser.parse(transaction, decoders).bind(binding, payloadIndex)
 }

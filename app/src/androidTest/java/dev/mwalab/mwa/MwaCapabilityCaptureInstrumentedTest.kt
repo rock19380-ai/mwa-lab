@@ -167,8 +167,9 @@ class MwaCapabilityCaptureInstrumentedTest {
                         it.detail == "capability_snapshot" })
                     assertFalse(f.evidence.toString().contains("SECRET_CAPABILITY_FAILURE"))
                 } finally {
-                    host.close()
+                    // Initiate client close before server close to avoid pinned clientlib's cleanup lock inversion.
                     runCatching { association.close().get(10, TimeUnit.SECONDS) }
+                    host.close()
                 }
             }
         }

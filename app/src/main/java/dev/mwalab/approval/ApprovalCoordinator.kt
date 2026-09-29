@@ -1,5 +1,6 @@
 package dev.mwalab.approval
 
+import dev.mwalab.transaction.TransactionApprovalDiagnostics
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ data class ApprovalRequest(
     val chain: String,
     val payloadFingerprints: List<String>,
     val payloadLengths: List<Int>,
+    val transactionSummaries: TransactionApprovalDiagnostics? = null,
 )
 
 sealed interface ApprovalState {
