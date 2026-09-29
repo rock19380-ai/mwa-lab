@@ -1,0 +1,110 @@
+{
+  "branch": "phase4-capability-transaction-diagnostics",
+  "checkedAtUtc": "2026-09-29T10:12:37.362227+00:00",
+  "checks": [
+    {
+      "command": "python3 scripts/generate_phase4_transaction_vectors.py --check",
+      "result": "PASS"
+    },
+    {
+      "command": "./scripts/phase1_static.sh",
+      "result": "PASS"
+    },
+    {
+      "command": "Python compile() syntax check for both new scripts",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew :app:testDebugUnitTest --tests dev.mwalab.transaction.Phase4TransactionVectorsTest :demo-client:testDebugUnitTest",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew test lint assembleDebug :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest :app:installDebug :demo-client:installDebug",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew :demo-client:connectedDebugAndroidTest",
+      "result": "PASS"
+    },
+    {
+      "command": "./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=dev.mwalab.mwa.MwaTransactionApprovalInstrumentedTest",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 scripts/phase4_diagnostic_acceptance.py --serial emulator-5554 --evidence-dir docs/evidence/phase4",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "deviceAcceptance": "phase4-step4.11-device-acceptance.json",
+  "frozenSha256": {
+    "app/schemas/dev.mwalab.storage.MwaLabDatabase/1.json": "1952a8bcaef8bf1c1910c0e99f1d13464aebbcb2b031376caee3130f9584874c",
+    "app/schemas/dev.mwalab.storage.MwaLabDatabase/2.json": "d47469a9e925020a795ba726fc2a27bca4dfa506c0d6fac59716fa6a7eb9fac7",
+    "scripts/phase3_static.sh": "1de48365d68aa940dba18a8535495154eaf7c0549b64582066110242e72070e6"
+  },
+  "frozenSourceDiffFromParent": [],
+  "historicalStaticGateNote": "Phase 2/3 static scripts retain historical future-phase absence assertions and were not modified or run. Applicable contracts are covered by unit, instrumentation, source comparisons and real device acceptance.",
+  "instrumentedClasses": [
+    "dev.mwalab.mwa.MwaTransactionApprovalInstrumentedTest",
+    "dev.mwalab.democlient.DemoClientCrossAppInstrumentedTest"
+  ],
+  "instrumentedTests": {
+    "app": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 10
+    },
+    "demo-client": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 1
+    }
+  },
+  "lint": {
+    "app": {
+      "Error": 0,
+      "Warning": 23
+    },
+    "demo-client": {
+      "Error": 0,
+      "Warning": 8
+    }
+  },
+  "newDemoFactoryTests": 3,
+  "newFixtureTests": 24,
+  "parentCommit": "19dff4a8e06848f63f516c07dc13fa43e4ac9bb6",
+  "phase": "4.11",
+  "phase3Tag": {
+    "name": "phase3-protocol-recorder-timeline-2026-09-28",
+    "object": "f0a335eb28833b30dd18af34dfa9b8c711835957",
+    "target": "913642d30c4445602b5ff7f72995e826a196938b"
+  },
+  "protectedPaths": [
+    "app/src/main/java",
+    "app/schemas",
+    "scripts/phase3_static.sh",
+    "demo-client/src/main/java/dev/mwalab/democlient/Phase2AcceptanceRunner.kt",
+    "demo-client/src/main/java/dev/mwalab/democlient/DemoLegacyTransactionFactory.kt",
+    "demo-client/src/main/java/dev/mwalab/democlient/DemoDevnetRpc.kt"
+  ],
+  "status": "PASS",
+  "unitTests": {
+    "app": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 224
+    },
+    "demo-client": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 6
+    }
+  }
+}

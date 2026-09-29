@@ -1,0 +1,392 @@
+{
+  "apkSha256": {
+    "app": "5831dd25ebdb9c20fdb52b68960d1eb0bf4c2739a7de38ecd5a46751bca3abdf",
+    "demo-client": "69258e5b7c9999a34621dad4fa7af58c2b50dc2a77548ba26324d777bc74bd85"
+  },
+  "capturedAtUtc": "2026-09-29T10:06:45.468537+00:00",
+  "checks": [
+    {
+      "gate": "SYSTEM_TRANSFER-real-cross-app-terminal-binding",
+      "result": "PASS"
+    },
+    {
+      "gate": "UNKNOWN_PROGRAM-real-cross-app-terminal-binding",
+      "result": "PASS"
+    },
+    {
+      "gate": "V0_REJECT-real-cross-app-terminal-binding",
+      "result": "PASS"
+    },
+    {
+      "gate": "force-stop-restart-all-four-tables-equal",
+      "result": "PASS"
+    },
+    {
+      "gate": "SYSTEM_TRANSFER-restart-product-inspector",
+      "result": "PASS"
+    },
+    {
+      "gate": "UNKNOWN_PROGRAM-restart-product-inspector",
+      "result": "PASS"
+    },
+    {
+      "gate": "V0_REJECT-restart-product-inspector",
+      "result": "PASS"
+    }
+  ],
+  "device": {
+    "model": "sdk_gphone64_x86_64",
+    "sdk": "36"
+  },
+  "getCapabilitiesProtocolEventCreated": false,
+  "phase": "4.11",
+  "restartTableSha256": {
+    "capability_snapshots": "0dff778cebef7c4f42ca61045f27d3e3ce9786e5e40b0083768058e8f5f478b6",
+    "protocol_events": "5f3d2a6f39ff666b7d94b6f16c6fefaea06ed87f50b41f2db962324ee7564364",
+    "sessions": "dfeec5fdc477dfdc145737c10e8f3e5a7f787497f67e1ee30aa6be28ca2c5bf0",
+    "transaction_diagnostics": "d60076f021a0b25830213fc4944e669bf1cfaafff26dd642a05ff073fd77efea"
+  },
+  "scenarios": [
+    {
+      "capability": {
+        "captured_at_ms": 1790676190150,
+        "max_messages": 10,
+        "max_transactions": 10,
+        "optional_features_json": "[\"solana:signTransactions\"]",
+        "session_id": "87d3fd73-f7df-445d-9d53-d6b00155042b",
+        "source": "CONFIGURED_WALLETLIB_PROFILE",
+        "supported_versions_json": "[\"legacy\"]"
+      },
+      "event": {
+        "capability_context_json": null,
+        "completed_at_ms": 1790676224065,
+        "event_id": "87d3fd73-f7df-445d-9d53-d6b00155042b:2",
+        "failure_source": "NONE",
+        "injected_fault_id": null,
+        "method": "SIGN_TRANSACTIONS",
+        "outcome": "SUCCESS",
+        "protocol_error_code": null,
+        "request_summary_json": "{\"address_count\":\"1\",\"chain\":\"solana:devnet\",\"method\":\"sign_transactions\",\"payload_0_length\":\"215\",\"payload_0_sha256\":\"2aa3ffee5dc5ee024c40aa3673dae8c05b1eada5c0592d2e65761a443e87aea6\",\"payload_count\":\"1\"}",
+        "response_summary_json": "{\"network_validation\":\"devnet_blockhash_valid\",\"result\":\"signed\",\"signed_payload_count\":\"1\",\"transaction_version\":\"legacy\"}",
+        "sequence": 2,
+        "session_id": "87d3fd73-f7df-445d-9d53-d6b00155042b",
+        "started_at_ms": 1790676191440
+      },
+      "preapprovalScreenshot": "phase4-step4.11-system_transfer-before-approval.png",
+      "restartScreenshot": "phase4-step4.11-system_transfer-restart-inspector.png",
+      "scenario": "SYSTEM_TRANSFER",
+      "session": {
+        "close_reason": "SERVING_COMPLETE",
+        "cluster": "solana:devnet",
+        "completed_at_ms": 1790676224117,
+        "dapp_identity_name": "MWA Lab Demo Client \u2014 FOR TESTING ONLY",
+        "session_id": "87d3fd73-f7df-445d-9d53-d6b00155042b",
+        "started_at_ms": 1790676190131
+      },
+      "transaction": {
+        "accounts": [
+          {
+            "fee_payer": true,
+            "index": 0,
+            "public_key": "DrMmLEDbJEdDaHNaEkxNktgk58apf9wrBbGjRJimZdjA",
+            "signer": true,
+            "writable": true
+          },
+          {
+            "fee_payer": false,
+            "index": 1,
+            "public_key": "3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3",
+            "signer": false,
+            "writable": true
+          },
+          {
+            "fee_payer": false,
+            "index": 2,
+            "public_key": "11111111111111111111111111111111",
+            "signer": false,
+            "writable": false
+          }
+        ],
+        "diagnostic_id": "87d3fd73-f7df-445d-9d53-d6b00155042b:2:payload:0",
+        "error": null,
+        "event_id": "87d3fd73-f7df-445d-9d53-d6b00155042b:2",
+        "fee_payer": "DrMmLEDbJEdDaHNaEkxNktgk58apf9wrBbGjRJimZdjA",
+        "fingerprint_sha256": "2aa3ffee5dc5ee024c40aa3673dae8c05b1eada5c0592d2e65761a443e87aea6",
+        "format": 1,
+        "header": {
+          "readonly_signed": 0,
+          "readonly_unsigned": 1,
+          "required": 1
+        },
+        "inspection_status": "PARSED",
+        "instruction_count": 1,
+        "instructions": [
+          {
+            "accounts": [
+              0,
+              1
+            ],
+            "data_length": 12,
+            "data_sha256": "9d4669043442ae1dd96001d9abe61442bde1116add5910c2611d461b5592da16",
+            "decoded": {
+              "from": "DrMmLEDbJEdDaHNaEkxNktgk58apf9wrBbGjRJimZdjA",
+              "kind": "SYSTEM_TRANSFER",
+              "lamports": "10000000",
+              "to": "3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3"
+            },
+            "index": 0,
+            "program_id": "11111111111111111111111111111111",
+            "program_index": 2
+          }
+        ],
+        "limitations": [
+          "SIGNATURES_NOT_VERIFIED",
+          "BLOCKHASH_NOT_VALIDATED",
+          "HEADER_PRIVILEGES_ONLY",
+          "LIMITED_PROGRAM_DECODING"
+        ],
+        "lookups": [],
+        "payload_index": 0,
+        "recent_blockhash": "agKcMAE9V7nPDKx9DqjcC99JF8as6adjh5TqhWGoiAX",
+        "required_signer_count": 1,
+        "session_id": "87d3fd73-f7df-445d-9d53-d6b00155042b",
+        "signature_count": 1,
+        "static_account_count": 3,
+        "total_account_count": 3,
+        "version": "LEGACY",
+        "wire_length": 215
+      }
+    },
+    {
+      "capability": {
+        "captured_at_ms": 1790676228168,
+        "max_messages": 10,
+        "max_transactions": 10,
+        "optional_features_json": "[\"solana:signTransactions\"]",
+        "session_id": "f84dde7a-732b-4d6d-98e8-254ef31ca227",
+        "source": "CONFIGURED_WALLETLIB_PROFILE",
+        "supported_versions_json": "[\"legacy\"]"
+      },
+      "event": {
+        "capability_context_json": null,
+        "completed_at_ms": 1790676258723,
+        "event_id": "f84dde7a-732b-4d6d-98e8-254ef31ca227:2",
+        "failure_source": "NONE",
+        "injected_fault_id": null,
+        "method": "SIGN_TRANSACTIONS",
+        "outcome": "SUCCESS",
+        "protocol_error_code": null,
+        "request_summary_json": "{\"address_count\":\"1\",\"chain\":\"solana:devnet\",\"method\":\"sign_transactions\",\"payload_0_length\":\"206\",\"payload_0_sha256\":\"79758128a26a7405c43579bd04baf8037e0c1495e086a1310a1d1b5375b46494\",\"payload_count\":\"1\"}",
+        "response_summary_json": "{\"network_validation\":\"devnet_blockhash_valid\",\"result\":\"signed\",\"signed_payload_count\":\"1\",\"transaction_version\":\"legacy\"}",
+        "sequence": 2,
+        "session_id": "f84dde7a-732b-4d6d-98e8-254ef31ca227",
+        "started_at_ms": 1790676229235
+      },
+      "preapprovalScreenshot": "phase4-step4.11-unknown_program-before-approval.png",
+      "restartScreenshot": "phase4-step4.11-unknown_program-restart-inspector.png",
+      "scenario": "UNKNOWN_PROGRAM",
+      "session": {
+        "close_reason": "SERVING_COMPLETE",
+        "cluster": "solana:devnet",
+        "completed_at_ms": 1790676258779,
+        "dapp_identity_name": "MWA Lab Demo Client \u2014 FOR TESTING ONLY",
+        "session_id": "f84dde7a-732b-4d6d-98e8-254ef31ca227",
+        "started_at_ms": 1790676228154
+      },
+      "transaction": {
+        "accounts": [
+          {
+            "fee_payer": true,
+            "index": 0,
+            "public_key": "DrMmLEDbJEdDaHNaEkxNktgk58apf9wrBbGjRJimZdjA",
+            "signer": true,
+            "writable": true
+          },
+          {
+            "fee_payer": false,
+            "index": 1,
+            "public_key": "3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3",
+            "signer": false,
+            "writable": true
+          },
+          {
+            "fee_payer": false,
+            "index": 2,
+            "public_key": "6k78AbasGMFFrhG95Pj6jQbqkVt7FQMhVgemxJovWKR6",
+            "signer": false,
+            "writable": false
+          }
+        ],
+        "diagnostic_id": "f84dde7a-732b-4d6d-98e8-254ef31ca227:2:payload:0",
+        "error": null,
+        "event_id": "f84dde7a-732b-4d6d-98e8-254ef31ca227:2",
+        "fee_payer": "DrMmLEDbJEdDaHNaEkxNktgk58apf9wrBbGjRJimZdjA",
+        "fingerprint_sha256": "79758128a26a7405c43579bd04baf8037e0c1495e086a1310a1d1b5375b46494",
+        "format": 1,
+        "header": {
+          "readonly_signed": 0,
+          "readonly_unsigned": 1,
+          "required": 1
+        },
+        "inspection_status": "PARSED",
+        "instruction_count": 1,
+        "instructions": [
+          {
+            "accounts": [
+              0,
+              1
+            ],
+            "data_length": 3,
+            "data_sha256": "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81",
+            "decoded": {
+              "kind": "UNKNOWN"
+            },
+            "index": 0,
+            "program_id": "6k78AbasGMFFrhG95Pj6jQbqkVt7FQMhVgemxJovWKR6",
+            "program_index": 2
+          }
+        ],
+        "limitations": [
+          "SIGNATURES_NOT_VERIFIED",
+          "BLOCKHASH_NOT_VALIDATED",
+          "HEADER_PRIVILEGES_ONLY",
+          "SEMANTIC_DECODING_NOT_IMPLEMENTED"
+        ],
+        "lookups": [],
+        "payload_index": 0,
+        "recent_blockhash": "8ucLymmHWqiG4XosHaQL9NWW6pX8BSt28Rd6T5vkEcde",
+        "required_signer_count": 1,
+        "session_id": "f84dde7a-732b-4d6d-98e8-254ef31ca227",
+        "signature_count": 1,
+        "static_account_count": 3,
+        "total_account_count": 3,
+        "version": "LEGACY",
+        "wire_length": 206
+      }
+    },
+    {
+      "capability": {
+        "captured_at_ms": 1790676263010,
+        "max_messages": 10,
+        "max_transactions": 10,
+        "optional_features_json": "[\"solana:signTransactions\"]",
+        "session_id": "dc144350-9c49-4a2c-82ad-75d8c65408b9",
+        "source": "CONFIGURED_WALLETLIB_PROFILE",
+        "supported_versions_json": "[\"legacy\"]"
+      },
+      "event": {
+        "capability_context_json": null,
+        "completed_at_ms": 1790676264181,
+        "event_id": "dc144350-9c49-4a2c-82ad-75d8c65408b9:2",
+        "failure_source": "LOCAL_PARSER",
+        "injected_fault_id": null,
+        "method": "SIGN_TRANSACTIONS",
+        "outcome": "FAILURE",
+        "protocol_error_code": -2,
+        "request_summary_json": "{\"address_count\":\"1\",\"chain\":\"solana:devnet\",\"method\":\"sign_transactions\",\"payload_0_length\":\"252\",\"payload_0_sha256\":\"ddfd395de0d9071a6ae3ac21e11fd7bc80441a8228579c47f68b786f1796b8b0\",\"payload_count\":\"1\"}",
+        "response_summary_json": "{\"result\":\"invalid_legacy_transaction\"}",
+        "sequence": 2,
+        "session_id": "dc144350-9c49-4a2c-82ad-75d8c65408b9",
+        "started_at_ms": 1790676264167
+      },
+      "preapprovalScreenshot": null,
+      "restartScreenshot": "phase4-step4.11-v0_reject-restart-inspector.png",
+      "scenario": "V0_REJECT",
+      "session": {
+        "close_reason": "SERVING_COMPLETE",
+        "cluster": "solana:devnet",
+        "completed_at_ms": 1790676264206,
+        "dapp_identity_name": "MWA Lab Demo Client \u2014 FOR TESTING ONLY",
+        "session_id": "dc144350-9c49-4a2c-82ad-75d8c65408b9",
+        "started_at_ms": 1790676262993
+      },
+      "transaction": {
+        "accounts": [
+          {
+            "fee_payer": true,
+            "index": 0,
+            "public_key": "DrMmLEDbJEdDaHNaEkxNktgk58apf9wrBbGjRJimZdjA",
+            "signer": true,
+            "writable": true
+          },
+          {
+            "fee_payer": false,
+            "index": 1,
+            "public_key": "3JF3sEqM796hk5WFqA6EtmEwJQ9quALszsfJyvXNQKy3",
+            "signer": false,
+            "writable": true
+          },
+          {
+            "fee_payer": false,
+            "index": 2,
+            "public_key": "11111111111111111111111111111111",
+            "signer": false,
+            "writable": false
+          }
+        ],
+        "diagnostic_id": "dc144350-9c49-4a2c-82ad-75d8c65408b9:2:payload:0",
+        "error": null,
+        "event_id": "dc144350-9c49-4a2c-82ad-75d8c65408b9:2",
+        "fee_payer": "DrMmLEDbJEdDaHNaEkxNktgk58apf9wrBbGjRJimZdjA",
+        "fingerprint_sha256": "ddfd395de0d9071a6ae3ac21e11fd7bc80441a8228579c47f68b786f1796b8b0",
+        "format": 1,
+        "header": {
+          "readonly_signed": 0,
+          "readonly_unsigned": 1,
+          "required": 1
+        },
+        "inspection_status": "PARTIAL",
+        "instruction_count": 1,
+        "instructions": [
+          {
+            "accounts": [
+              0,
+              3
+            ],
+            "data_length": 12,
+            "data_sha256": "9d4669043442ae1dd96001d9abe61442bde1116add5910c2611d461b5592da16",
+            "decoded": {
+              "kind": "UNAVAILABLE",
+              "program": "SYSTEM",
+              "reason": "UNRESOLVED_ACCOUNTS"
+            },
+            "index": 0,
+            "program_id": "11111111111111111111111111111111",
+            "program_index": 2
+          }
+        ],
+        "limitations": [
+          "SIGNATURES_NOT_VERIFIED",
+          "BLOCKHASH_NOT_VALIDATED",
+          "HEADER_PRIVILEGES_ONLY",
+          "LIMITED_PROGRAM_DECODING",
+          "VERSIONED_INSPECTION_PARTIAL",
+          "LOOKUP_ADDRESSES_UNRESOLVED"
+        ],
+        "lookups": [
+          {
+            "index": 0,
+            "readonly": [],
+            "table": "7tj9biW3KRJ7EEWmVUGigHiouCTXhV2dzcyvwma7Cyu7",
+            "writable": [
+              7
+            ]
+          }
+        ],
+        "payload_index": 0,
+        "recent_blockhash": "DJ27pVWjBhedAtL7FVZa76NRokQ9MFXgTzRqbu5ZqNvE",
+        "required_signer_count": 1,
+        "session_id": "dc144350-9c49-4a2c-82ad-75d8c65408b9",
+        "signature_count": 1,
+        "static_account_count": 3,
+        "total_account_count": 4,
+        "version": "V0",
+        "wire_length": 252
+      }
+    }
+  ],
+  "schemaVersion": 2,
+  "serial": "emulator-5554",
+  "status": "PASS",
+  "submittedTransactions": 0
+}

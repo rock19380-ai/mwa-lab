@@ -37,6 +37,8 @@ android {
     sourceSets {
         getByName("androidTest").assets.directories.add("$projectDir/schemas")
     }
+    sourceSets.getByName("test").resources.directories.add(rootProject.file("test-vectors/transactions").path)
+
     packaging {
         resources {
             excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"

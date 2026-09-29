@@ -30,15 +30,27 @@ class DemoClientActivity : ComponentActivity() {
             intent?.getStringExtra(EXTRA_PHASE2_SCENARIO),
         )
 
+        // Explicit Phase 2 selection keeps its existing path and precedence.
+        val phase4Scenario = if (phase2Scenario == null) Phase4AcceptanceScenario.fromWireName(
+            intent?.getStringExtra(EXTRA_PHASE4_SCENARIO),
+        ) else null
+
         setContent {
             MaterialTheme {
-                var state by remember(phase2Scenario) {
+                var state by remember(phase2Scenario, phase4Scenario) {
                     mutableStateOf<DemoUiState>(DemoUiState.Running)
                 }
 
-                LaunchedEffect(phase2Scenario) {
+                LaunchedEffect(phase2Scenario, phase4Scenario) {
                     state = withContext(Dispatchers.IO) {
-                        if (phase2Scenario == null) {
+                        if (phase4Scenario != null) {
+                            runCatching {
+                                Phase4AcceptanceRunner(applicationContext).run(phase4Scenario)
+                            }.fold(
+                                onSuccess = { DemoUiState.Phase4Complete(it) },
+                                onFailure = { DemoUiState.Failed("PHASE4 ${phase4Scenario.name}", phase2FailureDetail(it)) },
+                            )
+                        } else if (phase2Scenario == null) {
                             runCatching {
                                 DemoClientRunner(applicationContext).runCanonical()
                             }.fold(
@@ -76,7 +88,10 @@ class DemoClientActivity : ComponentActivity() {
                         style = MaterialTheme.typography.titleMedium,
                     )
 
-                    if (phase2Scenario == null) {
+                    if (phase4Scenario != null) {
+                        Text("Phase 4 transaction diagnostics: ${phase4Scenario.name}")
+                        Text("SOLANA DEVNET · SIGN ONLY · NO SUBMISSION")
+                    } else if (phase2Scenario == null) {
                         Text("Canonical Phase 1 sequence")
                     } else {
                         Text("Phase 2 device acceptance: ${phase2Scenario.wireName}")
@@ -108,6 +123,16 @@ class DemoClientActivity : ComponentActivity() {
                                     current.result.optionalFeatures.joinToString(),
                             )
                         }
+                        is DemoUiState.Phase4Complete -> {
+                            val result = current.result
+                            Text("PHASE4 ${result.scenario.name}: PASS")
+                            Text("MWA Lab payload fingerprint: ${result.fingerprintSha256}")
+                            Text("Wire length: ${result.wireLength} bytes")
+                            Text("Fee payer: ${result.feePayer}")
+                            Text("Recent blockhash: ${result.recentBlockhash}")
+                            Text("Signature verified: ${result.signatureVerified}")
+                            result.protocolErrorCode?.let { Text("Expected protocol error: $it") }
+                        }
                         is DemoUiState.Phase2Complete -> {
                             val result = current.result
                             Text("PHASE2 ${result.scenario.wireName}: PASS")
@@ -121,6 +146,7 @@ class DemoClientActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_PHASE2_SCENARIO = "mwa_phase2_scenario"
+        const val EXTRA_PHASE4_SCENARIO = "mwa_phase4_scenario"
     }
 }
 
@@ -149,5 +175,6 @@ private sealed interface DemoUiState {
     data object Running : DemoUiState
     data class Failed(val label: String, val detail: String? = null) : DemoUiState
     data class CanonicalComplete(val result: DemoRunResult) : DemoUiState
+    data class Phase4Complete(val result: Phase4AcceptanceResult) : DemoUiState
     data class Phase2Complete(val result: Phase2AcceptanceResult) : DemoUiState
 }

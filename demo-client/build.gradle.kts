@@ -32,6 +32,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    sourceSets.getByName("test").resources.directories.add(rootProject.file("test-vectors/transactions").path)
+
     buildFeatures {
         compose = true
     }
