@@ -244,3 +244,28 @@ debug APK assembly, AndroidTest APK assembly, current `phase4_static.sh`, and
 
 The next required gate is the hostile pre-freeze audit. Exact-head remote CI and
 the final annotated freeze tag are still intentionally unclaimed.
+
+## Pre-freeze hostile audit closeout
+
+The final hostile pre-freeze audit was executed against Phase 4 candidate
+`387183f183564f885c963cac7ba72b41817101b5` and passed without a product-source repair.
+
+Verified audit properties:
+
+- fresh Demo Client cross-app instrumentation: PASS;
+- installed `solana-wallet` endpoint discovery: PASS;
+- real System Transfer diagnostics and terminal binding: PASS;
+- unknown-program explicit-unknown diagnostics and terminal binding: PASS;
+- v0 detection with authoritative signing rejection: PASS;
+- force-stop/restart persistence across the Phase 4 durable tables: PASS;
+- Phase 4 static/schema/source-authority gate: PASS;
+- deterministic transaction vectors: PASS;
+- durable-schema secret/raw-payload column scan: PASS;
+- unresolved Git conflict-marker scan: PASS;
+- tracked worktree remained clean.
+
+Audit summary SHA-256: `d5d716836c0f56a5aa920a8a62631d68b93e869dc68b698005700cc82ac0de55`.
+
+The final freeze remains conditional on GitHub Actions succeeding for the exact
+post-audit-evidence closeout commit. The annotated freeze tag is the final
+external receipt for that exact-head CI result. Phase 5 is not started.

@@ -38,3 +38,11 @@ closeout.
 
 This evidence does **not** claim the final Phase 4 freeze/tag or exact-head
 remote CI. Those belong to the later pre-freeze audit/final closeout.
+
+## Pre-freeze hostile audit
+
+- `phase4-prefreeze-hostile-audit-summary.json` records the final read/test-only hostile audit against candidate `387183f183564f885c963cac7ba72b41817101b5`.
+- Audit summary SHA-256: `d5d716836c0f56a5aa920a8a62631d68b93e869dc68b698005700cc82ac0de55`.
+- The audit verified fresh real cross-app discovery/execution, persisted Phase 4 acceptance evidence, static/schema/authority/security gates, and a clean tracked worktree.
+- No Phase 4 product source repair was required after the hostile audit.
+- The freeze tag is created only after GitHub Actions succeeds for the exact post-evidence closeout commit.

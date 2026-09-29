@@ -1,5 +1,6 @@
 # Phase 4 changed/added file inventory
 # Paths are repository-relative, sorted, and unique.
+
 .github/workflows/android.yml
 CHANGELOG.md
 PHASE_4_FILES.txt
@@ -89,6 +90,7 @@ docs/PROTOCOL_SUPPORT.md
 docs/SECURITY.md
 docs/TESTING.md
 docs/evidence/phase4/README.md
+docs/evidence/phase4/phase4-prefreeze-hostile-audit-summary.json
 docs/evidence/phase4/phase4-protected-sources.json
 docs/evidence/phase4/phase4-step4.11-device-acceptance.json
 docs/evidence/phase4/phase4-step4.11-local-gates.json

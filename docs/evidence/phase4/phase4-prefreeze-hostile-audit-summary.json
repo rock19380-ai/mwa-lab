@@ -1,0 +1,21 @@
+{
+  "branch": "phase4-capability-transaction-diagnostics",
+  "capturedAtUtc": "2026-09-29T11:10:24.554246+00:00",
+  "classification": "PRODUCT_PASS_AUDIT_HARNESS_ARTIFACT_ASSUMPTIONS_RESOLVED",
+  "deviceAcceptanceSha256": "046a8111b3a141595c78751e9a7911691eaa4b36b78a69ad5c2792e9d97a116b",
+  "deviceSerial": "emulator-5554",
+  "head": "387183f183564f885c963cac7ba72b41817101b5",
+  "phase": "4-pre-freeze-hostile-audit",
+  "phase3TagTarget": "913642d30c4445602b5ff7f72995e826a196938b",
+  "status": "PASS",
+  "verified": {
+    "deterministicVectors": "PASS",
+    "existingRealPhase4Acceptance": "PASS",
+    "freshDemoCrossApp": "PASS",
+    "gitConflictMarkerScan": "PASS",
+    "phase4Static": "PASS",
+    "schemaSecretRawColumnScan": "PASS",
+    "walletEndpointResolution": "PASS",
+    "worktreeClean": true
+  }
+}
