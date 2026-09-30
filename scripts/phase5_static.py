@@ -130,6 +130,8 @@ def check_scope() -> None:
 
 def check_ci() -> None:
     ci = text(".github/workflows/android.yml")
+    require(re.search(r"(?m)^\s*fetch-depth:\s*0\s*$", ci) is not None,
+            "CI checkout must include history for the Phase 4 ancestry assertion")
     require("phase5-simulation-diagnostic-classification" in ci, "Phase 5 CI branch missing")
     require("phase5_static.sh" in ci, "Phase 5 CI gate missing")
     require("MwaLabDatabase/3.json" in ci, "CI does not route schema 3 to Phase 5")

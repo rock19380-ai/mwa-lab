@@ -1,0 +1,14 @@
+GitHub Actions run 36671496660
+Head SHA: cf7b0bc37be65b0bab8300143699b53ff2d11eef
+Conclusion: failure
+URL: https://github.com/rock19380-ai/mwa-lab/actions/runs/36671496660
+
+Selected verbatim log lines:
+2026-09-30T05:01:29.5919695Z   fetch-depth: 1
+2026-09-30T05:01:30.0182110Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +cf7b0bc37be65b0bab8300143699b53ff2d11eef:refs/remotes/origin/phase5-simulation-diagnostic-classification
+2026-09-30T05:10:30.9211193Z ##[group]Run ./scripts/phase5_static.sh
+2026-09-30T05:10:31.0161431Z PHASE 5 DESIGN CHECK: PASS
+2026-09-30T05:10:31.0780731Z PHASE 5 DETERMINISTIC SIMULATION VECTORS: PASS
+2026-09-30T05:10:31.1282099Z fatal: Not a valid commit name 6028375636251eb3071f0a5240a2ad1efc78131e
+2026-09-30T05:10:31.1283474Z PHASE 5 STATIC GATE: FAIL: Command '['git', '-c', 'safe.directory=/home/runner/work/mwa-lab/mwa-lab', 'merge-base', '--is-ancestor', '6028375636251eb3071f0a5240a2ad1efc78131e', 'HEAD']' returned non-zero exit status 128.
+2026-09-30T05:10:31.2797232Z ##[error]Process completed with exit code 1.
