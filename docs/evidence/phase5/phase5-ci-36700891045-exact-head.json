@@ -1,0 +1,15 @@
+{
+  "conclusion": "success",
+  "databaseId": 36700891045,
+  "headBranch": "phase5-simulation-diagnostic-classification",
+  "headSha": "fc131ae7ef7a876cce85994233cffae68511e067",
+  "jobs": [
+    {
+      "conclusion": "success",
+      "name": "android",
+      "status": "completed"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/rock19380-ai/mwa-lab/actions/runs/36700891045"
+}

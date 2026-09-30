@@ -304,13 +304,30 @@ control and absent synthetic raw-payload/secret sentinels. The repaired
 full-history CI checkout passed at implementation commit
 `ad0b584980a8322705070d20de59c978021cd47a` (run 36693030227).
 
-The real cross-package Phase 5 attempt stopped before SIMULATE: the authorized
-lab identity had zero Devnet lamports and the fresh transaction required a
-5,000-lamport fee. The public Devnet faucet returned an internal error and then
-rate-limit/empty-faucet code 429. GOOD_PASS_APPROVE, BAD_FAIL_APPROVE,
-GOOD_PASS_REJECT, and post-request restart are therefore not live-verified.
-The disposable Room test DB result does not substitute for a completed live
-request or its actual diagnostic DB snapshot.
+The initial real cross-package Phase 5 attempt stopped before SIMULATE: the
+then-authorized lab identity had zero Devnet lamports against a 5,000-lamport
+fee. Faucet errors and that blocked attempt remain historical evidence.
+Subsequently, the user funded the exact current installed identity; its confirmed
+balance was 1,000,000,000 lamports at slot 505877125. Fresh template fees were
+5,000 lamports, and each actual demo request fetched its own fresh blockhash,
+fee and balance. The installed identity was preserved throughout live acceptance.
+
+`python3 scripts/phase5_device_acceptance.py --scenario ALL` passed all three
+real cross-package UI/wire scenarios. Independent read-only SQLite checks bound
+each fingerprint to its exact session, canonical event, transaction and simulation
+row. GOOD_PASS_APPROVE and BAD_FAIL_APPROVE returned independently verified
+signatures; GOOD_PASS_REJECT returned -3, with parent OBSERVED_PROTOCOL and an
+unchanged PASS/NONE child. Each demo reported submittedTransactions=0.
+
+The real process was force-stopped and relaunched. All three sessions' rows,
+payload indexes, attempt order and classifications remained identical. The last
+session's persisted UI independently displayed the parent error, transaction
+inspector, matching simulation fingerprint, redacted logs and PASS warning.
+The live DB/WAL/SHM byte scan is separately scoped from the disposable Room
+sentinel test; see `phase5-live-audit-method.md` and the live acceptance JSON.
+No product code changed during this continuation, so the already-passing JVM,
+connected, lint and build suites were retained rather than rerun. The new
+final evidence commit must still receive its own exact-head CI success.
 
 A session-close regression test was added after the initial CI repair. It failed
 on the earlier settlement implementation and passes after commit

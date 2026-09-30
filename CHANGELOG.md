@@ -8,9 +8,10 @@
 - Room schema v3 sanitized simulation child evidence with deterministic attempt ordering and restart persistence.
 - Explicit PASS/FAIL/UNAVAILABLE diagnostic classification preserving parent MWA authority.
 - Bounded/redacted program-log diagnostics, deterministic simulation vectors, hostile sentinel scans, and a Phase 5 static/CI gate.
-- Phase 5 CI checkout now fetches frozen ancestry so the unchanged ancestry assertion runs in a clean GitHub Actions checkout; exact-head implementation CI passes. Live Devnet acceptance remains pending a funded lab identity.
+- Phase 5 CI checkout now fetches frozen ancestry so the unchanged ancestry assertion runs in a clean GitHub Actions checkout; exact-head implementation CI passes. Required live Devnet acceptance subsequently passed after funding the exact installed lab identity.
 - Completed simulation child attempts now retain bounded settlement after immediate session close while late callbacks are rejected; a deterministic regression test proved the prior evidence-loss race.
 - Phase 5 device acceptance automation now surfaces explicit funding failures promptly and cannot label UI-only checks as database/restart-verified.
+- Real cross-package Devnet PASS-approve, runtime FAIL-approve, and PASS-reject acceptance, independently verified canonical parent/child persistence, restart UI, and a scoped live SQLite/WAL/SHM byte scan.
 
 - Phase 4 session-scoped configured capability snapshots with truthful walletlib provenance.
 - Room schema v2 migration adding capability snapshots and sanitized transaction diagnostics without historical backfill.

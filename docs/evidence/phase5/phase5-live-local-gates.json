@@ -1,0 +1,32 @@
+{
+  "capturedAtUtc": "2026-09-30T10:59:03.444273+00:00",
+  "implementationCheckpoint": "fc131ae7ef7a876cce85994233cffae68511e067",
+  "productCodeChanged": false,
+  "roomSchema": 3,
+  "protectedPredecessorHashes": "PASS",
+  "migration1To2Unchanged": true,
+  "migration1To2BlockSha256": "bab591cd03348416d5129e67ce878f0a0bb3d01ab0a0202a9da8fd6e101e6995",
+  "migration2To3Present": true,
+  "securityScan": "PASS",
+  "retainedNotRerun": {
+    "appJvm": 245,
+    "demoJvm": 9,
+    "appConnected": 109,
+    "demoConnected": 1,
+    "failures": 0,
+    "lint": "PASS",
+    "debugApks": "PASS",
+    "androidTestApks": "PASS"
+  },
+  "liveScenarios": "PASS",
+  "liveCanonicalRestart": "PASS",
+  "livePersistedUi": "PASS",
+  "liveDatabaseByteScan": "PASS_WITH_DOCUMENTED_SCOPE",
+  "phase5Static": "PASS",
+  "gitDiffCheck": "PASS",
+  "finalEvidenceCommitCi": "REQUIRED_AFTER_COMMIT",
+  "design": "PASS",
+  "deterministicVectors": "PASS",
+  "deviceParser": "PASS",
+  "newEvidenceSafetyScan": "PASS"
+}

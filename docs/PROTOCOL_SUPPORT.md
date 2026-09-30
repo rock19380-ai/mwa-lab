@@ -182,9 +182,13 @@ Simulation is diagnostic evidence only and **does not guarantee** later
 submission or confirmation. The parent `ProtocolEvent` is still determined only
 by the existing MWA authorization/approval/signing/submission path.
 
-Phase 5 implementation and instrumentation support the table above. Live
-Devnet PASS/FAIL and real cross-package restart are **not yet verified**: the
-2026-09-30 device attempt stopped before simulation because the authorized
-lab account had zero lamports against a 5,000-lamport fee. The controlled
-RPC-unavailable case is verified by instrumentation, not a production fault
-toggle or a claimed live outage.
+Phase 5 implementation, instrumentation, and real cross-package Devnet
+acceptance support the table above. On 2026-09-30, after the exact installed
+payer was funded and reverified, PASS-approve and runtime FAIL-approve both
+returned verified signed payloads; PASS-reject returned ERROR_NOT_SIGNED (-3),
+with parent OBSERVED_PROTOCOL and child PASS/NONE. All three reported zero
+submissions. Canonical parent/transaction/simulation rows were unchanged across
+force-stop/relaunch, and the persisted UI reloaded the PASS-reject relationship.
+The initial zero-balance attempt remains historical evidence, not a simulation
+result. RPC_UNAVAILABLE remains verified by controlled instrumentation, not a
+production fault toggle or a claimed live outage.

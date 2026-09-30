@@ -1,0 +1,203 @@
+{
+  "capturedAtUtc": "2026-09-30T10:50:35.393590+00:00",
+  "implementationHead": "fc131ae7ef7a876cce85994233cffae68511e067",
+  "network": "solana:devnet",
+  "device": {
+    "serial": "emulator-5554",
+    "api": 36,
+    "model": "sdk_gphone64_x86_64"
+  },
+  "payer": "5amADFiYY9UsNQnwoATm3W3f4YCCDqJnbhZvbqoK5EWV",
+  "confirmedBalanceBeforeLamports": 1000000000,
+  "confirmedBalanceSlot": 505877125,
+  "freshTemplateFeeQuotes": {
+    "GOOD_MEMO": {
+      "lamports": 5000,
+      "slot": 505876488
+    },
+    "BAD_SYSTEM_OPCODE": {
+      "lamports": 5000,
+      "slot": 505876492
+    }
+  },
+  "feeValidation": "Each real demo request independently fetched a fresh blockhash and passed getFeeForMessage/getBalance before sign_transactions.",
+  "status": "LIVE_SCENARIOS_CANONICAL_BINDING_AND_RESTART_PASS",
+  "scenarios": [
+    {
+      "scenario": "GOOD_PASS_APPROVE",
+      "sessionId": "76f5cc6d-bfc2-4872-a877-976baea22cf2",
+      "eventId": "76f5cc6d-bfc2-4872-a877-976baea22cf2:2",
+      "requestId": "af240e36-4398-4111-a142-9f992bc5d71e",
+      "payloadIndex": 0,
+      "attemptNumbers": [
+        1
+      ],
+      "transactionFingerprintSha256": "131b8100253b8629bb31235002a1a975727ef8ca8a9854825f04841fb6aa7bcc",
+      "transactionVersion": "LEGACY",
+      "inspectionStatus": "PARSED",
+      "outcome": "PASS",
+      "failureSource": "NONE",
+      "contextSlot": 505877227,
+      "unitsConsumed": 14864,
+      "durationMillis": 93,
+      "startedAtMillis": 1790765110581,
+      "completedAtMillis": 1790765110675,
+      "errorKind": null,
+      "instructionIndex": null,
+      "instructionErrorKind": null,
+      "customProgramErrorCode": null,
+      "boundedLogCount": 4,
+      "orderedSafeLogsSha256": "c50585f0d1784b2da5d629893968c832a5711165d9132fc6fd95ae3e3c8db430",
+      "parentMethod": "SIGN_TRANSACTIONS",
+      "parentOutcome": "SUCCESS",
+      "parentFailureSource": "NONE",
+      "parentProtocolErrorCode": null,
+      "parentResponseSummary": {
+        "network_validation": "devnet_blockhash_valid",
+        "result": "signed",
+        "signed_payload_count": "1",
+        "transaction_version": "legacy"
+      },
+      "submittedTransactionsReportedByDemo": 0,
+      "canonicalBindingVerified": true,
+      "deauthorizationAndSessionCloseObserved": true
+    },
+    {
+      "scenario": "BAD_FAIL_APPROVE",
+      "sessionId": "b5bad52c-9f3b-4699-9450-3c35ba645468",
+      "eventId": "b5bad52c-9f3b-4699-9450-3c35ba645468:2",
+      "requestId": "6292cf10-66d7-4bb2-890a-43804d731d2c",
+      "payloadIndex": 0,
+      "attemptNumbers": [
+        1
+      ],
+      "transactionFingerprintSha256": "0530951a35c699ec1830669ff0f6c4237fdc7bb298b4c6286835b871b5aa8620",
+      "transactionVersion": "LEGACY",
+      "inspectionStatus": "PARSED",
+      "outcome": "FAIL",
+      "failureSource": "SIMULATION",
+      "contextSlot": 505877329,
+      "unitsConsumed": 150,
+      "durationMillis": 102,
+      "startedAtMillis": 1790765134569,
+      "completedAtMillis": 1790765134671,
+      "errorKind": "INSTRUCTION_ERROR",
+      "instructionIndex": 0,
+      "instructionErrorKind": "InvalidInstructionData",
+      "customProgramErrorCode": null,
+      "boundedLogCount": 2,
+      "orderedSafeLogsSha256": "d966eecba410ed4048ac85d19e3a30691af3b3680a6585bc6f6413a0b22199a7",
+      "parentMethod": "SIGN_TRANSACTIONS",
+      "parentOutcome": "SUCCESS",
+      "parentFailureSource": "NONE",
+      "parentProtocolErrorCode": null,
+      "parentResponseSummary": {
+        "network_validation": "devnet_blockhash_valid",
+        "result": "signed",
+        "signed_payload_count": "1",
+        "transaction_version": "legacy"
+      },
+      "submittedTransactionsReportedByDemo": 0,
+      "canonicalBindingVerified": true,
+      "deauthorizationAndSessionCloseObserved": true
+    },
+    {
+      "scenario": "GOOD_PASS_REJECT",
+      "sessionId": "f8fd32d6-4f2d-4c75-a793-00a55f758a1d",
+      "eventId": "f8fd32d6-4f2d-4c75-a793-00a55f758a1d:2",
+      "requestId": "bb9eb6fd-878a-427f-a8e2-f231103a26c8",
+      "payloadIndex": 0,
+      "attemptNumbers": [
+        1
+      ],
+      "transactionFingerprintSha256": "b0063ea9d21016acbbde681b9f9c7def6b7b749e642b255658a315f7dce6dd0c",
+      "transactionVersion": "LEGACY",
+      "inspectionStatus": "PARSED",
+      "outcome": "PASS",
+      "failureSource": "NONE",
+      "contextSlot": 505877434,
+      "unitsConsumed": 14864,
+      "durationMillis": 100,
+      "startedAtMillis": 1790765159634,
+      "completedAtMillis": 1790765159734,
+      "errorKind": null,
+      "instructionIndex": null,
+      "instructionErrorKind": null,
+      "customProgramErrorCode": null,
+      "boundedLogCount": 4,
+      "orderedSafeLogsSha256": "c50585f0d1784b2da5d629893968c832a5711165d9132fc6fd95ae3e3c8db430",
+      "parentMethod": "SIGN_TRANSACTIONS",
+      "parentOutcome": "FAILURE",
+      "parentFailureSource": "OBSERVED_PROTOCOL",
+      "parentProtocolErrorCode": -3,
+      "parentResponseSummary": {
+        "result": "rejected"
+      },
+      "submittedTransactionsReportedByDemo": 0,
+      "canonicalBindingVerified": true,
+      "deauthorizationAndSessionCloseObserved": true
+    }
+  ],
+  "restart": {
+    "forceStopObserved": true,
+    "processChanged": true,
+    "canonicalRowsEqualBeforeAndAfter": true,
+    "canonicalRowsSha256": "48680cc963d4d8022031bb80d8d91fb80b0eab097efd44d9a097b70ae2e11eca",
+    "persistedUiReload": "PASS",
+    "uiVerifiedSessionId": "f8fd32d6-4f2d-4c75-a793-00a55f758a1d",
+    "uiChecks": [
+      "canonical SIGN_TRANSACTIONS parent with OBSERVED_PROTOCOL and ERROR_NOT_SIGNED",
+      "Phase 4 LEGACY transaction diagnostic",
+      "matching transaction fingerprint",
+      "payload 1 / attempt 1 / latest",
+      "PASS / NONE child",
+      "expanded bounded redacted logs",
+      "PASS disclaimer"
+    ]
+  },
+  "databaseByteScan": {
+    "status": "PASS",
+    "scope": "actual installed wallet diagnostic database after three real Devnet simulation requests",
+    "files": [
+      {
+        "name": "mwa_lab.db",
+        "bytesScanned": 98304
+      },
+      {
+        "name": "mwa_lab.db-wal",
+        "bytesScanned": 420272
+      },
+      {
+        "name": "mwa_lab.db-shm",
+        "bytesScanned": 32768
+      }
+    ],
+    "positiveControlFingerprintsFound": 3,
+    "exactUnsignedPayloadAndEncodedFormsAbsent": true,
+    "exactMessageAndEncodedFormsAbsentIncludingSignedTransactionBody": true,
+    "acceptanceMemoAbsent": true,
+    "syntheticSecretSentinelsAbsent": true,
+    "rawRpcEnvelopeMarkersAbsent": true,
+    "unsafeSimulationColumnsAbsent": true,
+    "rawDatabaseCopiedIntoEvidence": false,
+    "rawBytesRetainedByAudit": false,
+    "limits": "Individual real signatures, auth/association tokens and protected keys were not extracted for literal matching. Their boundary is covered by schema/source checks and existing instrumented synthetic-sentinel tests; absence of unknown values is not claimed from a literal byte scan."
+  },
+  "rawPayloadStoredInEvidence": false,
+  "freezeTagCreated": false,
+  "confirmedBalanceAfterLamports": 3000000000,
+  "confirmedBalanceAfterSlot": 505878889,
+  "balanceNote": "Balance increased during acceptance; balance change is not used as a submission counter.",
+  "initialFundingVerification": {
+    "historicalPayer": "9xioY2tZrmkgSdZXts9Ybqb7HWEwf7Ss48G3JvKuBXfm",
+    "confirmedBalanceLamports": 5000000000,
+    "slot": 505874700,
+    "currentInstalledPayerInitiallyUnfunded": true,
+    "caseSensitiveAddressMismatchResolvedBeforeAcceptance": true
+  },
+  "submissionEvidenceScope": "Demo reported zero; fixed production sign_transactions path and canonical AUTHORIZE/SIGN_TRANSACTIONS/DEAUTHORIZE timeline were independently inspected. No network packet counter was installed.",
+  "auditNotes": [
+    "Initial temporary host query returned non-JSON output during relaunch; strict repeat passed all row comparisons.",
+    "A below-viewport parent field required scrolling before its UI assertion. No product or invariant change."
+  ]
+}

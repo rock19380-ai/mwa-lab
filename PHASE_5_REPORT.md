@@ -1,11 +1,13 @@
 # MWA Lab — Phase 5 simulation diagnostic closeout checkpoint
 
-**Status: NOT FROZEN.** Local implementation checks and exact-head implementation
-CI pass. Required real cross-package Devnet PASS/FAIL and persistence/restart
-acceptance are blocked by the unfunded lab identity. No Phase 5 freeze tag exists.
-The exact-head CI result for this documentation/test-harness commit can only be
-recorded after that commit exists; its run ID belongs in the external closeout
-receipt and final response, not as a fabricated pre-commit fact here.
+**Status: implementation and required live acceptance VERIFIED.** The earlier
+funding blocker is resolved. Real cross-package PASS-approve, runtime FAIL-approve,
+PASS-reject, canonical child binding and restart checks passed on 2026-09-30.
+This continuation changes only documentation and sanitized evidence.
+Freeze remains conditional on successful CI for this final evidence commit,
+a clean synchronized branch and the final invariant audit. Its exact CI run and
+freeze SHA belong in the annotated tag/final closeout receipt, which are produced
+after the commit exists; they are not fabricated as pre-commit facts here.
 
 ## Baseline and implementation
 
@@ -91,7 +93,7 @@ request database scan. Static security and protected-source hashes passed; see
 The targeted hostile/authority cases are recorded in
 `phase5-prefreeze-hostile-audit-summary.json`.
 
-## Device and live Devnet status
+## Historical funding blocker
 
 The Android 16 emulator `emulator-5554` ran the installed wallet and demo
 client through the real cross-package MWA association. The GOOD_PASS_APPROVE
@@ -108,15 +110,91 @@ runner now labels even successful visible-UI checks as preliminary until
 canonical parent/child database binding and restart are verified; its parser
 self-test runs in the Phase 5 static gate.
 
-GOOD_PASS_APPROVE: **BLOCKED before simulation**. BAD_FAIL_APPROVE and
-GOOD_PASS_REJECT: **NOT RUN**. Completed-request persistence/restart: **NOT
-RUN**. A live simulation PASS, live runtime FAIL, parent wire outcome, and live
-`submittedTransactions=0` are **not proven** by this attempt. The controlled
+At that checkpoint GOOD_PASS_APPROVE was **BLOCKED before simulation**;
+BAD_FAIL_APPROVE, GOOD_PASS_REJECT and restart were **NOT RUN**. A live
+simulation PASS, runtime FAIL, parent wire outcome and live zero-submission
+result were **not proven** by that historical attempt. The controlled
 RPC-unavailable case and FAIL-approve/PASS-reject authority behavior pass
 instrumentation, but those fixtures are not live Devnet receipts.
 
-The next prerequisite is at least 5,000 Devnet lamports on the same authorized
-lab identity. After funding, rerun the real device scenarios, inspect canonical
-parent/transaction/simulation child rows before and after force-stop/relaunch,
-repeat the security scan, then obtain exact-head CI for the final closeout
-commit. Only then may the Phase 5 freeze tag be considered.
+## Funded live acceptance (2026-09-30)
+
+Continuation began from clean local/remote
+`fc131ae7ef7a876cce85994233cffae68511e067`. Exact-head
+[CI 36700891045](https://github.com/rock19380-ai/mwa-lab/actions/runs/36700891045)
+was reverified completed/success, including lint, JVM tests, debug/AndroidTest
+APKs, APK checks and the Phase 5 static gate.
+
+The historical address was confirmed funded, but the installed wallet's current
+public identity differed. Real authorization and Home independently showed
+`5amADFiYY9UsNQnwoATm3W3f4YCCDqJnbhZvbqoK5EWV`; it survived a normal
+force-stop/relaunch unchanged. After resolving a case-sensitive funding-address
+mismatch, the user funded that exact payer. Confirmed balance was
+**1,000,000,000 lamports at slot 505877125**. Fresh fee quotes for both existing
+transaction templates were **5,000 lamports**; every actual demo request also
+obtained a fresh blockhash, fee and balance through its existing RPC path.
+No faucet request or product/validation change was made in this continuation.
+
+The existing debug APKs ran on `emulator-5554`, `MWA_Lab_API_36`, Android 16 /
+API 36, through the actual cross-package MWA local association. The acceptance
+runner triggered SIMULATE and then an explicit APPROVE or REJECT action.
+
+| Scenario | Simulation child | Canonical parent | Slot | Units | Safe logs | Submissions reported |
+| --- | --- | --- | --- | --- | --- | --- |
+| GOOD_PASS_APPROVE | PASS / NONE | SUCCESS / NONE, signature verified | 505877227 | 14864 | 4 | 0 |
+| BAD_FAIL_APPROVE | FAIL / SIMULATION, instruction 0 InvalidInstructionData | SUCCESS / NONE, signature verified | 505877329 | 150 | 2 | 0 |
+| GOOD_PASS_REJECT | PASS / NONE | FAILURE / OBSERVED_PROTOCOL, ERROR_NOT_SIGNED (-3) | 505877434 | 14864 | 4 | 0 |
+
+APPROVE and REJECT remained enabled after simulation; PASS remained on the
+approval screen until the explicit decision. PASS warnings were visible. The
+bad transaction used the existing structurally valid unknown System Program
+opcode, producing a real runtime failure without product fault injection.
+The fixed production gateway mapped err=null to PASS and the safe runtime error
+to FAIL; raw RPC bodies were not captured as evidence.
+
+The demo's zero-submission field is corroborated by the audited sign_transactions
+path and canonical method timeline (AUTHORIZE, SIGN_TRANSACTIONS, DEAUTHORIZE).
+It is not a packet-capture counter. Balance increased during the run because
+further funding arrived; balance change is not used as submission proof.
+
+`phase5-device-acceptance.json` remains explicitly UI/wire-only. The independent
+`phase5-live-devnet-acceptance.json` records exact session/event/request/fingerprint
+bindings, payload index 0 and attempt 1, safe classifications, slots, units,
+ordered-log hashes and canonical outcomes. All sessions ended normally after
+deauthorization, exercising completed child settlement during real session close.
+
+## Live restart and persistence security
+
+Read-only SQLite checks verified canonical parent/transaction/simulation joins,
+foreign keys, schema 3 and integrity. Force-stop ended the process; relaunch
+created a different process. All three sessions' records remained identical,
+including identities, fingerprints, payload/attempt ordering and parent/child
+classification. The last session's persisted UI showed the rejected parent,
+legacy diagnostic and independent PASS/NONE child with matching fingerprint,
+expandable redacted logs and disclaimer. Screenshots/XML are under the
+`phase5-device-restart-*` names.
+
+The actual `mwa_lab.db` (98,304 bytes), WAL (420,272 bytes) and SHM (32,768 bytes)
+were scanned in memory. All three fingerprints were found as positive controls.
+Exact reconstructed unsigned payloads and signed-message bodies, checked raw/
+hex/base64 forms, memo text, raw RPC envelope markers and synthetic secret
+sentinels were absent. No DB snapshot or raw payload was saved in evidence.
+Real individual signatures/tokens/protected keys were not extracted for literal
+matching; schema/source controls and existing instrumented sentinel tests cover
+that boundary. See `phase5-live-audit-method.md` for scope and limitations.
+
+One temporary host audit query produced non-JSON output during relaunch; a strict
+repeat passed all comparisons. A UI assertion initially checked a field below
+the viewport; scrolling that actual field into view completed the check. These
+were audit-command/viewport issues; no product code or acceptance invariant was
+changed. The historical blocked evidence remains unchanged.
+
+## Final closeout gates
+
+Design, deterministic vectors, the device parser self-test, static security,
+Phase 5 static and diff checks are rerun for the new evidence. The unchanged
+product retains the previously verified 245 app + 9 demo JVM tests, 109 app + 1
+demo connected tests, lint and APK builds. Controlled RPC_UNAVAILABLE evidence
+remains instrumentation-based: RPC_NETWORK leaves APPROVE/REJECT independent.
+Phase 6 and Phase 7 remain NOT STARTED. Final evidence-only CI must match the
+new exact HEAD before the annotated Phase 5 freeze tag is created.

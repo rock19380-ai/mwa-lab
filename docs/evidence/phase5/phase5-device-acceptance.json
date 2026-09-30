@@ -1,0 +1,38 @@
+{
+  "phase": "5-device-acceptance",
+  "status": "UI_ONLY_PENDING_DATABASE_AND_RESTART_VERIFICATION",
+  "network": "solana:devnet",
+  "crossPackagePath": true,
+  "scenarios": [
+    {
+      "scenario": "GOOD_PASS_APPROVE",
+      "simulationUi": "PASS",
+      "decision": "APPROVE",
+      "fingerprintSha256": "131b8100253b8629bb31235002a1a975727ef8ca8a9854825f04841fb6aa7bcc",
+      "submittedTransactionsReportedByDemo": 0,
+      "parentWireResponse": "VERIFIED_BY_DEMO",
+      "diagnosticDatabaseVerified": false
+    },
+    {
+      "scenario": "BAD_FAIL_APPROVE",
+      "simulationUi": "FAIL",
+      "decision": "APPROVE",
+      "fingerprintSha256": "0530951a35c699ec1830669ff0f6c4237fdc7bb298b4c6286835b871b5aa8620",
+      "submittedTransactionsReportedByDemo": 0,
+      "parentWireResponse": "VERIFIED_BY_DEMO",
+      "diagnosticDatabaseVerified": false
+    },
+    {
+      "scenario": "GOOD_PASS_REJECT",
+      "simulationUi": "PASS",
+      "decision": "REJECT",
+      "fingerprintSha256": "b0063ea9d21016acbbde681b9f9c7def6b7b749e642b255658a315f7dce6dd0c",
+      "submittedTransactionsReportedByDemo": 0,
+      "parentWireResponse": "VERIFIED_BY_DEMO",
+      "diagnosticDatabaseVerified": false
+    }
+  ],
+  "databaseByteScan": "NOT_RUN",
+  "restartPersistence": "NOT_RUN",
+  "freezeTagCreated": false
+}

@@ -260,3 +260,9 @@ A finished, already accepted simulation attempt may complete its bounded
 parent-then-child persistence after session teardown. Teardown rejects late
 callbacks and pending targets; it does not transfer completion authority or
 wait for the diagnostic write before returning the MWA response.
+
+The funded Phase 5 live run independently verified this separation: a runtime
+FAIL child accompanied a successful signed parent, while a PASS child remained
+PASS after the parent returned ERROR_NOT_SIGNED/OBSERVED_PROTOCOL. All three
+live sessions' canonical parent, transaction and simulation rows survived
+process restart without reclassification or rebinding.

@@ -212,7 +212,7 @@ closeout/freeze evidence rather than self-referenced inside this report.
 
 Apache-2.0.
 
-## Phase 5 simulation diagnostics — pre-freeze implementation
+## Phase 5 simulation diagnostics
 
 Phase 5 adds **user-triggered Solana Devnet simulation for supported legacy
 transactions** before signing. The simulator uses the existing fixed Devnet RPC
@@ -238,8 +238,12 @@ Legacy simulation is the P0 scope. Versioned v0 transactions remain detectable
 for diagnostics but are not simulatable/signable in this release. Phase 6 fault
 injection and Phase 7 Markdown/JSON report export remain out of scope.
 
-The implementation passes local verification and an exact-head implementation CI
-run, but it is **not frozen**. The real cross-package Devnet acceptance reached
-a funding prerequisite: the lab test account has zero lamports and requires at
-least a 5,000-lamport transaction fee. Live PASS/FAIL and restart evidence remain
-pending; no Phase 5 freeze tag has been created.
+Real cross-package Devnet acceptance on Android 16 passed GOOD_PASS_APPROVE,
+BAD_FAIL_APPROVE, and GOOD_PASS_REJECT after the user funded the exact installed
+lab identity. All three sign-only scenarios reported zero submissions. Canonical
+parent/transaction/simulation rows survived force-stop/relaunch unchanged, and
+the persisted UI showed the rejected parent with its independent PASS child.
+See `PHASE_5_REPORT.md` and `docs/evidence/phase5/phase5-live-devnet-acceptance.json`.
+The earlier unfunded attempt remains recorded as historical evidence. Final
+freeze provenance is recorded by the annotated tag only after exact-head CI
+succeeds on the evidence commit.

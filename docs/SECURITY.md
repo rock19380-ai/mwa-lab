@@ -260,6 +260,13 @@ The 2026-09-30 Phase 5 audit reran the static security scan and five Room
 simulation instrumentation tests. The disposable schema-3 database scan (including WAL/SHM when present)
 found its stored-fingerprint positive control and did not find synthetic raw
 transaction, signature, token, key/seed, or RPC-body sentinels. This establishes
-the test persistence boundary; a completed live Phase 5 request and its actual
-post-request database remain unverified because the test identity lacked
-Devnet fee lamports.
+the test persistence boundary. A subsequent funded live run also inspected the
+actual installed diagnostic database, WAL and SHM after three real requests.
+All three fingerprint positive controls were present. Reconstructed unsigned
+payloads, signed-message bodies and their checked encodings, acceptance memo,
+raw RPC envelope markers and synthetic secret sentinels were absent. No database
+bytes or raw payloads were retained in evidence. Individual real signatures,
+auth/association tokens and protected keys were not extracted for literal
+matching: their safety remains supported by schema/source controls and the
+existing instrumented sentinel tests. The live byte scan does not claim to
+search for unknown secret values.
