@@ -235,3 +235,23 @@ Versioned v0 inspection is deliberately non-authoritative and partial when looku
 table addresses are unresolved. It does not enable v0 signing. Phase 4 introduces
 no mainnet path, transaction simulation, synthetic fault engine, report exporter,
 or Android share-sheet diagnostic export.
+
+## Phase 5 simulation security boundary
+
+Simulation transaction bytes are **transient only** inside the coordinator and
+RPC call. They are never a Room column or a public ViewModel/Compose field. Raw
+RPC request/response bodies are not persisted or exported. Simulation results
+store only bounded structured metadata such as fingerprints, numeric slot/compute
+units, allowlisted error categories, and redacted program-log structure.
+
+RPC program logs are untrusted input. Line count, per-line code points, and total
+code points are bounded; control/format characters are rejected or replaced; and
+free-form log content is redacted before entering public/durable results. This
+prevents arbitrary RPC/log text from becoming a secret-bearing diagnostic
+channel.
+
+Simulation **cannot authorize**, **cannot sign**, and **cannot submit**. PASS does
+not grant approval; FAIL/UNAVAILABLE does not reject or disable approval. The
+fixed Devnet endpoint remains the only production RPC authority, mainnet remains
+unavailable, v0 signing remains unsupported, and malformed/oversized RPC data
+fails closed.

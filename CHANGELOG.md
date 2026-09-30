@@ -4,6 +4,11 @@
 
 ### Added
 
+- Phase 5 user-triggered legacy transaction simulation through the fixed Solana Devnet RPC boundary.
+- Room schema v3 sanitized simulation child evidence with deterministic attempt ordering and restart persistence.
+- Explicit PASS/FAIL/UNAVAILABLE diagnostic classification preserving parent MWA authority.
+- Bounded/redacted program-log diagnostics, deterministic simulation vectors, hostile sentinel scans, and a Phase 5 static/CI gate.
+
 - Phase 4 session-scoped configured capability snapshots with truthful walletlib provenance.
 - Room schema v2 migration adding capability snapshots and sanitized transaction diagnostics without historical backfill.
 - Bounded read-only legacy/v0 transaction inspection with account privilege derivation and SHA-256 fingerprints.
@@ -32,6 +37,10 @@
 - Deterministic cross-package MWA Lab Demo Client used only for testing.
 
 ### Security
+
+- Phase 5 simulation bytes are transient only; raw RPC bodies, raw transactions, signatures, auth/association tokens, and key material are excluded from diagnostic persistence.
+- Simulation cannot authorize, approve, reject, sign, submit, or complete the canonical protocol event; PASS is not a success guarantee and FAIL/UNAVAILABLE cannot block user decisions.
+- Free-form RPC program-log content is redacted before public/durable results while bounded runtime structure is retained.
 
 - Phase 4 persists structured public transaction metadata/hashes only; raw transaction and unknown instruction payload bytes remain outside diagnostic storage.
 - Transaction inspection remains non-authoritative; legacy signing, explicit approval, authorization, and fixed Devnet submission boundaries are unchanged.

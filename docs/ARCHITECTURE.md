@@ -230,3 +230,28 @@ not raw transaction payloads or raw unknown instruction bytes. v0 lookup-table
 addresses are not resolved over RPC in Phase 4; partial diagnostics state the
 limitation and v0 signing remains unsupported. Simulation, fault injection, and
 report export are not part of this architecture phase.
+
+## Phase 5 simulation diagnostic branch
+
+Phase 5 introduces simulation as a **diagnostic child branch** of a genuine
+`SIGN_TRANSACTIONS` or `SIGN_AND_SEND_TRANSACTIONS` protocol event:
+
+```text
+canonical MWA request
+    ├─ approval/signing/submission -> unchanged authority
+    └─ optional simulation        -> diagnostic child branch
+                                      -> sanitized Room child evidence
+```
+
+`TransactionSimulationCoordinator` owns the transient transaction bytes and binds
+them to session/event/request/payload/fingerprint identity. Public UI state never
+contains those bytes. `TransactionSimulationService` invokes only the fixed
+Devnet `simulateTransaction` RPC. `SimulationDiagnosticSettlement` observes the
+canonical persistent completion and attaches completed simulation attempts only
+after the parent event is durable.
+
+The core authority rule is: **simulation = diagnostic child branch;
+signing/submission = unchanged authority**. The simulation branch cannot call the
+signing service, cannot approve/reject, cannot submit, cannot complete
+`ProtocolRecorder`, and cannot rewrite the parent event outcome. Late results are
+identity-bound and discarded when their session/request target is invalidated.

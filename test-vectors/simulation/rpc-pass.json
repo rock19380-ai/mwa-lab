@@ -1,0 +1,19 @@
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "result": {
+    "context": {
+      "slot": 52
+    },
+    "value": {
+      "err": null,
+      "logs": [
+        "Program 11111111111111111111111111111111 invoke [1]",
+        "Program log: VECTOR_FREEFORM_SENTINEL",
+        "Program 11111111111111111111111111111111 consumed 42 of 200 compute units",
+        "Program 11111111111111111111111111111111 success"
+      ],
+      "unitsConsumed": 42
+    }
+  }
+}

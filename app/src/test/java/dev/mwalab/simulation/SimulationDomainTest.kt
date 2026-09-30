@@ -80,6 +80,24 @@ class SimulationDomainTest {
         assertFalse(pass.programLogs.any { it.contains('\u0000') || it.contains('\u202e') })
     }
 
+    @Test fun arbitraryRpcLogTextCannotReachPublicOrDurableResult() {
+        val program = "11111111111111111111111111111111"
+        val logs = SimulationLimits.sanitizeLogs(listOf(
+            "Program $program invoke [1]",
+            "Program log: AUTH_TOKEN_SENTINEL_PRIVATE_PAYLOAD",
+            "Program $program consumed 42 of 200 compute units",
+            "Program $program success",
+            "RAW_RPC_BODY_SENTINEL",
+        ))
+        assertEquals(listOf("Program invocation, depth 1", SimulationLimits.REDACTED_LOG,
+            "Program consumed 42 of 200 compute units", "Program success",
+            SimulationLimits.REDACTED_LOG), logs.lines)
+        val pass = result(logs = logs)
+        assertFalse(pass.programLogs.joinToString().contains("AUTH_TOKEN_SENTINEL"))
+        assertFalse(pass.programLogs.joinToString().contains("RAW_RPC_BODY_SENTINEL"))
+        assertEquals(logs.lines, BoundedLogs(logs.lines, false).lines)
+    }
+
     private fun result(
         outcome: SimulationOutcome = SimulationOutcome.PASS,
         source: ProtocolFailureSource = ProtocolFailureSource.NONE,

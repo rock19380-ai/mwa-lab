@@ -5,6 +5,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.mwalab.protocol.ProtocolFailureSource
+import dev.mwalab.security.DiagnosticSanitizer
 import dev.mwalab.simulation.*
 import dev.mwalab.storage.MwaLabDatabase
 import dev.mwalab.storage.RoomSimulationRepository
@@ -105,6 +106,45 @@ class SimulationPersistenceInstrumentedTest {
                 it.contains("token") || it.contains("secret") || it.contains("rpc_body") })
             assertBad { SimulationResultJson.encode(listOf("unsafe\u0000line")) }
             assertBad { SimulationResultJson.decode("""["unsafe\nline"]""", false) }
+        } finally { db.close() }
+    }
+
+    @Test fun sqliteWalByteScanHasPositiveControlAndNoRawPayloadOrSecretSentinels() = runBlocking {
+        val name = name()
+        val db = open(name)
+        try {
+            val rawPayload = "RAW_TRANSACTION_PAYLOAD_SENTINEL_PHASE5".encodeToByteArray()
+            val rawSignature = "RAW_SIGNATURE_SENTINEL_PHASE5"
+            val authToken = "AUTH_TOKEN_SENTINEL_PHASE5"
+            val associationToken = "ASSOCIATION_TOKEN_SENTINEL_PHASE5"
+            val privateMaterial = "PRIVATE_KEY_SEED_SENTINEL_PHASE5"
+            val rpcBody = "RAW_RPC_BODY_SENTINEL_PHASE5"
+            val fingerprint = DiagnosticSanitizer.sha256(rawPayload)
+            seed(db.openHelper.writableDatabase, "scan", "scan:1", fingerprint)
+            val result = SimulationResult("scan:1:simulation:0:1",
+                SimulationTargetRef("scan", "scan:1", "request", 0, fingerprint),
+                1, 1, 2, 1, SimulationOutcome.PASS, ProtocolFailureSource.NONE, "processed",
+                contextSlot = 52, unitsConsumed = 42, logs = BoundedLogs(listOf(
+                    "Program log: $authToken $associationToken $privateMaterial $rpcBody $rawSignature",
+                    "Program 11111111111111111111111111111111 success"), false))
+            RoomSimulationRepository(db.simulationResultDao()).recordForEvent("scan", "scan:1", listOf(result))
+            val persisted = RoomSimulationRepository(db.simulationResultDao()).getForEvent("scan", "scan:1").single()
+            assertEquals(listOf(SimulationLimits.REDACTED_LOG, "Program success"), persisted.programLogs)
+            db.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").use {
+                while (it.moveToNext()) Unit
+            }
+            val bytes = listOf("", "-wal", "-shm").mapNotNull { suffix ->
+                context.getDatabasePath(name + suffix).takeIf { it.exists() }?.readBytes()
+            }
+            assertTrue(bytes.isNotEmpty())
+            assertTrue("Positive control: stored fingerprint must be visible in database bytes",
+                bytes.any { it.toString(Charsets.ISO_8859_1).contains(fingerprint) })
+            val all = bytes.map { it.toString(Charsets.ISO_8859_1) }
+            for (secret in listOf(rawPayload.decodeToString(), rawSignature, authToken,
+                associationToken, privateMaterial, rpcBody)) {
+                assertFalse("Sensitive sentinel reached SQLite/WAL/SHM",
+                    all.any { it.contains(secret) })
+            }
         } finally { db.close() }
     }
 

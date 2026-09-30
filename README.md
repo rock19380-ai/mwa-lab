@@ -211,3 +211,32 @@ closeout/freeze evidence rather than self-referenced inside this report.
 ## License
 
 Apache-2.0.
+
+## Phase 5 simulation diagnostics — pre-freeze implementation
+
+Phase 5 adds **user-triggered Solana Devnet simulation for supported legacy
+transactions** before signing. The simulator uses the existing fixed Devnet RPC
+boundary with `simulateTransaction`, `encoding=base64`, `sigVerify=false`, and
+`replaceRecentBlockhash=false`. It records bounded structured evidence such as
+PASS/FAIL/UNAVAILABLE, failure source, context slot, compute units, safe error
+classification, and redacted runtime-log structure.
+
+**Simulation is diagnostic evidence only and does not guarantee later submission
+or confirmation.** A simulation PASS never approves or signs a request. A
+simulation FAIL or RPC_UNAVAILABLE result never rejects a parent MWA request or
+disables APPROVE/REJECT. The existing approval, signing, submission, and
+`ProtocolRecorder` paths remain authoritative.
+
+Phase 5 persistence is Room schema 3. Simulation results are child diagnostics
+attached only after the canonical parent protocol event is durable. Raw
+transaction bytes remain transient; raw RPC bodies, signatures, authorization
+tokens, association tokens, private keys, and seed material are not diagnostic
+storage fields. Free-form RPC log content is redacted before public/durable
+results while bounded runtime structure is retained.
+
+Legacy simulation is the P0 scope. Versioned v0 transactions remain detectable
+for diagnostics but are not simulatable/signable in this release. Phase 6 fault
+injection and Phase 7 Markdown/JSON report export remain out of scope.
+
+The implementation is intentionally **not frozen yet**. Final device/live-Devnet
+acceptance and exact-head CI/freeze evidence are separate closeout gates.

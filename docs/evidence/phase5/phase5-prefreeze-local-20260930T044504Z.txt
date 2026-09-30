@@ -1,0 +1,174 @@
+=== PHASE 5 PREFREEZE LOCAL GATE ===
+utc=20260930T044504Z
+branch=phase5-simulation-diagnostic-classification
+head=08c01f4f2b28e1f83e688569fa912f0aa2c7c5ec
+=== deterministic design/vector/static/security gates ===
+PHASE 5 DESIGN CHECK: PASS
+PHASE 5 DETERMINISTIC SIMULATION VECTORS: PASS
+PHASE 5 SECURITY SCAN: PASS
+PHASE 5 DESIGN CHECK: PASS
+PHASE 5 DETERMINISTIC SIMULATION VECTORS: PASS
+PHASE 5 STATIC GATE: PASS
+=== diff hygiene ===
+=== Gradle lint/test/build ===
+Starting a Gradle Daemon, 2 incompatible and 1 stopped Daemons could not be reused, use --status for details
+Calculating task graph as configuration cache cannot be reused because file 'app/build.gradle.kts' has changed.
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:preDebugAndroidTestBuild SKIPPED
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :demo-client:extractProguardFiles UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :demo-client:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugLintReportModel
+> Task :demo-client:generateDebugUnitTestLintModel
+> Task :demo-client:generateDebugAndroidTestLintModel
+> Task :demo-client:lintAnalyzeDebug
+> Task :app:lintAnalyzeDebug
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :demo-client:lintAnalyzeDebugAndroidTest
+> Task :demo-client:lintAnalyzeDebugUnitTest
+
+> Task :demo-client:lintReportDebug
+Wrote HTML report to file:///home/abbaas/mwa-lab/demo-client/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/abbaas/mwa-lab/demo-client/build/reports/lint-results-debug.sarif
+
+> Task :demo-client:lintDebug
+> Task :demo-client:lint
+> Task :app:lintAnalyzeDebugUnitTest
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///home/abbaas/mwa-lab/app/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/abbaas/mwa-lab/app/build/reports/lint-results-debug.sarif
+
+> Task :app:lintDebug
+> Task :app:lint
+
+BUILD SUCCESSFUL in 1m 47s
+55 actionable tasks: 16 executed, 39 up-to-date
+Configuration cache entry stored.
+Calculating task graph as configuration cache cannot be reused because file 'app/build.gradle.kts' has changed.
+> Task :demo-client:preBuild UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :demo-client:preDebugBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :demo-client:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:generateDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebug UP-TO-DATE
+> Task :demo-client:packageDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :demo-client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :demo-client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :demo-client:processDebugNavigationResources UP-TO-DATE
+> Task :demo-client:extractDeepLinksDebug UP-TO-DATE
+> Task :demo-client:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:generateDebugRFile UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :demo-client:compileDebugNavigationResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :demo-client:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :demo-client:checkDebugAarMetadata UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :demo-client:compileDebugKotlin UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:mergeDebugResources UP-TO-DATE
+> Task :demo-client:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :demo-client:processDebugJavaRes UP-TO-DATE
+> Task :demo-client:processDebugMainManifest UP-TO-DATE
+> Task :demo-client:processDebugManifest UP-TO-DATE
+> Task :demo-client:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :demo-client:processDebugResources UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :demo-client:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :demo-client:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :demo-client:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:kspDebugUnitTestKotlin
+> Task :demo-client:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :demo-client:testDebugUnitTest
+> Task :demo-client:test
+
+> Task :app:compileDebugUnitTestKotlin FAILED
+e: file:///home/abbaas/mwa-lab/app/src/test/java/dev/mwalab/simulation/TransactionSimulationServiceTest.kt:12:25 Unresolved reference 'assertFailsWith'.
+e: file:///home/abbaas/mwa-lab/app/src/test/java/dev/mwalab/simulation/TransactionSimulationServiceTest.kt:31:9 Unresolved reference 'assertFailsWith'.
+e: file:///home/abbaas/mwa-lab/app/src/test/java/dev/mwalab/simulation/TransactionSimulationServiceTest.kt:32:21 Suspension functions can only be called within coroutine body.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestKotlin' (registered by plugin 'com.android.internal.application').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 26s
+48 actionable tasks: 3 executed, 45 up-to-date
+Configuration cache entry stored.

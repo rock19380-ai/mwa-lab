@@ -1,0 +1,21 @@
+{
+  "phase": "5.12-5.15-prefreeze",
+  "status": "PASS",
+  "utc": "20260930T045322Z",
+  "branch": "phase5-simulation-diagnostic-classification",
+  "headBeforeCloseoutCommit": "08c01f4f2b28e1f83e688569fa912f0aa2c7c5ec",
+  "roomSchema": 3,
+  "designCheck": "PASS",
+  "deterministicVectors": "PASS",
+  "securityStaticScan": "PASS",
+  "phase5Static": "PASS",
+  "gitDiffCheck": "PASS",
+  "gradleLint": "PASS",
+  "gradleTest": "PASS",
+  "assembleDebug": "PASS",
+  "assembleAndroidTest": "PASS",
+  "connectedDebugAndroidTest": "PASS",
+  "liveDevnetAcceptance": "PENDING_SEPARATE_DEVICE_FLOW",
+  "freezeTagCreated": false,
+  "log": "docs/evidence/phase5/phase5-prefreeze-local-20260930T045322Z.txt"
+}

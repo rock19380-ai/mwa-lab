@@ -1,0 +1,22 @@
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "result": {
+    "context": {
+      "slot": 52
+    },
+    "value": {
+      "err": {
+        "InstructionError": [
+          0,
+          "InvalidInstructionData"
+        ]
+      },
+      "logs": [
+        "Program 11111111111111111111111111111111 invoke [1]",
+        "Program 11111111111111111111111111111111 failed: invalid instruction data"
+      ],
+      "unitsConsumed": 73
+    }
+  }
+}

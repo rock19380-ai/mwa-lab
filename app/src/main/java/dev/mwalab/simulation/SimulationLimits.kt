@@ -9,6 +9,25 @@ object SimulationLimits {
     const val MAX_INSTRUCTION_INDEX = 255
     const val MAX_CUSTOM_ERROR_CODE = 0xffff_ffffL
     const val TRUNCATION_MARKER = "Program logs truncated by MWA Lab diagnostic limit."
+    const val REDACTED_LOG = "Program log content redacted by MWA Lab."
+
+    private val invocation = Regex("^Program [1-9A-HJ-NP-Za-km-z]{32,44} invoke \\[([0-9]{1,3})\\]$")
+    private val success = Regex("^Program [1-9A-HJ-NP-Za-km-z]{32,44} success$")
+    private val consumed = Regex("^Program [1-9A-HJ-NP-Za-km-z]{32,44} consumed ([0-9]{1,12}) of ([0-9]{1,12}) compute units$")
+
+    /** RPC logs can echo arbitrary transaction data. Retain only bounded runtime structure. */
+    fun publicLogLine(line: String): String {
+        if (line == REDACTED_LOG || line == "Program success" ||
+            line.matches(Regex("^Program invocation, depth [0-9]{1,3}$")) ||
+            line.matches(Regex("^Program consumed [0-9]{1,12} of [0-9]{1,12} compute units$"))
+        ) return line
+        invocation.matchEntire(line)?.let { return "Program invocation, depth ${it.groupValues[1]}" }
+        if (success.matches(line)) return "Program success"
+        consumed.matchEntire(line)?.let {
+            return "Program consumed ${it.groupValues[1]} of ${it.groupValues[2]} compute units"
+        }
+        return REDACTED_LOG
+    }
 
     fun safeIdentity(value: String): Boolean = value.isNotBlank() && value.length <= 128 &&
         value.all { it.code in 0x21..0x7e }
@@ -56,7 +75,9 @@ object SimulationLimits {
 }
 
 class BoundedLogs(lines: List<String>, val truncated: Boolean) {
-    val lines: List<String> = java.util.Collections.unmodifiableList(ArrayList(lines))
+    val lines: List<String> = java.util.Collections.unmodifiableList(
+        ArrayList(lines.map(SimulationLimits::publicLogLine)),
+    )
 
     init {
         require(lines.size <= SimulationLimits.MAX_LOG_LINES)

@@ -35,15 +35,25 @@ class DemoClientActivity : ComponentActivity() {
             intent?.getStringExtra(EXTRA_PHASE4_SCENARIO),
         ) else null
 
+        val phase5Scenario = if (phase2Scenario == null && phase4Scenario == null)
+            Phase5AcceptanceScenario.fromWireName(intent?.getStringExtra(EXTRA_PHASE5_SCENARIO)) else null
+
         setContent {
             MaterialTheme {
-                var state by remember(phase2Scenario, phase4Scenario) {
+                var state by remember(phase2Scenario, phase4Scenario, phase5Scenario) {
                     mutableStateOf<DemoUiState>(DemoUiState.Running)
                 }
 
-                LaunchedEffect(phase2Scenario, phase4Scenario) {
+                LaunchedEffect(phase2Scenario, phase4Scenario, phase5Scenario) {
                     state = withContext(Dispatchers.IO) {
-                        if (phase4Scenario != null) {
+                        if (phase5Scenario != null) {
+                            runCatching {
+                                Phase5AcceptanceRunner(applicationContext).run(phase5Scenario)
+                            }.fold(
+                                onSuccess = { DemoUiState.Phase5Complete(it) },
+                                onFailure = { DemoUiState.Failed("PHASE5 ${phase5Scenario.name}", phase2FailureDetail(it)) },
+                            )
+                        } else if (phase4Scenario != null) {
                             runCatching {
                                 Phase4AcceptanceRunner(applicationContext).run(phase4Scenario)
                             }.fold(
@@ -88,7 +98,13 @@ class DemoClientActivity : ComponentActivity() {
                         style = MaterialTheme.typography.titleMedium,
                     )
 
-                    if (phase4Scenario != null) {
+                    if (phase5Scenario != null) {
+                        Text("Phase 5 simulation: ${phase5Scenario.name}")
+                        Text("SOLANA DEVNET · SIGN ONLY · NO SUBMISSION")
+                        Text("In MWA Lab, tap SIMULATE; inspect PASS or FAIL, then " +
+                            if (phase5Scenario.reject) "REJECT." else "APPROVE.")
+                        Text("Simulation is diagnostic only; a PASS does not guarantee submission or confirmation.")
+                    } else if (phase4Scenario != null) {
                         Text("Phase 4 transaction diagnostics: ${phase4Scenario.name}")
                         Text("SOLANA DEVNET · SIGN ONLY · NO SUBMISSION")
                     } else if (phase2Scenario == null) {
@@ -123,6 +139,17 @@ class DemoClientActivity : ComponentActivity() {
                                     current.result.optionalFeatures.joinToString(),
                             )
                         }
+                        is DemoUiState.Phase5Complete -> {
+                            val result = current.result
+                            Text("PHASE5 ${result.scenario.name}: PARENT RESPONSE VERIFIED")
+                            Text("MWA Lab payload fingerprint: ${result.fingerprintSha256}")
+                            Text("Wire length: ${result.wireLength} bytes")
+                            Text("Fee payer: ${result.feePayer}")
+                            Text("Signature verified: ${result.signatureVerified}")
+                            result.protocolErrorCode?.let { Text("Expected protocol error: $it") }
+                            Text("Submitted transactions: ${result.submittedTransactions}")
+                            Text("Check MWA Lab Session Detail for independent simulation evidence.")
+                        }
                         is DemoUiState.Phase4Complete -> {
                             val result = current.result
                             Text("PHASE4 ${result.scenario.name}: PASS")
@@ -147,6 +174,7 @@ class DemoClientActivity : ComponentActivity() {
     companion object {
         const val EXTRA_PHASE2_SCENARIO = "mwa_phase2_scenario"
         const val EXTRA_PHASE4_SCENARIO = "mwa_phase4_scenario"
+        const val EXTRA_PHASE5_SCENARIO = "mwa_phase5_scenario"
     }
 }
 
@@ -176,5 +204,6 @@ private sealed interface DemoUiState {
     data class Failed(val label: String, val detail: String? = null) : DemoUiState
     data class CanonicalComplete(val result: DemoRunResult) : DemoUiState
     data class Phase4Complete(val result: Phase4AcceptanceResult) : DemoUiState
+    data class Phase5Complete(val result: Phase5AcceptanceResult) : DemoUiState
     data class Phase2Complete(val result: Phase2AcceptanceResult) : DemoUiState
 }

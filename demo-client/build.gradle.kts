@@ -33,6 +33,7 @@ android {
     }
 
     sourceSets.getByName("test").resources.directories.add(rootProject.file("test-vectors/transactions").path)
+    sourceSets.getByName("test").resources.directories.add(rootProject.file("test-vectors/simulation").path)
 
     buildFeatures {
         compose = true

@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": -32005,
+    "message": "synthetic unavailable fixture"
+  },
+  "id": 1,
+  "jsonrpc": "2.0"
+}

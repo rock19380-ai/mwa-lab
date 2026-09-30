@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "result": {
+    "context": {
+      "slot": 52
+    },
+    "value": {
+      "err": {
+        "FutureRuntimeError": {
+          "opaque": "unclassified"
+        }
+      },
+      "logs": []
+    }
+  }
+}

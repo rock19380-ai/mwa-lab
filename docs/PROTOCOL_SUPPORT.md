@@ -157,3 +157,27 @@ Program decoding is deliberately limited to verified semantics. Unknown program
 or unsupported instruction semantics are shown as unknown/unavailable with public
 program/account metadata plus bounded data length/SHA-256 rather than fabricated
 meaning. No production-wallet compatibility claim is made by Phase 4.
+
+## Phase 5 simulation and diagnostic classification truth table
+
+| Capability | Phase 5 status |
+|---|---|
+| legacy simulation | supported, user-triggered diagnostic only |
+| v0 simulation | not supported in P0 |
+| v0 signing | not supported |
+| simulation broadcast | never; simulation does not submit |
+| PASS semantics | evidence only; does not guarantee signing, submission, or confirmation |
+| FAIL semantics | `SIMULATION` child evidence; does not reject parent request |
+| RPC unavailable | `RPC_NETWORK` child evidence; approval remains independent |
+| local unsafe input | `LOCAL_PARSER` unavailable diagnostic |
+| context slot / compute units | preserved when safely returned |
+| program logs | bounded runtime structure; free-form content redacted |
+| raw transaction persistence | not supported |
+| raw RPC body persistence | not supported |
+| synthetic `ProtocolMethod.SIMULATE` | not supported |
+| fault injection | not implemented / Phase 6 |
+| report export | not implemented / Phase 7 |
+
+Simulation is diagnostic evidence only and **does not guarantee** later
+submission or confirmation. The parent `ProtocolEvent` is still determined only
+by the existing MWA authorization/approval/signing/submission path.

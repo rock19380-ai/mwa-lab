@@ -226,7 +226,7 @@ class TransactionInspectorUiInstrumentedTest {
         scroll("Payload 1 · attempt 2 · LATEST")
         compose.onNodeWithTag("persisted-simulation-$eventId-0-2-logs-expander")
             .performScrollTo().performClick()
-        scroll("Program log: bounded")
+        scroll(SimulationLimits.REDACTED_LOG)
         scroll("Simulation passed on Devnet", substring = true)
         compose.runOnIdle { diagnostics = SessionSimulationUiState.Unavailable }
         scroll("Retry simulation diagnostics")

@@ -264,3 +264,32 @@ The recorded Android 16 (`sdk_gphone64_x86_64`, API 36) run exercises:
 Phase 4 does not claim simulation, fault injection, report export, ALT RPC
 resolution, v0 signing, or production-wallet compatibility. Those remain outside
 this phase's acceptance matrix.
+
+## Phase 5 simulation test matrix
+
+Phase 5 adds deterministic public transaction templates and synthetic RPC
+fixtures under `test-vectors/simulation/`. The templates use a synthetic public
+payer/blockhash only for deterministic reconstruction; live acceptance must
+substitute the authorized payer and a fresh Devnet blockhash. Synthetic fixtures
+are never described as live-network evidence.
+
+Required test coverage includes domain invariants; fixed RPC flags and bounded
+response parsing; PASS/FAIL/custom-error/blockhash/unknown/RPC-unavailable
+classification; coordinator duplicate-tap, retry, stale-session, fingerprint,
+and v0 rejection; parent/child settlement ordering and persistence-failure
+isolation; Room 1->2->3 and 2->3 migrations; approval UI states and PASS warning;
+restart-surviving Session Detail evidence; hostile log/JSON/identity cases; and a
+SQLite/WAL sentinel scan proving safe positive-control metadata is present while
+raw payload/token/signature/private/RPC-body sentinels are absent.
+
+Local deterministic gates are:
+
+```bash
+python3 scripts/verify_phase5_simulation_vectors.py
+./scripts/phase5_static.sh
+./gradlew lint test assembleDebug assembleDebugAndroidTest
+```
+
+Device/live-Devnet acceptance remains a separate pre-freeze requirement and may
+only be marked PASS when it was actually executed through the real cross-package
+MWA path.

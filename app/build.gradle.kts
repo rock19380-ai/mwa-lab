@@ -36,6 +36,7 @@ android {
     }
     sourceSets {
         getByName("androidTest").assets.directories.add("$projectDir/schemas")
+        getByName("androidTest").assets.directories.add(rootProject.file("test-vectors/simulation").path)
     }
     sourceSets.getByName("test").resources.directories.add(rootProject.file("test-vectors/transactions").path)
 
