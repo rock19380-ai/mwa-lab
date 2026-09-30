@@ -52,6 +52,23 @@ class SimulationDiagnosticSettlementTest {
         assertEquals(1, f.sessions.writes)
     }
 
+    @Test fun completedAttemptSurvivesImmediateSessionCloseAfterDurableParent() = runTest {
+        val f = Fixture(this)
+        val handle = f.recorder.begin("session", ProtocolMethod.SIGN_TRANSACTIONS, f.requestSummary)
+        val context = f.settlement.begin(handle, "request")!!
+        val accepted = f.result(handle, 1)
+        assertTrue(f.settlement.record(accepted))
+        val parent = f.recorder.complete(handle, ProtocolOutcome.SUCCESS)
+        f.settlement.completed(parent)
+        f.settlement.finish(context)
+        // Serving-complete can close the session before the scheduled child write runs.
+        f.settlement.invalidateSession("session")
+        assertFalse(f.settlement.record(f.result(handle, 2)))
+        runCurrent()
+        assertEquals(listOf(accepted), f.saved)
+        assertEquals(parent.event, f.sessions.getSession("session")!!.events.single())
+    }
+
     @Test fun failedParentWrongIdentityAndInvalidationNeverInsert() = runTest {
         val f = Fixture(this)
         val handle = f.recorder.begin("session", ProtocolMethod.SIGN_TRANSACTIONS, f.requestSummary)

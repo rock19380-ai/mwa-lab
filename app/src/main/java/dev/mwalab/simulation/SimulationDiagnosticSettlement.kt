@@ -31,6 +31,7 @@ class SimulationDiagnosticSettlement(
         internal val workers = mutableListOf<Job>()
         internal var completion: ProtocolRecorder.CompletionResult? = null
         internal var finished = false
+        internal var acceptsResults = true
         internal var invalidated = false
     }
 
@@ -47,7 +48,8 @@ class SimulationDiagnosticSettlement(
     fun record(result: SimulationResult): Boolean {
         val context = active[result.target.eventId] ?: return false
         synchronized(context) {
-            if (context.invalidated || context.completion is ProtocolRecorder.CompletionResult.PersistenceFailed ||
+            if (!context.acceptsResults || context.invalidated ||
+                context.completion is ProtocolRecorder.CompletionResult.PersistenceFailed ||
                 result.target.sessionId != context.handle.sessionId ||
                 result.target.eventId != context.handle.eventId ||
                 result.target.requestId != context.requestId) return false
@@ -63,7 +65,7 @@ class SimulationDiagnosticSettlement(
     fun completed(result: ProtocolRecorder.CompletionResult) {
         val context = active[result.event.eventId] ?: return
         synchronized(context) {
-            if (context.invalidated || !matches(context.handle, result.event)) return
+            if (!context.acceptsResults || context.invalidated || !matches(context.handle, result.event)) return
             context.completion = result
         }
     }
@@ -85,11 +87,24 @@ class SimulationDiagnosticSettlement(
     }
 
     fun invalidateSession(sessionId: String) {
-        active.values.filter { it.handle.sessionId == sessionId }.forEach(::expire)
+        active.values.filter { it.handle.sessionId == sessionId }.forEach { context ->
+            synchronized(context) {
+                if (context.finished && context.attempts.isNotEmpty() &&
+                    context.completion !is ProtocolRecorder.CompletionResult.PersistenceFailed) {
+                    // Reject all late callbacks, but let already accepted safe attempts
+                    // finish their bounded parent-then-child write after session close.
+                    context.acceptsResults = false
+                    active.remove(context.handle.eventId, context)
+                } else {
+                    expire(context)
+                }
+            }
+        }
     }
 
     private fun expire(context: Context) {
         synchronized(context) {
+            context.acceptsResults = false
             context.invalidated = true
             active.remove(context.handle.eventId, context)
             context.workers.forEach { it.cancel() }
