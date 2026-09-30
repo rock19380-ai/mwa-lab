@@ -320,6 +320,11 @@ class MwaTransactionApprovalInstrumentedTest {
             }
         }
         private val rpc = object : DevnetRpcGateway {
+            override suspend fun simulateTransaction(
+                transaction: ByteArray,
+                options: dev.mwalab.rpc.DevnetSimulationOptions,
+            ): DevnetRpcResult<dev.mwalab.rpc.SimulationRpcValue> =
+                error("Existing approval flow must never invoke simulation")
             override suspend fun isBlockhashValid(blockhash: ByteArray, minContextSlot: Int?): DevnetRpcResult<Boolean> {
                 order += "blockhash"
                 assertArrayEquals(ByteArray(32) { 0x77 }, blockhash)

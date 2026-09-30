@@ -1,0 +1,26 @@
+{
+  "scope": "Steps 5.0–5.4 only",
+  "roomSchema": 2,
+  "designCheck": "PASS",
+  "jvm": {
+    "command": "./gradlew test lint",
+    "result": "PASS",
+    "tests": 238,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "connected": [
+    {"class": "dev.mwalab.rpc.SolanaDevnetSimulationRpcInstrumentedTest", "tests": 4, "failures": 0, "errors": 0, "skipped": 0},
+    {"class": "dev.mwalab.mwa.MwaTransactionApprovalInstrumentedTest", "tests": 10, "failures": 0, "errors": 0, "skipped": 0},
+    {"class": "dev.mwalab.rpc.SolanaDevnetRpcGatewayInstrumentedTest", "tests": 9, "failures": 0, "errors": 0, "skipped": 0}
+  ],
+  "phase4StaticOnFrozenBaseline": "PASS",
+  "phase4StaticOnPhase5Checkout": {
+    "result": "EXPECTED_SCOPE_FAILURE",
+    "error": "PHASE 4 STATIC GATE ERROR: Unreviewed runtime file added/removed",
+    "reason": "The frozen Phase 4 gate expressly excludes future-phase runtime files. It was not changed."
+  },
+  "liveDevnetAcceptance": "NOT_RUN",
+  "step5.5OrLater": "NOT_STARTED"
+}

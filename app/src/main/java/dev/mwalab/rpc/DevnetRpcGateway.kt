@@ -2,6 +2,7 @@ package dev.mwalab.rpc
 
 import android.util.Base64
 import com.funkatronics.encoders.Base58
+import dev.mwalab.simulation.SimulationLimits
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -49,6 +50,11 @@ data class DevnetSendOptions(
 }
 
 interface DevnetRpcGateway {
+    suspend fun simulateTransaction(
+        transaction: ByteArray,
+        options: DevnetSimulationOptions,
+    ): DevnetRpcResult<SimulationRpcValue>
+
     suspend fun isBlockhashValid(
         blockhash: ByteArray,
         minContextSlot: Int? = null,
@@ -151,6 +157,32 @@ class SolanaDevnetRpcGateway internal constructor(
     private val transport: DevnetHttpTransport = FixedDevnetHttpTransport(),
 ) : DevnetRpcGateway {
     private val requestId = AtomicLong(0)
+
+    override suspend fun simulateTransaction(
+        transaction: ByteArray,
+        options: DevnetSimulationOptions,
+    ): DevnetRpcResult<SimulationRpcValue> {
+        if (transaction.isEmpty() || transaction.size > SimulationLimits.MAX_TRANSACTION_BYTES) {
+            return DevnetRpcResult.MalformedResponse
+        }
+        val config = JSONObject()
+            .put("encoding", "base64")
+            .put("sigVerify", false)
+            .put("replaceRecentBlockhash", false)
+            .put("innerInstructions", false)
+            .put("commitment", options.commitment)
+        options.minContextSlot?.let { config.put("minContextSlot", it) }
+        val params = JSONArray()
+            .put(Base64.encodeToString(transaction, Base64.NO_WRAP))
+            .put(config)
+        return when (val response = rpc("simulateTransaction", params)) {
+            is RpcEnvelope.Success -> SimulationRpcValueParser.parse(response.value)
+            is RpcEnvelope.RpcError -> if (response.code == Int.MIN_VALUE) DevnetRpcResult.MalformedResponse
+                else DevnetRpcResult.RpcError(response.code)
+            is RpcEnvelope.TransportFailure -> DevnetRpcResult.TransportFailure(response.reason)
+            RpcEnvelope.Malformed -> DevnetRpcResult.MalformedResponse
+        }
+    }
 
     override suspend fun isBlockhashValid(
         blockhash: ByteArray,
@@ -294,9 +326,14 @@ class SolanaDevnetRpcGateway internal constructor(
                     return RpcEnvelope.Malformed
                 }
 
-                val error = response.optJSONObject("error")
-                if (error != null) {
-                    return RpcEnvelope.RpcError(error.optInt("code", Int.MIN_VALUE))
+                val rawError = response.opt("error")
+                if (rawError != null && rawError !== JSONObject.NULL) {
+                    val error = rawError as? JSONObject ?: return RpcEnvelope.Malformed
+                    val code = when (val rawCode = error.opt("code")) {
+                        is Int, is Long, is java.math.BigInteger -> rawCode.toString().toIntOrNull()
+                        else -> null
+                    } ?: return RpcEnvelope.Malformed
+                    return RpcEnvelope.RpcError(code)
                 }
                 if (!response.has("result")) return RpcEnvelope.Malformed
                 RpcEnvelope.Success(response.opt("result"))

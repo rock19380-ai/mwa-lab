@@ -262,6 +262,11 @@ class SignAndSendSubmissionExecutorTest {
         private val onSend: (Int) -> Unit = {},
         private val onCommitment: () -> Unit = {},
     ) : DevnetRpcGateway {
+        override suspend fun simulateTransaction(
+            transaction: ByteArray,
+            options: DevnetSimulationOptions,
+        ): DevnetRpcResult<SimulationRpcValue> = error("Submission must never invoke simulation")
+
         private val sendResults = ArrayDeque(sendResults)
         private val commitmentResults = ArrayDeque(commitmentResults)
         val calls = mutableListOf<String>()
