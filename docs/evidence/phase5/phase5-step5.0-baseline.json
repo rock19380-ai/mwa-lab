@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "repository": "/home/abbaas/mwa-lab",
+  "remote": "https://github.com/rock19380-ai/mwa-lab.git",
+  "startingBranch": "phase4-capability-transaction-diagnostics",
+  "startingHead": "6028375636251eb3071f0a5240a2ad1efc78131e",
+  "frozenTag": "phase4-capability-transaction-diagnostics-2026-09-29",
+  "frozenTagPeeledCommit": "6028375636251eb3071f0a5240a2ad1efc78131e",
+  "frozenCommitReachableFromStartingHead": true,
+  "workingTreeCleanBeforeBranch": true,
+  "untrackedProductFilesBeforeBranch": false,
+  "historicalTagsResolvable": true,
+  "roomSchema": 2,
+  "schemaExports": [1, 2],
+  "walletlib": "2.0.7",
+  "phase4Static": "PASS",
+  "gitDiffCheck": "PASS",
+  "phase5ImplementationPresentBeforeBranch": false,
+  "simulationImplementationPresentBeforeBranch": false,
+  "phase6FaultEnginePresentBeforeBranch": false,
+  "phase7ReportExporterPresentBeforeBranch": false,
+  "githubActions": {
+    "runId": 36560570328,
+    "headSha": "6028375636251eb3071f0a5240a2ad1efc78131e",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/rock19380-ai/mwa-lab/actions/runs/36560570328"
+  },
+  "protectedSourceHashes": "phase5-step5.0-protected-sources.sha256"
+}
