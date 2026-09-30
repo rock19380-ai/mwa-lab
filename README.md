@@ -136,9 +136,9 @@ Phase 4 device acceptance exercised System Transfer, Unknown Program, and v0
 authoritative rejection through the real cross-package path, then verified all
 four diagnostic tables across force-stop/restart. See
 [PHASE_4_REPORT.md](PHASE_4_REPORT.md) and
-[Phase 4 evidence](docs/evidence/phase4/). Simulation, deterministic fault
-injection, and diagnostic report export remain Phase 5, Phase 6, and Phase 7
-work respectively.
+[Phase 4 evidence](docs/evidence/phase4/). At that Phase 4 checkpoint,
+simulation was still Phase 5 work. Phase 6 fault injection and Phase 7 report
+export remain outside the current implementation.
 
 ## Historical Phase 2 exclusions
 
@@ -238,5 +238,8 @@ Legacy simulation is the P0 scope. Versioned v0 transactions remain detectable
 for diagnostics but are not simulatable/signable in this release. Phase 6 fault
 injection and Phase 7 Markdown/JSON report export remain out of scope.
 
-The implementation is intentionally **not frozen yet**. Final device/live-Devnet
-acceptance and exact-head CI/freeze evidence are separate closeout gates.
+The implementation passes local verification and an exact-head implementation CI
+run, but it is **not frozen**. The real cross-package Devnet acceptance reached
+a funding prerequisite: the lab test account has zero lamports and requires at
+least a 5,000-lamport transaction fee. Live PASS/FAIL and restart evidence remain
+pending; no Phase 5 freeze tag has been created.

@@ -1,0 +1,5 @@
+UTC: 2026-09-30T10:08:10.380902+00:00
+Deterministic parser self-test: PASS.
+Explicit LAB_IDENTITY_NEEDS_DEVNET_SOL UI failure propagates promptly with balance and required fee; raw UI XML is not included in the error.
+A visible-UI/demo-wire result remains UI_ONLY_PENDING_DATABASE_AND_RESTART_VERIFICATION.
+The repeat real cross-package attempt reported the same zero-balance / 5000-lamport prerequisite before SIMULATE.

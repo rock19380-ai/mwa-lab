@@ -255,3 +255,8 @@ signing/submission = unchanged authority**. The simulation branch cannot call th
 signing service, cannot approve/reject, cannot submit, cannot complete
 `ProtocolRecorder`, and cannot rewrite the parent event outcome. Late results are
 identity-bound and discarded when their session/request target is invalidated.
+
+A finished, already accepted simulation attempt may complete its bounded
+parent-then-child persistence after session teardown. Teardown rejects late
+callbacks and pending targets; it does not transfer completion authority or
+wait for the diagnostic write before returning the MWA response.

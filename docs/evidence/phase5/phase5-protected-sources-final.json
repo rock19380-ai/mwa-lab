@@ -1,0 +1,48 @@
+{
+  "utc": "2026-09-30T09:20:27.407940+00:00",
+  "status": "PASS",
+  "files": {
+    "scripts/phase3_static.sh": {
+      "expectedSha256": "1de48365d68aa940dba18a8535495154eaf7c0549b64582066110242e72070e6",
+      "actualSha256": "1de48365d68aa940dba18a8535495154eaf7c0549b64582066110242e72070e6",
+      "unchanged": true
+    },
+    "scripts/phase4_static.sh": {
+      "expectedSha256": "889b082ca911f8e546d59c45d583daa819ea7a0c862f970a19ced049dd41c687",
+      "actualSha256": "889b082ca911f8e546d59c45d583daa819ea7a0c862f970a19ced049dd41c687",
+      "unchanged": true
+    },
+    "scripts/phase4_static.py": {
+      "expectedSha256": "89065c87d5593ee207967cefca7029cddb30acf0b1f27b3c4a83538ca51d93c4",
+      "actualSha256": "89065c87d5593ee207967cefca7029cddb30acf0b1f27b3c4a83538ca51d93c4",
+      "unchanged": true
+    },
+    "app/schemas/dev.mwalab.storage.MwaLabDatabase/1.json": {
+      "expectedSha256": "1952a8bcaef8bf1c1910c0e99f1d13464aebbcb2b031376caee3130f9584874c",
+      "actualSha256": "1952a8bcaef8bf1c1910c0e99f1d13464aebbcb2b031376caee3130f9584874c",
+      "unchanged": true
+    },
+    "app/schemas/dev.mwalab.storage.MwaLabDatabase/2.json": {
+      "expectedSha256": "d47469a9e925020a795ba726fc2a27bca4dfa506c0d6fac59716fa6a7eb9fac7",
+      "actualSha256": "d47469a9e925020a795ba726fc2a27bca4dfa506c0d6fac59716fa6a7eb9fac7",
+      "unchanged": true
+    },
+    "app/src/main/java/dev/mwalab/signing/LabSigningService.kt": {
+      "expectedSha256": "3cce0f6a5d055c4175e5b2d1c6fab1232404fec74f50046b4de99428c09b4bba",
+      "actualSha256": "3cce0f6a5d055c4175e5b2d1c6fab1232404fec74f50046b4de99428c09b4bba",
+      "unchanged": true
+    },
+    "app/src/main/java/dev/mwalab/protocol/recorder/PersistentProtocolRecorder.kt": {
+      "expectedSha256": "f0e96965042db664593afab4ee3e8b81bc2f927aa23ff178e0100dda91f2ffc9",
+      "actualSha256": "f0e96965042db664593afab4ee3e8b81bc2f927aa23ff178e0100dda91f2ffc9",
+      "unchanged": true
+    },
+    "app/src/main/java/dev/mwalab/transaction/LegacyTransactionCodec.kt": {
+      "expectedSha256": "a45109373214d7c845f81534e6b5cc7ee37e771dfbd4486157ad994ae4fb45fa",
+      "actualSha256": "a45109373214d7c845f81534e6b5cc7ee37e771dfbd4486157ad994ae4fb45fa",
+      "unchanged": true
+    }
+  },
+  "migration1To2BlockSha256": "bab591cd03348416d5129e67ce878f0a0bb3d01ab0a0202a9da8fd6e101e6995",
+  "migration1To2UnchangedAgainstPhase4": true
+}

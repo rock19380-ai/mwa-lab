@@ -293,3 +293,34 @@ python3 scripts/verify_phase5_simulation_vectors.py
 Device/live-Devnet acceptance remains a separate pre-freeze requirement and may
 only be marked PASS when it was actually executed through the real cross-package
 MWA path.
+
+### Phase 5 closeout checkpoint (2026-09-30)
+
+Local checks passed: 245 app JVM tests, 9 demo-client JVM tests, 109 app
+connected tests, and 1 demo-client connected test; Gradle lint and both debug
+APK/AndroidTest APK builds passed. The five Room simulation instrumentation
+tests include a database byte scan (including WAL/SHM when present) with a stored-fingerprint positive
+control and absent synthetic raw-payload/secret sentinels. The repaired
+full-history CI checkout passed at implementation commit
+`ad0b584980a8322705070d20de59c978021cd47a` (run 36693030227).
+
+The real cross-package Phase 5 attempt stopped before SIMULATE: the authorized
+lab identity had zero Devnet lamports and the fresh transaction required a
+5,000-lamport fee. The public Devnet faucet returned an internal error and then
+rate-limit/empty-faucet code 429. GOOD_PASS_APPROVE, BAD_FAIL_APPROVE,
+GOOD_PASS_REJECT, and post-request restart are therefore not live-verified.
+The disposable Room test DB result does not substitute for a completed live
+request or its actual diagnostic DB snapshot.
+
+A session-close regression test was added after the initial CI repair. It failed
+on the earlier settlement implementation and passes after commit
+`7d7f709ebeea42fa454c9009557311f4a291fe28`. The test asserts that a
+completed child attempt is not lost if session teardown happens immediately
+after canonical parent persistence, while late callbacks are rejected.
+
+The device runner now fails promptly on an explicit demo-client funding error
+and emits only a preliminary UI/demo-wire receipt after visible success. Its
+deterministic parser self-test is included in `scripts/phase5_static.sh` and
+prevents a UI-only result from claiming Room binding, raw-payload absence, or
+restart persistence. The repaired settlement commit passed exact-head CI run
+36698868948.

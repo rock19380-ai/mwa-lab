@@ -3,7 +3,8 @@
 
 Requires an unlocked adb device/emulator, installed debug APKs, and enough Devnet
 lamports on the persistent MWA Lab identity to pay one transaction fee. It drives
-only visible UI text and stores screenshots/UI XML plus a sanitized JSON summary.
+only visible UI text and stores screenshots/UI XML plus a preliminary JSON summary.
+It cannot claim database binding or restart persistence by itself.
 """
 from __future__ import annotations
 import argparse, json, re, subprocess, sys, time
@@ -60,15 +61,23 @@ def wait_for_text(needle, timeout=60, substring=False, scroll=False):
     while time.time()<deadline:
         try:
             last=dump_xml()
+            failure=next((n.attrib.get('text','') for n in nodes(last)
+                if re.fullmatch(r'PHASE5 [A-Z_]+: FAIL',n.attrib.get('text',''))),None)
+            if failure is not None:
+                detail=next((n.attrib.get('text','') for n in nodes(last)
+                    if n.attrib.get('text','').startswith('Failure: ')),'Failure detail unavailable')
+                raise RuntimeError(f'{failure}; {detail}')
             n=find_text(last,needle,substring)
             if n is not None: return n,last
+        except RuntimeError:
+            raise
         except Exception:
             pass
         if scroll and swipes < 8:
             adb('shell','input','swipe','500','1500','500','650','300')
             swipes += 1
         time.sleep(1)
-    raise RuntimeError(f'timeout waiting for UI text: {needle}\nlast_xml={last[:1500]}')
+    raise RuntimeError(f'timeout waiting for UI text: {needle}')
 
 def capture(label):
     EVIDENCE.mkdir(parents=True,exist_ok=True)
@@ -85,6 +94,8 @@ def run_scenario(name):
     simulate,_=wait_for_text('SIMULATE',timeout=90,scroll=True)
     tap_node(simulate)
     wait_for_text(expected_sim,timeout=45,scroll=True)
+    if expected_sim == 'Simulation PASS':
+        wait_for_text('Simulation passed on Devnet at the recorded context. This does not guarantee later signing, submission, confirmation, or unchanged chain state.',timeout=10,scroll=True)
     sim_xml=capture(f'phase5-device-{name.lower()}-simulation')
     if name == 'BAD_FAIL_APPROVE':
         if 'Simulation failure source: SIMULATION' not in sim_xml:
@@ -99,8 +110,22 @@ def run_scenario(name):
         raise RuntimeError('approved parent response did not verify signature')
     if not should_sign and 'Expected protocol error:' not in final_xml:
         raise RuntimeError('rejection did not surface authoritative protocol error')
-    return {'scenario':name,'simulation':expected_sim.replace('Simulation ',''),'decision':decision,
-            'submittedTransactions':0,'parentResponse':'VERIFIED'}
+    fingerprint_node=find_text(final_xml,'MWA Lab payload fingerprint: ',substring=True)
+    if fingerprint_node is None:
+        raise RuntimeError('Demo Client did not show a safe transaction fingerprint')
+    fingerprint=fingerprint_node.attrib.get('text','').split(': ',1)[-1]
+    if re.fullmatch(r'[0-9a-f]{64}',fingerprint) is None:
+        raise RuntimeError('Demo Client fingerprint is malformed')
+    return {'scenario':name,'simulationUi':expected_sim.replace('Simulation ',''),'decision':decision,
+            'fingerprintSha256':fingerprint,'submittedTransactionsReportedByDemo':0,
+            'parentWireResponse':'VERIFIED_BY_DEMO','diagnosticDatabaseVerified':False}
+
+def preliminary_summary(results):
+    # UI and demo wire checks alone cannot prove canonical parent/child Room binding
+    # or restart persistence. Keep this receipt explicitly preliminary.
+    return {'phase':'5-device-acceptance','status':'UI_ONLY_PENDING_DATABASE_AND_RESTART_VERIFICATION',
+            'network':'solana:devnet','crossPackagePath':True,'scenarios':results,
+            'databaseByteScan':'NOT_RUN','restartPersistence':'NOT_RUN','freezeTagCreated':False}
 
 def main():
     ap=argparse.ArgumentParser()
@@ -113,10 +138,8 @@ def main():
     for name in selected:
         print(f'=== {name} ===',flush=True)
         results.append(run_scenario(name))
-        print(f'{name}: PASS',flush=True)
-    summary={'phase':'5-device-acceptance','status':'PASS','network':'solana:devnet',
-             'crossPackagePath':True,'scenarios':results,'rawPayloadPersisted':False,
-             'freezeTagCreated':False}
+        print(f'{name}: UI AND DEMO WIRE CHECKS PASS; DATABASE/RESTART PENDING',flush=True)
+    summary=preliminary_summary(results)
     path=EVIDENCE/'phase5-device-acceptance.json'
     path.write_text(json.dumps(summary,indent=2)+'\n')
     print(path.read_text(),end='')
@@ -125,3 +148,5 @@ if __name__=='__main__':
     try: main()
     except subprocess.CalledProcessError as exc:
         print(exc.output or str(exc),file=sys.stderr); sys.exit(exc.returncode or 1)
+    except RuntimeError as exc:
+        print(str(exc),file=sys.stderr); sys.exit(1)

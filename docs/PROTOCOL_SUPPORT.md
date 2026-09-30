@@ -181,3 +181,10 @@ meaning. No production-wallet compatibility claim is made by Phase 4.
 Simulation is diagnostic evidence only and **does not guarantee** later
 submission or confirmation. The parent `ProtocolEvent` is still determined only
 by the existing MWA authorization/approval/signing/submission path.
+
+Phase 5 implementation and instrumentation support the table above. Live
+Devnet PASS/FAIL and real cross-package restart are **not yet verified**: the
+2026-09-30 device attempt stopped before simulation because the authorized
+lab account had zero lamports against a 5,000-lamport fee. The controlled
+RPC-unavailable case is verified by instrumentation, not a production fault
+toggle or a claimed live outage.

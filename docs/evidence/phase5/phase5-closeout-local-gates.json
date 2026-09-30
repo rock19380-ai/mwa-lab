@@ -1,0 +1,53 @@
+{
+  "capturedAtUtc": "2026-09-30T09:54:35.447213+00:00",
+  "implementationHead": "7d7f709ebeea42fa454c9009557311f4a291fe28",
+  "roomSchema": 3,
+  "migration1To2Unchanged": true,
+  "migration1To2BlockSha256": "bab591cd03348416d5129e67ce878f0a0bb3d01ab0a0202a9da8fd6e101e6995",
+  "migration2To3Present": true,
+  "jvm": {
+    "app": {
+      "tests": 245,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "demo-client": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "connected": {
+    "app": {
+      "tests": 109,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "demo-client": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "lint": "PASS",
+  "assembleDebug": "PASS",
+  "assembleAndroidTest": "PASS",
+  "design": "PASS",
+  "vectors": "PASS",
+  "phase5Static": "PASS",
+  "securityScan": "PASS",
+  "gitDiffCheck": "PASS",
+  "implementationCiRunId": 36693030227,
+  "implementationCiConclusion": "success",
+  "liveAcceptance": "BLOCKED_NO_DEVNET_FEE_LAMPORTS",
+  "freezeTagCreated": false,
+  "postRepairCiRunId": 36698868948,
+  "postRepairCiConclusion": "success",
+  "postRepairCiHeadSha": "7d7f709ebeea42fa454c9009557311f4a291fe28",
+  "deviceAcceptanceParserTest": "PASS",
+  "finalDocumentationCi": "PENDING_AFTER_CLOSEOUT_COMMIT"
+}

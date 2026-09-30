@@ -1,0 +1,19 @@
+{
+  "runId": 36698868948,
+  "headSha": "7d7f709ebeea42fa454c9009557311f4a291fe28",
+  "branch": "phase5-simulation-diagnostic-classification",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/rock19380-ai/mwa-lab/actions/runs/36698868948",
+  "jobId": 109833307142,
+  "jobConclusion": "success",
+  "requiredSteps": {
+    "Lint": "success",
+    "Unit tests": "success",
+    "Assemble debug APKs": "success",
+    "Assemble AndroidTest APKs": "success",
+    "Verify primary debug APK exists": "success",
+    "Verify demo-client debug APK exists": "success",
+    "Phase 5 simulation diagnostic classification gate": "success"
+  }
+}

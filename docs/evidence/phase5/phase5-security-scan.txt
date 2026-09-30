@@ -1,0 +1,5 @@
+UTC: 2026-09-30T09:55:52.136528+00:00
+Head: 7d7f709ebeea42fa454c9009557311f4a291fe28
+Scope: Phase 5 static security scan of simulation entity, schema 3, transient coordinator, settlement, fixed Devnet RPC flags, and product logging patterns.
+PHASE 5 SECURITY SCAN: PASS
+Synthetic literals in test sources are fixtures, not emitted persistence evidence.

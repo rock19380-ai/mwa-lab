@@ -255,3 +255,11 @@ not grant approval; FAIL/UNAVAILABLE does not reject or disable approval. The
 fixed Devnet endpoint remains the only production RPC authority, mainnet remains
 unavailable, v0 signing remains unsupported, and malformed/oversized RPC data
 fails closed.
+
+The 2026-09-30 Phase 5 audit reran the static security scan and five Room
+simulation instrumentation tests. The disposable schema-3 database scan (including WAL/SHM when present)
+found its stored-fingerprint positive control and did not find synthetic raw
+transaction, signature, token, key/seed, or RPC-body sentinels. This establishes
+the test persistence boundary; a completed live Phase 5 request and its actual
+post-request database remain unverified because the test identity lacked
+Devnet fee lamports.

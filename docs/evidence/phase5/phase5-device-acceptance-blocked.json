@@ -1,0 +1,46 @@
+{
+  "capturedAtUtc": "2026-09-30T09:24:59.622962+00:00",
+  "status": "BLOCKED_BEFORE_SIMULATION",
+  "device": {
+    "serial": "emulator-5554",
+    "model": "sdk_gphone64_x86_64",
+    "api": 36
+  },
+  "network": "solana:devnet",
+  "path": "real cross-package MWA local association",
+  "scenarioAttempted": "GOOD_PASS_APPROVE",
+  "walletPublicAddress": "9xioY2tZrmkgSdZXts9Ybqb7HWEwf7Ss48G3JvKuBXfm",
+  "observedBalanceLamports": 0,
+  "requiredFeeLamports": 5000,
+  "phase5DemoResult": "LAB_IDENTITY_NEEDS_DEVNET_SOL",
+  "devnetFaucetAttempts": [
+    {
+      "amountLamports": 1000000,
+      "rpcErrorCode": -32603,
+      "classification": "RPC_ERROR_INTERNAL"
+    },
+    {
+      "amountLamports": 100000,
+      "rpcErrorCode": 429,
+      "classification": "AIRDROP_LIMIT_OR_EMPTY_FAUCET"
+    }
+  ],
+  "scenarioResults": {
+    "GOOD_PASS_APPROVE": "BLOCKED_BEFORE_SIMULATION",
+    "BAD_FAIL_APPROVE": "NOT_RUN",
+    "GOOD_PASS_REJECT": "NOT_RUN",
+    "PERSISTENCE_RESTART": "NOT_RUN"
+  },
+  "submittedTransactions": "NOT_PROVEN_FOR_LIVE_PHASE5",
+  "rawPayloadStoredInEvidence": false,
+  "freezeTagCreated": false,
+  "repeatAttempt": {
+    "capturedAtUtc": "2026-09-30T10:06:35.651174+00:00",
+    "runner": "hardened fail-fast Phase 5 device acceptance parser",
+    "walletPublicAddress": "9xioY2tZrmkgSdZXts9Ybqb7HWEwf7Ss48G3JvKuBXfm",
+    "observedBalanceLamports": 0,
+    "requiredFeeLamports": 5000,
+    "result": "BLOCKED_BEFORE_SIMULATION",
+    "rawUiXmlEmittedInError": false
+  }
+}

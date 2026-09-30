@@ -1,0 +1,14 @@
+Phase 5 settlement close-race regression (2026-09-30)
+
+Observed failure on the previous implementation:
+- Test: SimulationDiagnosticSettlementTest.completedAttemptSurvivesImmediateSessionCloseAfterDurableParent
+- Gradle result: 1 test, 1 failure, AssertionError at test line 55.
+- Trigger: the parent was durably completed; a safe simulation attempt was accepted; finish scheduled the child write; immediate invalidateSession cancelled that worker before it ran.
+
+Narrow repair:
+- Session invalidation rejects late callbacks, including callbacks that read the context before the removal lock.
+- Already accepted, finished attempts retain their bounded parent-then-child workers; no parent event is created or changed.
+- Failure/cancellation paths without an accepted finished attempt still expire.
+
+The targeted settlement suite passed after the repair. Final full regression results are recorded separately in phase5-closeout-local-gates.json.
+Fix commit: 7d7f709ebeea42fa454c9009557311f4a291fe28

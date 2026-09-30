@@ -1,0 +1,83 @@
+{
+  "capturedAtUtc": "2026-09-30T09:54:35.447213+00:00",
+  "status": "PASS_FOR_LOCAL_TESTED_BOUNDARIES",
+  "liveDevnetStatus": "BLOCKED_NO_FUNDED_LAB_IDENTITY",
+  "simulationJvm": {
+    "TEST-dev.mwalab.simulation.SimulationResultParserTest.xml": {
+      "tests": 3,
+      "failures": 0,
+      "cases": [
+        "availabilityFailuresDoNotBecomeProtocolOrRuntimeFailures",
+        "passHasNoFailureSourceAndPreservesSafeMeasurements",
+        "runtimeAndUnknownFailureStaySimulationFailures"
+      ]
+    },
+    "TEST-dev.mwalab.simulation.TransactionSimulationCoordinatorTest.xml": {
+      "tests": 3,
+      "failures": 0,
+      "cases": [
+        "duplicateTapRetryAndReleaseKeepOneExactAttempt",
+        "sessionReplacementCannotRedirectLateResultAtSamePayloadIndex",
+        "rejectsMismatchedFingerprintV0AndStaleIdentity"
+      ]
+    },
+    "TEST-dev.mwalab.simulation.TransactionSimulationServiceTest.xml": {
+      "tests": 2,
+      "failures": 0,
+      "cases": [
+        "cancellationRemainsCancellationAndCannotBeReclassified",
+        "unexpectedGatewayExceptionBecomesUnknownUnavailableWithoutLeakingText"
+      ]
+    },
+    "TEST-dev.mwalab.simulation.SimulationDomainTest.xml": {
+      "tests": 6,
+      "failures": 0,
+      "cases": [
+        "logsAreBoundedSanitizedAndDefensivelyOwned",
+        "structuredErrorCannotInventCustomMeaningOrOverflow",
+        "targetRequiresCompleteSafeBinding",
+        "numericAndStateBoundsRejectUnsafeResults",
+        "outcomeAndFailureSourceMustAgree",
+        "arbitraryRpcLogTextCannotReachPublicOrDurableResult"
+      ]
+    },
+    "TEST-dev.mwalab.simulation.SimulationDiagnosticSettlementTest.xml": {
+      "tests": 5,
+      "failures": 0,
+      "cases": [
+        "failedParentWrongIdentityAndInvalidationNeverInsert",
+        "parentBeforeChildAndLateAttemptPreserveOrderWithoutDelayingParent",
+        "completedAttemptSurvivesImmediateSessionCloseAfterDurableParent",
+        "childWriteFailureIsIsolatedAndDelayedClaimWaitsForRealParent",
+        "childBeforeParentWaitsAndKeepsCanonicalFailure"
+      ]
+    }
+  },
+  "hostConnected": {
+    "tests": 13,
+    "failures": 0,
+    "cases": [
+      "diagnosticDaoFailureCannotChangeSigningSubmissionRejectionOrMalformedWireResults",
+      "simulationPersistenceAndParentFailureAreIsolatedFromWireResult",
+      "unavailableSimulationAndLateInFlightResultNeverChangeApprovalOrParent",
+      "authorizationRevokedDuringTransactionApprovalStillWinsOverApprove",
+      "malformedWrongSignerAndV0RequestsRetainAuthoritativeRejectionWithoutApproval",
+      "inspectorCannotBypassDevnetBlockhashValidationOrChangeItsErrorMapping",
+      "transactionApprovalRejectionKeepsOriginalNotSignedErrorsAndNeverSignsOrSubmits",
+      "inspectorExceptionPreservesBothTransactionResultsAndMessageSigningNeverUsesInspector",
+      "canonicalEventWriteFailurePreservesWireResultsAndNeverCreatesOrphanDiagnostics",
+      "malformedDiagnosticHeaderCannotRejectARequestAcceptedByFrozenCodec",
+      "signAndSendRetainsSignedPayloadsSignatureVerificationOptionsAndCommitmentOrder",
+      "signTransactionsShowsCorrectBoundSummariesBeforeSigningAndPreservesSignatureSlots",
+      "simulationPassRejectAndFailApproveKeepBothWireMethodsAuthoritative"
+    ]
+  },
+  "databaseSentinelScan": "PASS_IN_DISPOSABLE_SCHEMA3_ROOM_DATABASE",
+  "staticSecurityScan": "PASS",
+  "notes": [
+    "No Phase 5 production fault toggle was added. RPC outage uses test seam.",
+    "PASS/FAIL/UNAVAILABLE cannot determine the parent MWA outcome in tested paths.",
+    "No actual live PASS/FAIL or post-request restart evidence is claimed."
+  ],
+  "sessionCloseAcceptedAttemptRace": "PASS_AFTER_RED_BEFORE_GREEN_REPAIR"
+}
