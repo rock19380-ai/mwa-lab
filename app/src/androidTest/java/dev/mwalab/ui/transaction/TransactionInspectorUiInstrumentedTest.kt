@@ -18,6 +18,7 @@ import dev.mwalab.protocol.*
 import dev.mwalab.session.*
 import dev.mwalab.storage.*
 import dev.mwalab.transaction.*
+import dev.mwalab.simulation.*
 import dev.mwalab.ui.sessions.*
 import dev.mwalab.ui.theme.MWALabTheme
 import java.io.ByteArrayOutputStream
@@ -203,6 +204,39 @@ class TransactionInspectorUiInstrumentedTest {
         scroll("Raw metadata")
     }
 
+    @Test fun simulationAttemptsStayBelowParentAndRetryDoesNotHideTimeline() {
+        val ref = SimulationTargetRef(sessionId, eventId, "request", 0, "a".repeat(64))
+        val first = SimulationResult("sim-first", ref, 1, 1, 2, 1,
+            SimulationOutcome.FAIL, ProtocolFailureSource.SIMULATION, "processed", 9,
+            SimulationErrorSummary(SimulationErrorKind.BLOCKHASH_NOT_FOUND))
+        val latest = SimulationResult("sim-latest", ref, 2, 2, 3, 1,
+            SimulationOutcome.PASS, ProtocolFailureSource.NONE, "processed", 10,
+            unitsConsumed = 12, logs = BoundedLogs(listOf("Program log: bounded"), false))
+        var diagnostics by mutableStateOf<SessionSimulationUiState>(
+            SessionSimulationUiState.Recorded(listOf(first, latest)))
+        var retries = 0
+        compose.setContent { MWALabTheme {
+            SessionDetailScreen(SessionDetailUiState.Ready(
+                SessionSummary(MwaSession(sessionId, 100), listOf(event())),
+                simulations = mapOf(eventId to diagnostics)), {}, {},
+                onRetrySimulations = { assertEquals(eventId, it); retries++ })
+        } }
+        scroll("#1 SIGN_TRANSACTIONS")
+        scroll("SIMULATION DIAGNOSTICS · event #1")
+        scroll("Payload 1 · attempt 2 · LATEST")
+        compose.onNodeWithTag("persisted-simulation-$eventId-0-2-logs-expander")
+            .performScrollTo().performClick()
+        scroll("Program log: bounded")
+        scroll("Simulation passed on Devnet", substring = true)
+        compose.runOnIdle { diagnostics = SessionSimulationUiState.Unavailable }
+        scroll("Retry simulation diagnostics")
+        compose.onNodeWithText("Retry simulation diagnostics").performClick()
+        compose.runOnIdle { assertEquals(1, retries) }
+        scroll("#1 SIGN_TRANSACTIONS")
+        compose.runOnIdle { diagnostics = SessionSimulationUiState.Missing }
+        scroll("Simulation was not recorded for this event.")
+    }
+
     @Test fun reopenedRoomDiagnosticsReachSessionDetailThroughTheRepositoryAndViewModel() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val name = "phase4-10-ui-${UUID.randomUUID()}.db"
@@ -215,6 +249,10 @@ class TransactionInspectorUiInstrumentedTest {
                 "payload_count" to "1", "payload_0_sha256" to summary.fingerprintSha256,
                 "payload_0_length" to summary.wireLength.toString())))
             RoomTransactionDiagnosticRepository(db.transactionDiagnosticDao()).recordForEvent(sessionId, eventId, listOf(summary))
+            RoomSimulationRepository(db.simulationResultDao()).recordForEvent(sessionId, eventId,
+                listOf(SimulationResult("reopened-simulation", SimulationTargetRef(
+                    sessionId, eventId, "request", 0, summary.fingerprintSha256),
+                    1, 1, 2, 1, SimulationOutcome.PASS, ProtocolFailureSource.NONE, "processed", 11)))
         }
         db.close()
         val reopened = Room.databaseBuilder(context, MwaLabDatabase::class.java, name).build()
@@ -222,7 +260,8 @@ class TransactionInspectorUiInstrumentedTest {
         try {
             val model = SessionDetailViewModel(RoomSessionRepository(reopened.sessionDao(), reopened.protocolEventDao()),
                 RoomCapabilitySnapshotRepository(reopened.capabilitySnapshotDao()), scope,
-                RoomTransactionDiagnosticRepository(reopened.transactionDiagnosticDao()))
+                RoomTransactionDiagnosticRepository(reopened.transactionDiagnosticDao()),
+                RoomSimulationRepository(reopened.simulationResultDao()))
             model.selectSession(sessionId)
             compose.setContent { MWALabTheme {
                 val state by model.state.collectAsState()
@@ -234,6 +273,9 @@ class TransactionInspectorUiInstrumentedTest {
             open()
             scroll("Lamports: 10000000")
             scroll("MWA Lab payload fingerprint (SHA-256): ${summary.fingerprintSha256}")
+            scroll("SIMULATION DIAGNOSTICS · event #1")
+            scroll("Simulation PASS")
+            scroll("Simulation passed on Devnet", substring = true)
         } finally {
             scope.cancel()
             runBlocking { scope.coroutineContext[Job]!!.join() }

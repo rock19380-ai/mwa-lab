@@ -13,6 +13,7 @@ import dev.mwalab.ui.theme.MWALabTheme
 
 class MobileWalletAdapterActivity : ComponentActivity() {
     private val approvalCoordinator by lazy { MwaLabComposition.approvalCoordinator() }
+    private val simulationCoordinator by lazy { MwaLabComposition.simulationCoordinator(applicationContext) }
 
     private val sessionHost by lazy {
         MwaSessionHost(
@@ -30,10 +31,13 @@ class MobileWalletAdapterActivity : ComponentActivity() {
         setContent {
             MWALabTheme {
                 val approvalState by approvalCoordinator.state.collectAsState()
+                val simulationStates by simulationCoordinator.state.collectAsState()
                 SigningApprovalScreen(
                     state = approvalState,
                     onApprove = { approvalCoordinator.approve(it) },
                     onReject = { approvalCoordinator.reject(it) },
+                    simulationStates = simulationStates,
+                    onSimulate = { simulationCoordinator.simulate(it) },
                 )
             }
         }

@@ -6,6 +6,7 @@ import dev.mwalab.capabilities.CapabilitySnapshotRepository
 import dev.mwalab.protocol.ProtocolMethod
 import dev.mwalab.session.SessionRepository
 import dev.mwalab.transaction.TransactionDiagnosticRepository
+import dev.mwalab.simulation.SimulationRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -16,11 +17,13 @@ class SessionDetailViewModel(
     capabilityRepository: CapabilitySnapshotRepository,
     scope: CoroutineScope? = null,
     transactionRepository: TransactionDiagnosticRepository? = null,
+    simulationRepository: SimulationRepository? = null,
 ) : ViewModel() {
     private data class Selection(val id: String? = null, val attempt: Int = 0)
     private val selection = MutableStateFlow(Selection())
     private val capabilityAttempt = MutableStateFlow(0)
     private val transactionAttempts = MutableStateFlow<Map<String, Int>>(emptyMap())
+    private val simulationAttempts = MutableStateFlow<Map<String, Int>>(emptyMap())
     val state: StateFlow<SessionDetailUiState> = selection.flatMapLatest { selected ->
         val id = selected.id
         if (id == null) flowOf(SessionDetailUiState.Missing)
@@ -63,7 +66,30 @@ class SessionDetailViewModel(
                     else combine(reads) { states -> history.copy(transactions = states.toMap()) }
                 }
             }
-            combine(historyWithTransactions, capabilities) { history, capability ->
+            val historyWithSimulations = historyWithTransactions.flatMapLatest { history ->
+                if (history !is SessionDetailUiState.Ready || simulationRepository == null) flowOf(history)
+                else {
+                    val events = history.summary.events.filter { it.method == ProtocolMethod.SIGN_TRANSACTIONS ||
+                        it.method == ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS }
+                    val reads = events.map { event ->
+                        simulationAttempts.map { it[event.eventId] ?: 0 }.distinctUntilChanged().flatMapLatest {
+                            flow<SessionSimulationUiState> {
+                                emitAll(simulationRepository.observeForEvent(id, event.eventId).map { attempts ->
+                                    require(attempts.all { it.target.sessionId == id && it.target.eventId == event.eventId })
+                                    require(attempts.map { it.target.payloadIndex to it.attemptNumber }.distinct().size == attempts.size)
+                                    if (attempts.isEmpty()) SessionSimulationUiState.Missing
+                                    else SessionSimulationUiState.Recorded(
+                                        attempts.sortedWith(compareBy({ it.target.payloadIndex }, { it.attemptNumber })))
+                                })
+                            }.onStart { emit(SessionSimulationUiState.Loading) }
+                                .catch { emit(SessionSimulationUiState.Unavailable) }
+                        }.map { event.eventId to it }
+                    }
+                    if (reads.isEmpty()) flowOf(history)
+                    else combine(reads) { states -> history.copy(simulations = states.toMap()) }
+                }
+            }
+            combine(historyWithSimulations, capabilities) { history, capability ->
                 if (history is SessionDetailUiState.Ready) history.copy(capabilities = capability)
                 else history
             }
@@ -75,5 +101,8 @@ class SessionDetailViewModel(
     fun retryCapabilities() { capabilityAttempt.update { it + 1 } }
     fun retryTransactions(eventId: String) {
         transactionAttempts.update { it + (eventId to ((it[eventId] ?: 0) + 1)) }
+    }
+    fun retrySimulations(eventId: String) {
+        simulationAttempts.update { it + (eventId to ((it[eventId] ?: 0) + 1)) }
     }
 }

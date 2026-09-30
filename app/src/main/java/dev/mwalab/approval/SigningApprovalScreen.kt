@@ -15,10 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.mwalab.ui.transaction.TransactionApprovalPresentation
+import dev.mwalab.simulation.SimulationTargetRef
+import dev.mwalab.simulation.SimulationUiState
+import dev.mwalab.ui.simulation.SimulationResultContent
 
 /** Renders metadata; decision callbacks receive the original request ID. */
 @Composable
-fun SigningApprovalScreen(state: ApprovalState, onApprove: (String) -> Unit, onReject: (String) -> Unit) {
+fun SigningApprovalScreen(
+    state: ApprovalState,
+    onApprove: (String) -> Unit,
+    onReject: (String) -> Unit,
+    simulationStates: Map<SimulationTargetRef, SimulationUiState> = emptyMap(),
+    onSimulate: (SimulationTargetRef) -> Unit = {},
+) {
     Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("MWA LAB TEST ENDPOINT", style = MaterialTheme.typography.headlineSmall)
         Text("SOLANA DEVNET")
@@ -55,7 +64,26 @@ fun SigningApprovalScreen(state: ApprovalState, onApprove: (String) -> Unit, onR
                                 } else {
                                     TransactionApprovalPresentation.lines(summary).forEach { Text(it) }
                                 }
+                                request.simulationTargets.getOrNull(index)?.let { target ->
+                                    val simulation = simulationStates[target] ?: SimulationUiState.NotRun
+                                    OutlinedButton(
+                                        onClick = { onSimulate(target) },
+                                        enabled = simulation !is SimulationUiState.Running,
+                                        modifier = Modifier.testTag("simulate-button-$index"),
+                                    ) { Text("SIMULATE") }
+                                    when (simulation) {
+                                        SimulationUiState.NotRun -> Text("Simulation NOT RUN")
+                                        SimulationUiState.Running -> Text("Simulation RUNNING",
+                                            Modifier.testTag("simulation-$index-running"))
+                                        is SimulationUiState.Completed ->
+                                            SimulationResultContent(simulation.result, "simulation-$index")
+                                    }
+                                }
                             }
+                        }
+                        if (request.simulationTargets.any { it != null }) {
+                            Text("Simulation is diagnostic evidence only. APPROVE and REJECT remain independent.")
+                            Text("A successful simulation does not guarantee later submission or confirmation.")
                         }
                         if (diagnostics.omittedPayloadCount > 0) Text("Diagnostic payloads omitted: ${diagnostics.omittedPayloadCount}")
                     }

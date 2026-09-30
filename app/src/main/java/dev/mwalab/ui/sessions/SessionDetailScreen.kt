@@ -15,6 +15,7 @@ import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.protocol.ProtocolMethod
 import dev.mwalab.ui.transaction.transactionInspectorContent
 import dev.mwalab.security.DiagnosticSanitizer
+import dev.mwalab.ui.simulation.SimulationResultContent
 
 @Composable
 fun SessionDetailScreen(
@@ -23,6 +24,7 @@ fun SessionDetailScreen(
     onRetry: () -> Unit,
     onRetryCapabilities: () -> Unit = onRetry,
     onRetryTransactions: (String) -> Unit = { onRetry() },
+    onRetrySimulations: (String) -> Unit = { onRetry() },
 ) {
     var expandedTransactions by rememberSaveable { mutableStateOf(emptyList<String>()) }
     LazyColumn(Modifier.fillMaxSize().testTag("protocol-timeline"), contentPadding = PaddingValues(16.dp),
@@ -67,6 +69,9 @@ fun SessionDetailScreen(
                                 expandedTransactions = if (key in expandedTransactions) expandedTransactions - key
                                     else expandedTransactions + key
                             }, { onRetryTransactions(event.eventId) })
+                        simulationEventDiagnostics(event,
+                            state.simulations[event.eventId] ?: SessionSimulationUiState.Missing,
+                            { onRetrySimulations(event.eventId) })
                     }
                 }
             }
@@ -162,5 +167,54 @@ private fun LazyListScope.transactionEventDiagnostics(
     if (state is SessionTransactionUiState.Recorded) state.summaries.forEach { summary ->
         val key = "transaction-${event.eventId}-${summary.payloadIndex}"
         transactionInspectorContent(summary, key in expanded) { onToggle(key) }
+    }
+}
+
+private fun LazyListScope.simulationEventDiagnostics(
+    event: ProtocolEvent,
+    state: SessionSimulationUiState,
+    onRetry: () -> Unit,
+) {
+    item(key = "simulation-heading-${event.eventId}") {
+        Card(Modifier.fillMaxWidth().padding(start = 24.dp)
+            .testTag("simulation-diagnostics-${event.eventId}")) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("SIMULATION DIAGNOSTICS · event #${event.sequence}", style = MaterialTheme.typography.titleSmall)
+                Text("Child diagnostic evidence only; the protocol event above remains authoritative.")
+                when (state) {
+                    SessionSimulationUiState.Loading -> Text("Loading recorded simulation attempts…")
+                    SessionSimulationUiState.Missing ->
+                        Text("Simulation was not recorded for this event.")
+                    SessionSimulationUiState.Unavailable -> {
+                        Text("Recorded simulation attempts unavailable. The protocol timeline remains separate.")
+                        OutlinedButton(onClick = onRetry, modifier = Modifier.testTag("retry-simulations-${event.eventId}")) {
+                            Text("Retry simulation diagnostics")
+                        }
+                    }
+                    is SessionSimulationUiState.Recorded ->
+                        Text("${state.attempts.size} recorded simulation attempts")
+                }
+            }
+        }
+    }
+    if (state is SessionSimulationUiState.Recorded) {
+        val latest = state.attempts.groupBy { it.target.payloadIndex }.mapValues { (_, attempts) ->
+            attempts.maxOf { it.attemptNumber }
+        }
+        state.attempts.forEach { result ->
+            val index = result.target.payloadIndex
+            val tag = "persisted-simulation-${event.eventId}-$index-${result.attemptNumber}"
+            item(key = result.simulationId) {
+                Card(Modifier.fillMaxWidth().padding(start = 32.dp).testTag(tag)) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Payload ${index + 1} · attempt ${result.attemptNumber}" +
+                            if (result.attemptNumber == latest[index]) " · LATEST" else "",
+                            style = MaterialTheme.typography.titleSmall)
+                        Text("Transaction fingerprint: ${result.target.transactionFingerprintSha256}")
+                        SimulationResultContent(result, tag)
+                    }
+                }
+            }
+        }
     }
 }

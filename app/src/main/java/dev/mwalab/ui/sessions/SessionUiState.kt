@@ -3,6 +3,7 @@ package dev.mwalab.ui.sessions
 import dev.mwalab.capabilities.CapabilitySnapshot
 import dev.mwalab.session.SessionSummary
 import dev.mwalab.transaction.TransactionSummary
+import dev.mwalab.simulation.SimulationResult
 
 sealed interface SessionsUiState {
     data object Loading : SessionsUiState
@@ -18,6 +19,7 @@ sealed interface SessionDetailUiState {
         val summary: SessionSummary,
         val capabilities: SessionCapabilityUiState = SessionCapabilityUiState.Missing,
         val transactions: Map<String, SessionTransactionUiState> = emptyMap(),
+        val simulations: Map<String, SessionSimulationUiState> = emptyMap(),
     ) : SessionDetailUiState
     data object Error : SessionDetailUiState
 }
@@ -34,6 +36,13 @@ sealed interface SessionTransactionUiState {
     data object Missing : SessionTransactionUiState
     data class Recorded(val summaries: List<TransactionSummary>) : SessionTransactionUiState
     data object Unavailable : SessionTransactionUiState
+}
+
+sealed interface SessionSimulationUiState {
+    data object Loading : SessionSimulationUiState
+    data object Missing : SessionSimulationUiState
+    data class Recorded(val attempts: List<SimulationResult>) : SessionSimulationUiState
+    data object Unavailable : SessionSimulationUiState
 }
 
 sealed interface IdentityUiState {
