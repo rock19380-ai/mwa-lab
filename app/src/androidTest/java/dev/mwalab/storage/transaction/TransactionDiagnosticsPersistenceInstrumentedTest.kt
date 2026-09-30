@@ -242,7 +242,7 @@ class TransactionDiagnosticsPersistenceInstrumentedTest {
         val repo get() = RoomTransactionDiagnosticRepository(db.transactionDiagnosticDao())
         private val recorder by lazy { PersistentProtocolRecorder(sessions) }
         private fun open() = Room.databaseBuilder(context, MwaLabDatabase::class.java, name)
-            .addMigrations(MwaLabDatabase.MIGRATION_1_2).build()
+            .addMigrations(MwaLabDatabase.MIGRATION_1_2, MwaLabDatabase.MIGRATION_2_3).build()
         suspend fun parent(payloads: List<ByteArray>, session: String = "a",
             method: ProtocolMethod = ProtocolMethod.SIGN_TRANSACTIONS): Parent {
             if (sessions.getSession(session) == null) sessions.createSession(MwaSession(session, 0))

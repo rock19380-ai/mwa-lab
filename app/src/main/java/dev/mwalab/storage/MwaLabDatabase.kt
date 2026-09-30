@@ -12,6 +12,8 @@ import dev.mwalab.storage.protocol.ProtocolEventDao
 import dev.mwalab.storage.protocol.ProtocolEventEntity
 import dev.mwalab.storage.session.SessionDao
 import dev.mwalab.storage.session.SessionEntity
+import dev.mwalab.storage.simulation.SimulationResultDao
+import dev.mwalab.storage.simulation.SimulationResultEntity
 import dev.mwalab.storage.transaction.TransactionDiagnosticDao
 import dev.mwalab.storage.transaction.TransactionDiagnosticEntity
 
@@ -21,8 +23,9 @@ import dev.mwalab.storage.transaction.TransactionDiagnosticEntity
         ProtocolEventEntity::class,
         CapabilitySnapshotEntity::class,
         TransactionDiagnosticEntity::class,
+        SimulationResultEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class MwaLabDatabase : RoomDatabase() {
@@ -30,6 +33,7 @@ abstract class MwaLabDatabase : RoomDatabase() {
     abstract fun protocolEventDao(): ProtocolEventDao
     abstract fun capabilitySnapshotDao(): CapabilitySnapshotDao
     abstract fun transactionDiagnosticDao(): TransactionDiagnosticDao
+    abstract fun simulationResultDao(): SimulationResultDao
 
     companion object {
         const val DATABASE_NAME = "mwa_lab.db"
@@ -88,11 +92,58 @@ abstract class MwaLabDatabase : RoomDatabase() {
             }
         }
 
+
+        val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Forward-only empty child table. Historical rows remain unchanged.
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS simulation_results (
+                        simulation_id TEXT NOT NULL,
+                        session_id TEXT NOT NULL,
+                        event_id TEXT NOT NULL,
+                        request_id TEXT NOT NULL,
+                        payload_index INTEGER NOT NULL,
+                        attempt_number INTEGER NOT NULL,
+                        fingerprint_sha256 TEXT NOT NULL,
+                        started_at_ms INTEGER NOT NULL,
+                        completed_at_ms INTEGER NOT NULL,
+                        duration_ms INTEGER NOT NULL,
+                        outcome TEXT NOT NULL,
+                        failure_source TEXT NOT NULL,
+                        commitment TEXT NOT NULL,
+                        context_slot INTEGER,
+                        error_kind TEXT,
+                        instruction_index INTEGER,
+                        instruction_error_kind TEXT,
+                        custom_program_error_code INTEGER,
+                        rpc_error_code INTEGER,
+                        availability_reason TEXT,
+                        units_consumed INTEGER,
+                        logs_json TEXT NOT NULL,
+                        logs_truncated INTEGER NOT NULL,
+                        PRIMARY KEY(simulation_id),
+                        FOREIGN KEY(session_id) REFERENCES sessions(session_id)
+                            ON UPDATE NO ACTION ON DELETE CASCADE,
+                        FOREIGN KEY(event_id) REFERENCES protocol_events(event_id)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent(),
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_simulation_results_session_id ON simulation_results(session_id)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_simulation_results_event_id ON simulation_results(event_id)")
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_simulation_results_event_id_payload_index_attempt_number " +
+                        "ON simulation_results(event_id, payload_index, attempt_number)",
+                )
+            }
+        }
+
         fun create(context: Context): MwaLabDatabase =
             Room.databaseBuilder(
                 context.applicationContext,
                 MwaLabDatabase::class.java,
                 DATABASE_NAME,
-            ).addMigrations(MIGRATION_1_2).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     }
 }

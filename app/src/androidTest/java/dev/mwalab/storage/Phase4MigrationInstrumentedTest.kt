@@ -96,7 +96,7 @@ class Phase4MigrationInstrumentedTest {
         } finally { old.close() }
         open(name).withClosed { db ->
             val migrated = db.openHelper.writableDatabase
-            assertEquals(2, migrated.version)
+            assertEquals(3, migrated.version)
             assertEquals(before, history(migrated))
             assertEquals(0L, count(migrated, "capability_snapshots"))
             assertEquals(0L, count(migrated, "transaction_diagnostics"))
@@ -131,7 +131,7 @@ class Phase4MigrationInstrumentedTest {
         open(name).withClosed { db ->
             val migrated = db.openHelper.writableDatabase
             assertEquals(before, history(migrated))
-            assertEquals(2, migrated.version)
+            assertEquals(3, migrated.version)
             assertEquals(0L, count(migrated, "capability_snapshots"))
             assertEquals(0L, count(migrated, "transaction_diagnostics"))
         }
@@ -189,5 +189,5 @@ class Phase4MigrationInstrumentedTest {
         try { block(this) } finally { close() }
 
     private fun open(name: String) = Room.databaseBuilder(context, MwaLabDatabase::class.java, name)
-        .addMigrations(MwaLabDatabase.MIGRATION_1_2).build()
+        .addMigrations(MwaLabDatabase.MIGRATION_1_2, MwaLabDatabase.MIGRATION_2_3).build()
 }
