@@ -42,6 +42,7 @@ import dev.mwalab.protocol.recorder.ProtocolRecorder
 import dev.mwalab.rpc.DevnetRpcGateway
 import dev.mwalab.rpc.DevnetRpcResult
 import dev.mwalab.rpc.DevnetSendOptions
+import dev.mwalab.rpc.DevnetSimulationOptions
 import dev.mwalab.rpc.SignAndSendFatalReason
 import dev.mwalab.rpc.SignAndSendSubmission
 import dev.mwalab.rpc.SignAndSendSubmissionExecutor
@@ -49,6 +50,9 @@ import dev.mwalab.rpc.SignAndSendSubmissionResult
 import dev.mwalab.session.SessionCloseReason
 import dev.mwalab.session.SessionLifecycleCoordinator
 import dev.mwalab.security.DiagnosticSanitizer
+import dev.mwalab.simulation.SimulationDiagnosticSettlement
+import dev.mwalab.simulation.SimulationTargetRef
+import dev.mwalab.simulation.TransactionSimulationCoordinator
 import dev.mwalab.security.NetworkDecision
 import dev.mwalab.security.NetworkPolicy
 import dev.mwalab.signing.LabSigningService
@@ -88,6 +92,10 @@ class MwaSessionHost(
     transactionInspector: TransactionInspection = MwaLabComposition.transactionInspector(),
     private val transactionDiagnosticSettlement: TransactionDiagnosticSettlement =
         MwaLabComposition.transactionDiagnosticSettlement(context.applicationContext),
+    private val simulationCoordinator: TransactionSimulationCoordinator =
+        MwaLabComposition.simulationCoordinator(context.applicationContext),
+    private val simulationDiagnosticSettlement: SimulationDiagnosticSettlement =
+        MwaLabComposition.simulationDiagnosticSettlement(context.applicationContext),
     private val onSessionFinished: () -> Unit = {},
 ) : AutoCloseable {
     private val appContext = context.applicationContext
@@ -114,6 +122,8 @@ class MwaSessionHost(
     private val authIssuerConfig = AuthIssuerConfig(AUTH_ISSUER_NAME)
 
     fun openAssociation(uri: Uri?): AssociationOpenResult {
+        simulationCoordinator.invalidateSession(activeSessionId, sessionGeneration.get())
+        simulationDiagnosticSettlement.invalidateSession(activeSessionId)
         val generation = sessionGeneration.incrementAndGet()
         activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
         val replacedSessionId = activePersistentSessionId
@@ -126,6 +136,7 @@ class MwaSessionHost(
             clearActivePersistentSessionIfMatches(replacedSessionId)
         }
         activeSessionId = UUID.randomUUID().toString()
+        simulationCoordinator.activateSession(activeSessionId, generation)
         protocolSequence.set(0)
 
         if (uri == null) {
@@ -209,6 +220,8 @@ class MwaSessionHost(
     }
 
     override fun close() {
+        simulationCoordinator.invalidateSession(activeSessionId, sessionGeneration.get())
+        simulationDiagnosticSettlement.invalidateSession(activeSessionId)
         sessionGeneration.incrementAndGet()
         activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
         val sessionId = activePersistentSessionId
@@ -221,6 +234,8 @@ class MwaSessionHost(
     }
 
     private fun closeCurrentScenario(recordClose: Boolean) {
+        simulationCoordinator.invalidateSession(activeSessionId, sessionGeneration.get())
+        simulationDiagnosticSettlement.invalidateSession(activeSessionId)
         activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
         approvalCoordinator.cancelPending()
         val current = synchronized(lock) {
@@ -259,6 +274,8 @@ class MwaSessionHost(
 
         override fun onScenarioComplete() {
             if (!isCurrentGeneration(generation)) return
+            simulationCoordinator.invalidateSession(persistentSessionId, generation)
+            simulationDiagnosticSettlement.invalidateSession(persistentSessionId)
             record(MwaSessionEvent.SCENARIO_COMPLETE)
             finishPersistentSession(persistentSessionId, SessionCloseReason.SCENARIO_COMPLETE)
             clearActivePersistentSessionIfMatches(persistentSessionId)
@@ -266,6 +283,8 @@ class MwaSessionHost(
 
         override fun onScenarioError() {
             if (!isCurrentGeneration(generation)) return
+            simulationCoordinator.invalidateSession(persistentSessionId, generation)
+            simulationDiagnosticSettlement.invalidateSession(persistentSessionId)
             record(MwaSessionEvent.SCENARIO_ERROR)
             finishPersistentSession(persistentSessionId, SessionCloseReason.SCENARIO_ERROR)
             clearActivePersistentSessionIfMatches(persistentSessionId)
@@ -274,6 +293,8 @@ class MwaSessionHost(
 
         override fun onScenarioTeardownComplete() {
             if (!isCurrentGeneration(generation)) return
+            simulationCoordinator.invalidateSession(persistentSessionId, generation)
+            simulationDiagnosticSettlement.invalidateSession(persistentSessionId)
             record(MwaSessionEvent.TEARDOWN_COMPLETE)
             finishPersistentSession(persistentSessionId, SessionCloseReason.TEARDOWN_COMPLETE)
             clearActivePersistentSessionIfMatches(persistentSessionId)
@@ -551,7 +572,11 @@ class MwaSessionHost(
             )
             updatePersistentDappIdentity(persistentSessionId, request.identityName)
             record(MwaSessionEvent.SIGN_TRANSACTIONS_REQUEST)
+            val approvalRequestId = UUID.randomUUID().toString()
             authorizationScope.launch {
+                val simulationContext = simulationDiagnosticSettlement.begin(protocolHandle, approvalRequestId) {
+                    record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "simulation_results")
+                }
                 val diagnostics = transactionInspection.inspect(payloads, persistentSessionId, protocolHandle?.eventId)
                 val diagnosticContext = transactionDiagnosticSettlement.begin(protocolHandle, diagnostics) {
                     record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "transaction_diagnostics")
@@ -566,9 +591,13 @@ class MwaSessionHost(
                         sessionId = persistentSessionId,
                         protocolHandle = protocolHandle,
                         requestSummary = requestSummary,
+                        approvalRequestId = approvalRequestId,
+                        simulationEnabled = simulationContext != null,
                     )
                 } finally {
                     // Independent diagnostic work survives cancellation of this session's authorization scope.
+                    protocolHandle?.let { simulationCoordinator.releaseRequest(persistentSessionId, it.eventId, approvalRequestId) }
+                    simulationDiagnosticSettlement.finish(simulationContext)
                     transactionDiagnosticSettlement.finish(diagnosticContext)
                 }
             }
@@ -634,7 +663,11 @@ class MwaSessionHost(
             )
             updatePersistentDappIdentity(persistentSessionId, request.identityName)
             record(MwaSessionEvent.SIGN_AND_SEND_REQUEST)
+            val approvalRequestId = UUID.randomUUID().toString()
             authorizationScope.launch {
+                val simulationContext = simulationDiagnosticSettlement.begin(protocolHandle, approvalRequestId) {
+                    record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "simulation_results")
+                }
                 val diagnostics = transactionInspection.inspect(payloads, persistentSessionId, protocolHandle?.eventId)
                 val diagnosticContext = transactionDiagnosticSettlement.begin(protocolHandle, diagnostics) {
                     record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "transaction_diagnostics")
@@ -649,9 +682,13 @@ class MwaSessionHost(
                         sessionId = persistentSessionId,
                         protocolHandle = protocolHandle,
                         requestSummary = requestSummary,
+                        approvalRequestId = approvalRequestId,
+                        simulationEnabled = simulationContext != null,
                     )
                 } finally {
                     // Independent diagnostic work survives cancellation of this session's authorization scope.
+                    protocolHandle?.let { simulationCoordinator.releaseRequest(persistentSessionId, it.eventId, approvalRequestId) }
+                    simulationDiagnosticSettlement.finish(simulationContext)
                     transactionDiagnosticSettlement.finish(diagnosticContext)
                 }
             }
@@ -806,6 +843,29 @@ class MwaSessionHost(
         return result
     }
 
+    private fun registerSimulationTargets(
+        ready: TransactionPreparationResult.Ready,
+        sessionId: String,
+        handle: ProtocolEventHandle?,
+        requestId: String,
+        generation: Long,
+        enabled: Boolean,
+        options: DevnetSimulationOptions,
+    ): List<SimulationTargetRef?> {
+        if (!enabled || handle == null || !isCurrentGeneration(generation)) {
+            return List(ready.transactions.size) { null }
+        }
+        return ready.transactions.mapIndexed { index, parsed ->
+            runCatching {
+                val ref = SimulationTargetRef(
+                    sessionId, handle.eventId, requestId, index,
+                    DiagnosticSanitizer.sha256(parsed.original),
+                )
+                if (simulationCoordinator.register(ref, generation, parsed.original, options)) ref else null
+            }.getOrNull()
+        }
+    }
+
     private suspend fun handleSignTransactions(
         request: SignTransactionsRequest,
         payloads: Array<ByteArray>,
@@ -815,6 +875,8 @@ class MwaSessionHost(
         sessionId: String,
         protocolHandle: ProtocolEventHandle?,
         requestSummary: Map<String, String>,
+        approvalRequestId: String,
+        simulationEnabled: Boolean,
     ) {
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
@@ -949,8 +1011,14 @@ class MwaSessionHost(
             return
         }
 
+        val simulationTargets = registerSimulationTargets(
+            ready, sessionId, protocolHandle, approvalRequestId, generation, simulationEnabled,
+            DevnetSimulationOptions.forSignTransactions(),
+        )
         val approval = approvalCoordinator.requestApproval(
             ApprovalRequest(
+                requestId = approvalRequestId,
+                simulationTargets = simulationTargets,
                 sessionId = sessionId,
                 method = ProtocolMethod.SIGN_TRANSACTIONS.wireName,
                 dappIdentityName = request.identityName,
@@ -1069,6 +1137,8 @@ class MwaSessionHost(
         sessionId: String,
         protocolHandle: ProtocolEventHandle?,
         requestSummary: Map<String, String>,
+        approvalRequestId: String,
+        simulationEnabled: Boolean,
     ) {
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
@@ -1225,8 +1295,14 @@ class MwaSessionHost(
             return
         }
 
+        val simulationTargets = registerSimulationTargets(
+            ready, sessionId, protocolHandle, approvalRequestId, generation, simulationEnabled,
+            DevnetSimulationOptions.forSignAndSend(sendOptions),
+        )
         val approval = approvalCoordinator.requestApproval(
             ApprovalRequest(
+                requestId = approvalRequestId,
+                simulationTargets = simulationTargets,
                 sessionId = sessionId,
                 method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS.wireName,
                 dappIdentityName = request.identityName,
@@ -1766,6 +1842,7 @@ class MwaSessionHost(
             return
         }
         transactionDiagnosticSettlement.completed(result)
+        simulationDiagnosticSettlement.completed(result)
         if (result is ProtocolRecorder.CompletionResult.PersistenceFailed) {
             record(
                 MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED,

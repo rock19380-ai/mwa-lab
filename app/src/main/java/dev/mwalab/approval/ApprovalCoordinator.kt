@@ -1,6 +1,7 @@
 package dev.mwalab.approval
 
 import dev.mwalab.transaction.TransactionApprovalDiagnostics
+import dev.mwalab.simulation.SimulationTargetRef
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,16 @@ data class ApprovalRequest(
     val payloadFingerprints: List<String>,
     val payloadLengths: List<Int>,
     val transactionSummaries: TransactionApprovalDiagnostics? = null,
-)
+    val simulationTargets: List<SimulationTargetRef?> = emptyList(),
+) {
+    init {
+        require(simulationTargets.isEmpty() || simulationTargets.size == payloadFingerprints.size)
+        simulationTargets.forEachIndexed { index, ref ->
+            require(ref == null || (ref.sessionId == sessionId && ref.requestId == requestId &&
+                ref.payloadIndex == index && ref.transactionFingerprintSha256 == payloadFingerprints[index]))
+        }
+    }
+}
 
 sealed interface ApprovalState {
     data object Idle : ApprovalState

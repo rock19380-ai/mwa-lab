@@ -27,12 +27,14 @@ import dev.mwalab.session.*
 import dev.mwalab.signing.LabSigningService
 import dev.mwalab.storage.*
 import dev.mwalab.transaction.*
+import dev.mwalab.simulation.*
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -270,6 +272,109 @@ class MwaTransactionApprovalInstrumentedTest {
         }
     }
 
+    @Test
+    fun simulationPassRejectAndFailApproveKeepBothWireMethodsAuthoritative() {
+        Fixture().use { f ->
+            for (send in listOf(false, true)) {
+                f.simulationResponse = DevnetRpcResult.Success(SimulationRpcValue(91, null,
+                    BoundedLogs(listOf("Program log: bounded"), false), 42))
+                val signedBeforeSimulation = f.signCount
+                val submissionsBeforeSimulation = f.submitted.size
+                var pending = f.sign(send, arrayOf(f.transaction()))
+                var request = f.awaitApproval().request
+                var ref = request.simulationTargets.single()!!
+                assertTrue(f.simulator.simulate(ref))
+                assertEquals(SimulationOutcome.PASS, f.awaitSimulation(ref).outcome)
+                assertEquals(signedBeforeSimulation, f.signCount)
+                assertEquals(submissionsBeforeSimulation, f.submitted.size)
+                assertTrue(f.approvals.reject(request.requestId))
+                assertRemoteError(pending, ProtocolContract.ERROR_NOT_SIGNED)
+                f.assertEvent(method(send), ProtocolOutcome.FAILURE, ProtocolContract.ERROR_NOT_SIGNED, "rejected")
+                assertEquals(SimulationOutcome.PASS, f.awaitStoredSimulation(ref).outcome)
+
+                f.simulationResponse = DevnetRpcResult.Success(SimulationRpcValue(92,
+                    SimulationErrorSummary(SimulationErrorKind.INSTRUCTION_ERROR, 0, "Custom", 42),
+                    BoundedLogs(emptyList(), false), 43))
+                pending = f.sign(send, arrayOf(f.transaction()))
+                request = f.awaitApproval().request
+                ref = request.simulationTargets.single()!!
+                assertTrue(f.simulator.simulate(ref))
+                assertEquals(SimulationOutcome.FAIL, f.awaitSimulation(ref).outcome)
+                val submittedBeforeApproval = f.submitted.size
+                assertTrue(f.approvals.approve(request.requestId))
+                assertNotNull(pending.get(10, TimeUnit.SECONDS))
+                f.assertEvent(method(send), ProtocolOutcome.SUCCESS, null, if (send) "submitted" else "signed")
+                assertEquals(submittedBeforeApproval + if (send) 1 else 0, f.submitted.size)
+                assertEquals(SimulationOutcome.FAIL, f.awaitStoredSimulation(ref).outcome)
+            }
+            assertEquals(4, f.simulationCalls.size)
+            f.assertNoAuthTokensInStorage()
+        }
+    }
+
+    @Test
+    fun unavailableSimulationAndLateInFlightResultNeverChangeApprovalOrParent() {
+        Fixture().use { f ->
+            f.simulationResponse = DevnetRpcResult.TransportFailure(TransportFailureReason.HTTP)
+            var pending = f.sign(false, arrayOf(f.transaction()))
+            var request = f.awaitApproval().request
+            var ref = request.simulationTargets.single()!!
+            assertTrue(f.simulator.simulate(ref))
+            assertEquals(SimulationOutcome.UNAVAILABLE, f.awaitSimulation(ref).outcome)
+            assertTrue(f.approvals.approve(request.requestId))
+            assertNotNull(pending.get(10, TimeUnit.SECONDS))
+            f.assertEvent(ProtocolMethod.SIGN_TRANSACTIONS, ProtocolOutcome.SUCCESS, null, "signed")
+            assertEquals(ProtocolFailureSource.RPC_NETWORK, f.awaitStoredSimulation(ref).failureSource)
+
+            val gate = CompletableDeferred<Unit>()
+            f.simulationGate = gate
+            f.simulationResponse = DevnetRpcResult.Success(SimulationRpcValue(99,
+                SimulationErrorSummary(SimulationErrorKind.BLOCKHASH_NOT_FOUND),
+                BoundedLogs(emptyList(), false), null))
+            pending = f.sign(false, arrayOf(f.transaction()))
+            request = f.awaitApproval().request
+            ref = request.simulationTargets.single()!!
+            assertTrue(f.simulator.simulate(ref))
+            f.awaitSimulationCallCount(2)
+            assertFalse(f.simulator.simulate(ref))
+            assertTrue(f.approvals.reject(request.requestId))
+            assertRemoteError(pending, ProtocolContract.ERROR_NOT_SIGNED)
+            f.assertEvent(ProtocolMethod.SIGN_TRANSACTIONS, ProtocolOutcome.FAILURE,
+                ProtocolContract.ERROR_NOT_SIGNED, "rejected")
+            gate.complete(Unit)
+            assertEquals(SimulationOutcome.FAIL, f.awaitStoredSimulation(ref).outcome)
+            assertFalse(f.simulator.simulate(ref))
+            assertTrue(f.submitted.isEmpty())
+        }
+    }
+
+    @Test
+    fun simulationPersistenceAndParentFailureAreIsolatedFromWireResult() {
+        Fixture().use { f ->
+            f.failSimulationInserts()
+            var pending = f.sign(false, arrayOf(f.transaction()))
+            var request = f.awaitApproval().request
+            var ref = request.simulationTargets.single()!!
+            assertTrue(f.simulator.simulate(ref))
+            f.awaitSimulation(ref)
+            assertTrue(f.approvals.approve(request.requestId))
+            assertNotNull(pending.get(10, TimeUnit.SECONDS))
+            f.assertEvent(ProtocolMethod.SIGN_TRANSACTIONS, ProtocolOutcome.SUCCESS, null, "signed")
+            f.awaitFailures("simulation_results", 1)
+
+            f.failTransactionEventInserts()
+            pending = f.sign(false, arrayOf(f.transaction()))
+            request = f.awaitApproval().request
+            ref = request.simulationTargets.single()!!
+            assertTrue(f.simulator.simulate(ref))
+            f.awaitSimulation(ref)
+            assertTrue(f.approvals.reject(request.requestId))
+            assertRemoteError(pending, ProtocolContract.ERROR_NOT_SIGNED)
+            f.awaitFailures("protocol_complete_sign_transactions", 1)
+            assertTrue(runBlocking { f.simulationRepository.getForEvent(ref.sessionId, ref.eventId) }.isEmpty())
+        }
+    }
+
     private fun method(send: Boolean) = if (send) ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS else ProtocolMethod.SIGN_TRANSACTIONS
 
     private fun assertRemoteError(future: Future<*>, code: Int) {
@@ -293,11 +398,16 @@ class MwaTransactionApprovalInstrumentedTest {
         private val repo = RoomSessionRepository(db.sessionDao(), db.protocolEventDao())
         private val sessionFinished = CountDownLatch(1)
         private val diagnosticWorkerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        private val simulationWorkerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         val approvals = ApprovalCoordinator()
         val order = CopyOnWriteArrayList<String>()
         val inspected = CopyOnWriteArrayList<TransactionSummary>()
         val submitted = CopyOnWriteArrayList<ByteArray>()
         val options = CopyOnWriteArrayList<DevnetSendOptions>()
+        val simulationCalls = CopyOnWriteArrayList<DevnetSimulationOptions>()
+        @Volatile var simulationResponse: DevnetRpcResult<SimulationRpcValue> =
+            DevnetRpcResult.Success(SimulationRpcValue(1, null, BoundedLogs(emptyList(), false), null))
+        @Volatile var simulationGate: CompletableDeferred<Unit>? = null
         val evidence = CopyOnWriteArrayList<MwaSessionEvidence>()
         private val authTokens = CopyOnWriteArrayList<String>()
         private var diagnosticWritesFail = false
@@ -323,8 +433,11 @@ class MwaTransactionApprovalInstrumentedTest {
             override suspend fun simulateTransaction(
                 transaction: ByteArray,
                 options: dev.mwalab.rpc.DevnetSimulationOptions,
-            ): DevnetRpcResult<dev.mwalab.rpc.SimulationRpcValue> =
-                error("Existing approval flow must never invoke simulation")
+            ): DevnetRpcResult<dev.mwalab.rpc.SimulationRpcValue> {
+                simulationCalls += options
+                simulationGate?.await()
+                return simulationResponse
+            }
             override suspend fun isBlockhashValid(blockhash: ByteArray, minContextSlot: Int?): DevnetRpcResult<Boolean> {
                 order += "blockhash"
                 assertArrayEquals(ByteArray(32) { 0x77 }, blockhash)
@@ -339,11 +452,17 @@ class MwaTransactionApprovalInstrumentedTest {
                 return DevnetRpcResult.Success(true)
             }
         }
+        val simulationRepository = RoomSimulationRepository(db.simulationResultDao())
+        private val simulationSettlement = SimulationDiagnosticSettlement(repo, simulationRepository,
+            simulationWorkerScope)
+        val simulator = TransactionSimulationCoordinator(TransactionSimulationService(rpc),
+            { result -> simulationSettlement.record(result) }, simulationWorkerScope)
         private val host = MwaSessionHost(context, signingService = countingSigner, approvalCoordinator = approvals,
             rpcGateway = rpc, evidenceSink = { evidence += it }, protocolEvidenceSink = {}, protocolRecorder = recorder,
             sessionLifecycleCoordinator = SessionLifecycleCoordinator(repo, recorder),
             capabilitySnapshotRepository = RoomCapabilitySnapshotRepository(db.capabilitySnapshotDao()),
             transactionDiagnosticSettlement = TransactionDiagnosticSettlement(repo, RoomTransactionDiagnosticRepository(db.transactionDiagnosticDao()), diagnosticWorkerScope),
+            simulationCoordinator = simulator, simulationDiagnosticSettlement = simulationSettlement,
             transactionInspector = object : TransactionInspection {
                 override fun inspect(transaction: ByteArray, payloadIndex: Int, binding: TransactionDiagnosticBinding?): TransactionSummary {
                     order += "inspect:" + payloadIndex
@@ -416,6 +535,20 @@ class MwaTransactionApprovalInstrumentedTest {
             }
 
         }
+        fun awaitSimulation(ref: SimulationTargetRef): SimulationResult = await {
+            (simulator.state.value[ref] as? SimulationUiState.Completed)?.result
+        }
+        fun awaitStoredSimulation(ref: SimulationTargetRef): SimulationResult = await {
+            runBlocking { simulationRepository.getForEvent(ref.sessionId, ref.eventId) }
+                .singleOrNull { it.target == ref }
+        }
+        fun awaitSimulationCallCount(count: Int) {
+            await { simulationCalls.size.takeIf { it >= count } }
+        }
+        fun failSimulationInserts() {
+            db.openHelper.writableDatabase.execSQL("CREATE TRIGGER fail_simulations BEFORE INSERT ON simulation_results " +
+                "BEGIN SELECT RAISE(ABORT, 'controlled simulation failure'); END")
+        }
         fun assertOrderedEvents(methods: List<ProtocolMethod>) {
             val events = await { runBlocking { repo.observeSessions().first() }.single().events.takeIf { it.size == methods.size } }
             assertEquals(methods, events.map { it.method })
@@ -450,7 +583,8 @@ class MwaTransactionApprovalInstrumentedTest {
             await { evidence.count { it.event == MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED && it.detail == detail }
                 .takeIf { it >= count } }
             assertTrue(evidence.filter { it.event == MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED }
-                .all { it.detail == "transaction_diagnostics" || it.detail!!.startsWith("protocol_complete_") })
+                .all { it.detail == "transaction_diagnostics" || it.detail == "simulation_results" ||
+                    it.detail!!.startsWith("protocol_complete_") })
         }
         fun assertOnlyAuthorizationPersisted() {
             assertEquals(listOf(ProtocolMethod.AUTHORIZE), runBlocking { repo.observeSessions().first() }.single().events.map { it.method })
@@ -491,6 +625,7 @@ class MwaTransactionApprovalInstrumentedTest {
                 }
             }
             diagnosticWorkerScope.cancel()
+            simulationWorkerScope.cancel()
             db.close()
             context.deleteDatabase(name)
         }

@@ -15,6 +15,11 @@ import dev.mwalab.protocol.recorder.ProtocolRecorder
 import dev.mwalab.signing.LabSigningService
 import dev.mwalab.rpc.DevnetRpcGateway
 import dev.mwalab.rpc.SolanaDevnetRpcGateway
+import dev.mwalab.simulation.SimulationDiagnosticSettlement
+import dev.mwalab.simulation.SimulationRepository
+import dev.mwalab.simulation.TransactionSimulationCoordinator
+import dev.mwalab.simulation.TransactionSimulationService
+import dev.mwalab.storage.RoomSimulationRepository
 import dev.mwalab.session.SessionLifecycleCoordinator
 import dev.mwalab.session.SessionRepository
 import dev.mwalab.storage.MwaLabDatabase
@@ -45,6 +50,11 @@ object MwaLabComposition {
 
     @Volatile
     private var transactionDiagnosticSettlementInstance: TransactionDiagnosticSettlement? = null
+
+    @Volatile private var simulationRepositoryInstance: SimulationRepository? = null
+    @Volatile private var simulationDiagnosticSettlementInstance: SimulationDiagnosticSettlement? = null
+    @Volatile private var simulationServiceInstance: TransactionSimulationService? = null
+    @Volatile private var simulationCoordinatorInstance: TransactionSimulationCoordinator? = null
 
     @Volatile
     private var protocolRecorderInstance: ProtocolRecorder? = null
@@ -115,6 +125,34 @@ object MwaLabComposition {
             transactionDiagnosticSettlementInstance ?: TransactionDiagnosticSettlement(
                 sessionRepository(context), transactionDiagnosticRepository(context),
             ).also { transactionDiagnosticSettlementInstance = it }
+        }
+
+    fun simulationRepository(context: Context): SimulationRepository =
+        simulationRepositoryInstance ?: synchronized(this) {
+            simulationRepositoryInstance ?: RoomSimulationRepository(
+                database(context).simulationResultDao(),
+            ).also { simulationRepositoryInstance = it }
+        }
+
+    fun simulationDiagnosticSettlement(context: Context): SimulationDiagnosticSettlement =
+        simulationDiagnosticSettlementInstance ?: synchronized(this) {
+            simulationDiagnosticSettlementInstance ?: SimulationDiagnosticSettlement(
+                sessionRepository(context), simulationRepository(context),
+            ).also { simulationDiagnosticSettlementInstance = it }
+        }
+
+    fun simulationService(): TransactionSimulationService =
+        simulationServiceInstance ?: synchronized(this) {
+            simulationServiceInstance ?: TransactionSimulationService(devnetRpcGateway()).also {
+                simulationServiceInstance = it
+            }
+        }
+
+    fun simulationCoordinator(context: Context): TransactionSimulationCoordinator =
+        simulationCoordinatorInstance ?: synchronized(this) {
+            simulationCoordinatorInstance ?: TransactionSimulationCoordinator(
+                simulationService(), { result -> simulationDiagnosticSettlement(context).record(result) },
+            ).also { simulationCoordinatorInstance = it }
         }
 
     fun protocolRecorder(context: Context): ProtocolRecorder =
