@@ -20,6 +20,7 @@ import dev.mwalab.app.MwaLabComposition
 import dev.mwalab.faults.DeterministicFaultEngine
 import dev.mwalab.faults.FaultDecision
 import dev.mwalab.faults.FaultHook
+import dev.mwalab.faults.FaultId
 import dev.mwalab.faults.FaultRequestSnapshot
 import dev.mwalab.faults.FaultSelectionRepository
 import dev.mwalab.approval.ApprovalCoordinator
@@ -1167,6 +1168,7 @@ class MwaSessionHost(
                 payloadFingerprints = payloads.map { DiagnosticSanitizer.sha256(it) },
                 payloadLengths = payloads.map { it.size },
                 transactionSummaries = diagnostics,
+                faultSnapshotId = faultSnapshot.profile.id.takeUnless { it == FaultId.NORMAL },
             ),
         )
         if (!isCurrentGeneration(generation)) {
@@ -1494,6 +1496,7 @@ class MwaSessionHost(
                 payloadFingerprints = payloads.map { DiagnosticSanitizer.sha256(it) },
                 payloadLengths = payloads.map { it.size },
                 transactionSummaries = diagnostics,
+                faultSnapshotId = faultSnapshot.profile.id.takeUnless { it == FaultId.NORMAL },
             ),
         )
         if (!isCurrentGeneration(generation)) {
@@ -1901,6 +1904,7 @@ class MwaSessionHost(
                 chain = request.chain,
                 payloadFingerprints = payloads.map { DiagnosticSanitizer.sha256(it) },
                 payloadLengths = payloads.map { it.size },
+                faultSnapshotId = faultSnapshot.profile.id.takeUnless { it == FaultId.NORMAL },
             ),
         )
         if (!isCurrentGeneration(generation)) {

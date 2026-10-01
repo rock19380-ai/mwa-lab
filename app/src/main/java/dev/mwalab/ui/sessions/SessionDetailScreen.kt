@@ -122,6 +122,11 @@ private fun ProtocolEventCard(event: ProtocolEvent) {
                 Text("Completed ${timestampText(event.completedAtEpochMillis)}")
                 Text(protocolErrorText(event.protocolErrorCode))
                 Text("Failure source: ${event.failureSource.name}")
+                injectedConditionText(event)?.let { condition ->
+                    Text("INTENTIONAL TEST CONDITION", color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.titleSmall)
+                    Text(condition)
+                }
                 SafeSummary("Request summary", event.requestSummary)
                 SafeSummary("Response summary", event.responseSummary)
                 event.capabilityContext?.takeIf { it.isNotEmpty() }?.let {

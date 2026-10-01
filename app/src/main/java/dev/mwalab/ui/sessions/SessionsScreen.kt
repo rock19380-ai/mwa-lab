@@ -39,6 +39,8 @@ fun SessionCard(summary: SessionSummary, onSession: (String) -> Unit) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(summary.session.dappIdentityName ?: "Unknown dApp", style = MaterialTheme.typography.titleMedium)
             Text(sessionStatusText(summary.status), style = MaterialTheme.typography.labelLarge)
+            if (sessionHasInjectedCondition(summary)) Text("FAULT CONDITION RECORDED",
+                style = MaterialTheme.typography.labelLarge)
             Text("Started ${timestampText(summary.session.startedAtEpochMillis)}")
             Text("${summary.eventCount} events · ${summary.durationMillis?.let { "$it ms" } ?: "No recorded end"}")
             Text("SOLANA DEVNET · ${summary.session.cluster}", style = MaterialTheme.typography.labelMedium)

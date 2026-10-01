@@ -18,6 +18,7 @@ import dev.mwalab.ui.transaction.TransactionApprovalPresentation
 import dev.mwalab.simulation.SimulationTargetRef
 import dev.mwalab.simulation.SimulationUiState
 import dev.mwalab.ui.simulation.SimulationResultContent
+import dev.mwalab.faults.FaultCatalog
 
 /** Renders metadata; decision callbacks receive the original request ID. */
 @Composable
@@ -41,6 +42,14 @@ fun SigningApprovalScreen(
                 val request = state.request
                 Column(Modifier.weight(1f).testTag("approval-content").verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    request.faultSnapshotId?.let { faultId ->
+                        val profile = FaultCatalog.get(faultId)
+                        Text("FAULT ACTIVE · INTENTIONAL TEST CONDITION",
+                            Modifier.testTag("request-fault-banner"),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.titleMedium)
+                        Text("Request fault snapshot: ${profile.displayName} (${faultId.stableId})")
+                    }
                     Text("SIGNING APPROVAL", style = MaterialTheme.typography.titleLarge)
                     Text("dApp: ${request.dappIdentityName ?: "Unknown dApp"}")
                     Text("Method: ${request.method}")

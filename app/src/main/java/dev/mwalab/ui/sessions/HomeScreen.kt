@@ -6,9 +6,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.mwalab.faults.FaultProfile
+import dev.mwalab.faults.FaultId
 
 @Composable
-fun HomeScreen(state: HomeUiState, onSessions: () -> Unit, onSession: (String) -> Unit, onRetry: () -> Unit) {
+fun HomeScreen(state: HomeUiState, onSessions: () -> Unit, onSession: (String) -> Unit,
+    onRetry: () -> Unit, activeFault: FaultProfile? = null, onFaultLab: () -> Unit = {}) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
@@ -24,6 +27,16 @@ fun HomeScreen(state: HomeUiState, onSessions: () -> Unit, onSession: (String) -
             }
             Text("Identity secrets are protected and are never shown or exported.")
         }
+        activeFault?.let { profile -> item {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Active fault", style = MaterialTheme.typography.titleMedium)
+                    Text(if (profile.id == FaultId.NORMAL) "Normal" else profile.displayName)
+                    if (profile.id != FaultId.NORMAL) Text("FAULT ACTIVE · INTENTIONAL TEST CONDITION")
+                    TextButton(onClick = onFaultLab) { Text("Open Fault Lab") }
+                }
+            }
+        } }
         item { Button(onClick = onSessions) { Text("View sessions") } }
         state.lastSession?.let { summary ->
             item { Text("Last session", style = MaterialTheme.typography.titleMedium) }

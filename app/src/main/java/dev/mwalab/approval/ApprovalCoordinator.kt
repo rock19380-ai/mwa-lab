@@ -2,6 +2,7 @@ package dev.mwalab.approval
 
 import dev.mwalab.transaction.TransactionApprovalDiagnostics
 import dev.mwalab.simulation.SimulationTargetRef
+import dev.mwalab.faults.FaultId
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +29,8 @@ data class ApprovalRequest(
     val payloadLengths: List<Int>,
     val transactionSummaries: TransactionApprovalDiagnostics? = null,
     val simulationTargets: List<SimulationTargetRef?> = emptyList(),
+    /** Display-only snapshot captured by the host when this protocol request began. */
+    val faultSnapshotId: FaultId? = null,
 ) {
     init {
         require(simulationTargets.isEmpty() || simulationTargets.size == payloadFingerprints.size)

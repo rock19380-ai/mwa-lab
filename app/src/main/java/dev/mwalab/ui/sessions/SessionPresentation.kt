@@ -2,6 +2,8 @@ package dev.mwalab.ui.sessions
 
 import com.solana.mobilewalletadapter.common.ProtocolContract
 import dev.mwalab.protocol.ProtocolOutcome
+import dev.mwalab.protocol.ProtocolEvent
+import dev.mwalab.faults.FaultCatalog
 import dev.mwalab.session.SessionStatus
 import dev.mwalab.session.SessionSummary
 import java.text.SimpleDateFormat
@@ -40,3 +42,12 @@ fun protocolErrorText(code: Int?): String {
 fun failureText(summary: SessionSummary): String? = summary.events
     .firstOrNull { it.outcome == ProtocolOutcome.FAILURE }
     ?.let { "${it.method.name} · ${protocolErrorText(it.protocolErrorCode)} · ${it.failureSource.name}" }
+
+/** An applied condition is independent of the terminal failure source. */
+fun injectedConditionText(event: ProtocolEvent): String? = event.injectedFaultId?.let { id ->
+    val name = FaultCatalog.find(id)?.displayName
+    if (name == null) "Injected condition: $id" else "Injected condition: $name ($id)"
+}
+
+fun sessionHasInjectedCondition(summary: SessionSummary): Boolean =
+    summary.events.any { it.injectedFaultId != null }

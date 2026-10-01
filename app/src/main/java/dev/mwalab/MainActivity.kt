@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mwalab.app.MwaLabComposition
 import dev.mwalab.ui.sessions.*
+import dev.mwalab.ui.faults.FaultLabScreen
 import dev.mwalab.ui.theme.MWALabTheme
 
 class MainActivity : ComponentActivity() {
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val repository = MwaLabComposition.sessionRepository(applicationContext)
+        val faultSelection = MwaLabComposition.faultSelectionRepository(applicationContext)
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val model = when (modelClass) {
@@ -50,6 +52,7 @@ class MainActivity : ComponentActivity() {
                 var screen by rememberSaveable { mutableStateOf("Home") }
                 var selectedSession by rememberSaveable { mutableStateOf<String?>(null) }
                 val homeState by home.state.collectAsStateWithLifecycle()
+                val activeFault by faultSelection.selected.collectAsStateWithLifecycle()
                 val sessionsState by sessions.state.collectAsStateWithLifecycle()
                 val detailState by detail.state.collectAsStateWithLifecycle()
                 LaunchedEffect(selectedSession) { selectedSession?.let(detail::selectSession) }
@@ -65,17 +68,20 @@ class MainActivity : ComponentActivity() {
                             Row {
                                 TextButton(onClick = { screen = "Home" }) { Text("Home") }
                                 TextButton(onClick = { screen = "Sessions" }) { Text("Sessions") }
+                                TextButton(onClick = { screen = "Fault Lab" }) { Text("Fault Lab") }
                             }
                         }
                         HorizontalDivider()
                         Box(Modifier.weight(1f)) {
                             when (screen) {
                                 "Sessions" -> SessionsScreen(sessionsState, openSession, sessions::retry)
+                                "Fault Lab" -> FaultLabScreen(activeFault, faultSelection::select)
                                 "Detail" -> SessionDetailScreen(
                                     detailState, { screen = "Sessions" }, detail::retry, detail::retryCapabilities,
                                     detail::retryTransactions, detail::retrySimulations,
                                 )
-                                else -> HomeScreen(homeState, { screen = "Sessions" }, openSession, home::retry)
+                                else -> HomeScreen(homeState, { screen = "Sessions" }, openSession, home::retry,
+                                    activeFault, { screen = "Fault Lab" })
                             }
                         }
                     }
