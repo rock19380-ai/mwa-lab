@@ -341,3 +341,9 @@ deterministic parser self-test is included in `scripts/phase5_static.sh` and
 prevents a UI-only result from claiming Room binding, raw-payload absence, or
 restart persistence. The repaired settlement commit passed exact-head CI run
 36698868948.
+
+<!-- PHASE6:TESTING:BEGIN -->
+## Phase 6 verification
+
+Phase 6 adds catalog/engine tests, selection persistence tests, recorder fault invariants, concrete walletlib callback tests, delay cancellation and association-replacement tests, Fault Lab Activity-recreation coverage, session-presentation truthfulness tests, independent machine-readable fault vectors, and a client-side acceptance runner. Historical Phase 5 full static gating is not reused because it intentionally freezes the pre-Phase-6 recorder hash; Phase 6 CI runs the still-applicable Phase 5 design/vector/parser checks plus the dedicated Phase 6 gate.
+<!-- PHASE6:TESTING:END -->

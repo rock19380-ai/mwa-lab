@@ -247,3 +247,11 @@ See `PHASE_5_REPORT.md` and `docs/evidence/phase5/phase5-live-devnet-acceptance.
 The earlier unfunded attempt remains recorded as historical evidence. Final
 freeze provenance is recorded by the annotated tag only after exact-head CI
 succeeds on the evidence commit.
+
+<!-- PHASE6:SUMMARY:BEGIN -->
+## Phase 6 — Deterministic Fault Engine
+
+MWA Lab now supports deterministic fault profiles for authorization rejection, signing rejection, fixed delay, unsupported chain, invalid payload, payload-limit rejection, stale transaction, RPC unavailability, and submission failure. Fault selection is internal to MWA Lab and visible in Fault Lab. Persisted protocol events keep an applied `injectedFaultId` separate from the terminal `failureSource`, so synthetic conditions cannot be confused with observed failures.
+
+Phase 7 sanitized Markdown/JSON report export and Android Share Sheet are **not implemented yet**. MWA Lab remains a Solana Devnet-only protocol debugger/test endpoint, not a production wallet.
+<!-- PHASE6:SUMMARY:END -->

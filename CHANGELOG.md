@@ -53,3 +53,14 @@
 - Session-local active authorization is invalidated on deauthorize/teardown/replacement.
 - Privileged requests re-check authorization around approval/signing/submission.
 - Diagnostic sanitizer rejects auth/association tokens and raw message/transaction/signature fields.
+
+<!-- PHASE6:CHANGELOG:BEGIN -->
+### Phase 6 — Deterministic Fault Engine
+
+- Added ten-profile fault catalog including NORMAL.
+- Added deterministic authorization, signing, payload, stale-blockhash, delay, RPC, and submission scenarios.
+- Added canonical injected-fault evidence and injected-vs-observed truthfulness.
+- Added Fault Lab, global/request snapshot visibility, session fault presentation, machine-readable vectors, and Phase 6 demo acceptance runner.
+- Kept Room at schema 3, walletlib at 2.0.7, Devnet-only execution, and Phase 5 simulation authority unchanged.
+- Phase 7 sanitized report export remains pending.
+<!-- PHASE6:CHANGELOG:END -->

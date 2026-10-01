@@ -192,3 +192,9 @@ force-stop/relaunch, and the persisted UI reloaded the PASS-reject relationship.
 The initial zero-balance attempt remains historical evidence, not a simulation
 result. RPC_UNAVAILABLE remains verified by controlled instrumentation, not a
 production fault toggle or a claimed live outage.
+
+<!-- PHASE6:PROTOCOL:BEGIN -->
+## Phase 6 protocol-error reproduction
+
+Supported deterministic profiles reproduce the pinned walletlib 2.0.7 error families `ERROR_AUTHORIZATION_FAILED (-1)`, `ERROR_INVALID_PAYLOADS (-2)`, `ERROR_NOT_SIGNED (-3)`, `ERROR_NOT_SUBMITTED (-4)`, `ERROR_TOO_MANY_PAYLOADS (-6)`, and the walletlib legacy-named `ERROR_CLUSTER_NOT_SUPPORTED (-7)`. RPC-unavailable and submission-failure profiles intentionally remain distinct diagnostic IDs despite sharing `-4`. `FAULT_DELAY_5S` is an injected timing condition, not a forced terminal failure.
+<!-- PHASE6:PROTOCOL:END -->

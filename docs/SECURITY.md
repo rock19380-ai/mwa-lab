@@ -270,3 +270,9 @@ auth/association tokens and protected keys were not extracted for literal
 matching: their safety remains supported by schema/source controls and the
 existing instrumented sentinel tests. The live byte scan does not claim to
 search for unknown secret values.
+
+<!-- PHASE6:SECURITY:BEGIN -->
+## Phase 6 fault-engine security boundary
+
+Fault selection persists only a stable profile ID in app-private preferences. No exported production API can silently select a fault. Synthetic terminal failures are explicitly classified as `INJECTED` and require a valid injected fault ID. An applied nonterminal condition may coexist with `NONE` or `OBSERVED_PROTOCOL` terminal source. Room remains schema 3; no private keys, seeds, raw auth tokens, association secrets, or raw transactions are added to fault vectors or diagnostics. Mainnet remains rejected.
+<!-- PHASE6:SECURITY:END -->

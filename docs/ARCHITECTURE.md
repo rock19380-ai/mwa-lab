@@ -266,3 +266,9 @@ FAIL child accompanied a successful signed parent, while a PASS child remained
 PASS after the parent returned ERROR_NOT_SIGNED/OBSERVED_PROTOCOL. All three
 live sessions' canonical parent, transaction and simulation rows survived
 process restart without reclassification or rebinding.
+
+<!-- PHASE6:ARCH:BEGIN -->
+## Phase 6 deterministic fault path
+
+`PersistentFaultSelectionRepository` is the single process-wide selection authority. `MwaSessionHost` captures an immutable `FaultRequestSnapshot` at request start and evaluates `DeterministicFaultEngine` only at explicit hooks. Applied conditions are annotated on the canonical pending `ProtocolEvent`; Compose screens only project structured state. Phase 5 simulation remains a diagnostic child branch and is not used as fault authority.
+<!-- PHASE6:ARCH:END -->
