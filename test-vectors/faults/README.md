@@ -1,0 +1,5 @@
+# Phase 6 deterministic fault contracts
+
+`faults.properties` is independent, safe, machine-readable expected metadata. It contains no payloads, tokens, keys, or association material. Each `profiles` entry has a stable ID, catalog target methods/hook, wire error, terminal classification, and side-effect expectations. Method-specific callback entries document walletlib 2.0.7 translations. `NORMAL_FLOW` means the injection does not determine the terminal result. `METHOD_DEPENDENT` means a blockhash check occurs for transaction methods, but not messages. `delay_ms=5000` is the injected suspension, not a failure outcome.
+
+`FaultVectorVerifierTest` loads this canonical file through the Gradle-provided `mwalab.phase6.faultVectorsPath` JVM system property (with repository-relative fallback for direct IDE execution) and compares it with the runtime catalog plus fixed protocol/side-effect contracts. A fault must be selected manually in MWA Lab; these vectors do not control production wallet state.

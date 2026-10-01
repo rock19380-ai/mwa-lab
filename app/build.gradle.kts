@@ -47,6 +47,18 @@ android {
     }
 }
 
+// Phase 6 fault vectors live at the repository root as an independent,
+// machine-readable contract. Pass the canonical file path explicitly to local
+// JVM tests instead of relying on AGP to package an external directory as a
+// classpath resource. This keeps one authoritative vector file and works with
+// lazily-created Android unit-test tasks.
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    systemProperty(
+        "mwalab.phase6.faultVectorsPath",
+        rootProject.file("test-vectors/faults/faults.properties").absolutePath,
+    )
+}
+
 dependencies {
     implementation(libs.solana.mobile.walletlib)
     implementation(libs.kotlinx.coroutines.android)
