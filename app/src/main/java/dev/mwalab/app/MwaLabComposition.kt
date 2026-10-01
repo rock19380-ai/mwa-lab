@@ -1,6 +1,10 @@
 package dev.mwalab.app
 
 import android.content.Context
+import dev.mwalab.faults.DeterministicFaultEngine
+import dev.mwalab.faults.FaultSelectionRepository
+import dev.mwalab.faults.PersistentFaultSelectionRepository
+import dev.mwalab.faults.PrivatePreferencesFaultSelectionStore
 import dev.mwalab.approval.ApprovalCoordinator
 import dev.mwalab.transaction.TransactionInspection
 import dev.mwalab.transaction.TransactionInspector
@@ -58,6 +62,11 @@ object MwaLabComposition {
 
     @Volatile
     private var protocolRecorderInstance: ProtocolRecorder? = null
+
+    @Volatile
+    private var faultSelectionRepositoryInstance: FaultSelectionRepository? = null
+
+    private val faultEngineInstance = DeterministicFaultEngine()
 
     @Volatile
     private var sessionLifecycleCoordinatorInstance: SessionLifecycleCoordinator? = null
@@ -161,6 +170,15 @@ object MwaLabComposition {
                 sessionRepository = sessionRepository(context.applicationContext),
             ).also { protocolRecorderInstance = it }
         }
+
+    fun faultSelectionRepository(context: Context): FaultSelectionRepository =
+        faultSelectionRepositoryInstance ?: synchronized(this) {
+            faultSelectionRepositoryInstance ?: PersistentFaultSelectionRepository(
+                PrivatePreferencesFaultSelectionStore(context.applicationContext),
+            ).also { faultSelectionRepositoryInstance = it }
+        }
+
+    fun deterministicFaultEngine(): DeterministicFaultEngine = faultEngineInstance
 
     fun sessionLifecycleCoordinator(context: Context): SessionLifecycleCoordinator =
         sessionLifecycleCoordinatorInstance ?: synchronized(this) {
