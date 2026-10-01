@@ -1,5 +1,6 @@
 package dev.mwalab.protocol.recorder
 
+import dev.mwalab.faults.FaultId
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
@@ -344,6 +345,84 @@ class PersistentProtocolRecorderTest {
         assertEquals("<unsupported>", repository.events.single().requestSummary["chain"])
         assertEquals("<unsupported>", repository.events.single().responseSummary["commitment"])
         assertTrue(runCatching { recorder.begin("a", ProtocolMethod.GET_CAPABILITIES) }.exceptionOrNull() is IllegalArgumentException)
+    }
+
+    @Test
+    fun appliedFaultIsIdempotentAndCanEndSuccessfully() = runBlocking {
+        val repository = FakeSessionRepository()
+        val recorder = PersistentProtocolRecorder(repository, FakeClock(100))
+        val handle = recorder.begin("session-a", ProtocolMethod.SIGN_MESSAGES)
+        recorder.markInjectedFault(handle, FaultId.DELAY_5S)
+        recorder.markInjectedFault(handle, FaultId.DELAY_5S)
+        recorder.complete(handle, ProtocolOutcome.SUCCESS)
+        val event = repository.events.single()
+        assertEquals(FaultId.DELAY_5S.stableId, event.injectedFaultId)
+        assertEquals(ProtocolFailureSource.NONE, event.failureSource)
+        assertEquals(ProtocolOutcome.SUCCESS, event.outcome)
+    }
+
+    @Test
+    fun conflictingOrLateAnnotationIsRejectedWithoutChangingFirstEvent() = runBlocking {
+        val repository = FakeSessionRepository()
+        val recorder = PersistentProtocolRecorder(repository, FakeClock(100))
+        val handle = recorder.begin("session-a", ProtocolMethod.SIGN_MESSAGES)
+        recorder.markInjectedFault(handle, FaultId.DELAY_5S)
+        assertTrue(runCatching { recorder.markInjectedFault(handle, FaultId.SIGN_REJECT) }
+            .exceptionOrNull() is IllegalStateException)
+        assertTrue(runCatching { recorder.markInjectedFault(handle, FaultId.NORMAL) }
+            .exceptionOrNull() is IllegalArgumentException)
+        recorder.complete(handle, ProtocolOutcome.FAILURE, protocolErrorCode = -3,
+            failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL)
+        assertEquals(FaultId.DELAY_5S.stableId, repository.events.single().injectedFaultId)
+        assertEquals(ProtocolFailureSource.OBSERVED_PROTOCOL, repository.events.single().failureSource)
+        assertTrue(runCatching { recorder.markInjectedFault(handle, FaultId.DELAY_5S) }
+            .exceptionOrNull() is IllegalStateException)
+        assertEquals(1, repository.events.size)
+    }
+
+    @Test
+    fun injectedFailureCannotClaimTerminalWithoutAppliedFault() = runBlocking {
+        val repository = FakeSessionRepository()
+        val recorder = PersistentProtocolRecorder(repository, FakeClock(100))
+        val handle = recorder.begin("session-a", ProtocolMethod.AUTHORIZE)
+        assertTrue(runCatching { recorder.complete(handle, ProtocolOutcome.FAILURE,
+            failureSource = ProtocolFailureSource.INJECTED) }
+            .exceptionOrNull() is IllegalArgumentException)
+        assertTrue(repository.events.isEmpty())
+        recorder.markInjectedFault(handle, FaultId.AUTH_REJECT)
+        recorder.complete(handle, ProtocolOutcome.FAILURE, protocolErrorCode = -1,
+            failureSource = ProtocolFailureSource.INJECTED)
+        assertEquals(FaultId.AUTH_REJECT.stableId, repository.events.single().injectedFaultId)
+        assertEquals(ProtocolFailureSource.INJECTED, repository.events.single().failureSource)
+    }
+
+    @Test
+    fun cancellationPreservesAppliedFaultAndDoesNotCreateSecondTerminal() = runBlocking {
+        val repository = FakeSessionRepository()
+        val recorder = PersistentProtocolRecorder(repository, FakeClock(100))
+        val handle = recorder.begin("session-a", ProtocolMethod.SIGN_MESSAGES)
+        recorder.markInjectedFault(handle, FaultId.DELAY_5S)
+        val result = recorder.cancelPendingForSession("session-a").single()
+        assertEquals(FaultId.DELAY_5S.stableId, result.event.injectedFaultId)
+        assertEquals(ProtocolOutcome.CANCELLED, result.event.outcome)
+        assertEquals(ProtocolFailureSource.UNKNOWN, result.event.failureSource)
+        assertTrue(recorder.complete(handle, ProtocolOutcome.SUCCESS)
+            is ProtocolRecorder.CompletionResult.AlreadyCompleted)
+        assertEquals(1, repository.events.size)
+    }
+
+    @Test
+    fun normalEventKeepsNullFaultAndClaimedEventCannotBeAnnotated() = runBlocking {
+        val repository = BlockingSessionRepository()
+        val recorder = PersistentProtocolRecorder(repository, FakeClock(100))
+        val handle = recorder.begin("session-a", ProtocolMethod.SIGN_MESSAGES)
+        val completion = async { recorder.complete(handle, ProtocolOutcome.SUCCESS) }
+        repository.started.await()
+        assertTrue(runCatching { recorder.markInjectedFault(handle, FaultId.SIGN_REJECT) }
+            .exceptionOrNull() is IllegalStateException)
+        repository.release.complete(Unit)
+        completion.await()
+        assertEquals(null, repository.events.single().injectedFaultId)
     }
 
     private class FakeClock(var now: Long) : EventClock {

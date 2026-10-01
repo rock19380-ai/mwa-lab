@@ -1,5 +1,7 @@
 package dev.mwalab.protocol.recorder
 
+import dev.mwalab.faults.FaultEvidenceInvariant
+import dev.mwalab.faults.FaultId
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
@@ -28,6 +30,7 @@ class PersistentProtocolRecorder(
     private val mutex = Mutex()
     private val lastSequenceBySession = mutableMapOf<SessionId, Long>()
     private val pendingByEventId = linkedMapOf<String, ProtocolEventHandle>()
+    private val injectedFaultByEventId = mutableMapOf<String, FaultId>()
     private val settlingByEventId = mutableMapOf<String, Settlement>()
     private val closedSessionSummaries = mutableMapOf<SessionId, Map<String, String>>()
     private val completedByEventId = mutableMapOf<String, ProtocolRecorder.CompletionResult>()
@@ -70,6 +73,20 @@ class PersistentProtocolRecorder(
         return handle
     }
 
+    override suspend fun markInjectedFault(handle: ProtocolEventHandle, faultId: FaultId) {
+        require(faultId != FaultId.NORMAL) { "NORMAL is not an injected condition" }
+        mutex.withLock {
+            val pending = pendingByEventId[handle.eventId]
+                ?: throw IllegalStateException("Protocol event is no longer pending")
+            require(pending === handle) { "Protocol event handle does not match recorder state" }
+            val existing = injectedFaultByEventId[handle.eventId]
+            check(existing == null || existing == faultId) {
+                "A protocol event cannot carry two different injected faults"
+            }
+            injectedFaultByEventId[handle.eventId] = faultId
+        }
+    }
+
     override suspend fun complete(
         handle: ProtocolEventHandle,
         outcome: ProtocolOutcome,
@@ -101,12 +118,14 @@ class PersistentProtocolRecorder(
                     failureSource = failureSource,
                     requestSummary = handle.requestSummary.toMap(),
                     responseSummary = safeSummary(responseSummary),
-                    injectedFaultId = null,
+                    injectedFaultId = injectedFaultByEventId[handle.eventId]?.stableId,
                     capabilityContext = null,
                 )
+            FaultEvidenceInvariant.requireValid(event)
             // Validate/snapshot response metadata before relinquishing pending
             // ownership. Invalid diagnostics must remain settleable on close.
             pendingByEventId.remove(handle.eventId)
+            injectedFaultByEventId.remove(handle.eventId)
             settlingByEventId[handle.eventId] = Settlement(event, CompletableDeferred())
             CompletionClaim.First(event)
         }

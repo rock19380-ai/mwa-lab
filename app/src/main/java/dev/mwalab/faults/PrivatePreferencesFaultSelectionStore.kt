@@ -3,9 +3,12 @@ package dev.mwalab.faults
 import android.content.Context
 
 /** Only the stable ID is stored in this app's private preferences. */
-class PrivatePreferencesFaultSelectionStore(context: Context) : FaultSelectionStore {
+class PrivatePreferencesFaultSelectionStore(
+    context: Context,
+    preferencesName: String = "phase6_fault_selection",
+) : FaultSelectionStore {
     private val preferences = context.applicationContext.getSharedPreferences(
-        "phase6_fault_selection", Context.MODE_PRIVATE,
+        preferencesName, Context.MODE_PRIVATE,
     )
 
     override fun read(): String? = preferences.getString("active_fault_id", null)

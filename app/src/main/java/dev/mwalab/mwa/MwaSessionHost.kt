@@ -17,6 +17,11 @@ import com.solana.mobilewalletadapter.walletlib.scenario.SignAndSendTransactions
 import com.solana.mobilewalletadapter.walletlib.scenario.SignMessagesRequest
 import com.solana.mobilewalletadapter.walletlib.scenario.SignTransactionsRequest
 import dev.mwalab.app.MwaLabComposition
+import dev.mwalab.faults.DeterministicFaultEngine
+import dev.mwalab.faults.FaultDecision
+import dev.mwalab.faults.FaultHook
+import dev.mwalab.faults.FaultRequestSnapshot
+import dev.mwalab.faults.FaultSelectionRepository
 import dev.mwalab.approval.ApprovalCoordinator
 import dev.mwalab.approval.ApprovalDecision
 import dev.mwalab.approval.ApprovalRequest
@@ -85,6 +90,10 @@ class MwaSessionHost(
     private val protocolEvidenceSink: ProtocolEvidenceSink = ProtocolEvidenceStore,
     private val protocolRecorder: ProtocolRecorder =
         MwaLabComposition.protocolRecorder(context.applicationContext),
+    private val faultSelectionRepository: FaultSelectionRepository =
+        MwaLabComposition.faultSelectionRepository(context.applicationContext),
+    private val faultEngine: DeterministicFaultEngine =
+        MwaLabComposition.deterministicFaultEngine(),
     private val sessionLifecycleCoordinator: SessionLifecycleCoordinator =
         MwaLabComposition.sessionLifecycleCoordinator(context.applicationContext),
     private val capabilitySnapshotRepository: CapabilitySnapshotRepository =
@@ -317,6 +326,7 @@ class MwaSessionHost(
                 request.completeWithDecline()
                 return
             }
+            val faultSnapshot = captureFaultRequest(ProtocolMethod.AUTHORIZE, persistentSessionId, generation)
             val startedAt = System.currentTimeMillis()
             val requestSummary = mapOf(
                 "chain" to (request.chain ?: "<missing>"),
@@ -334,6 +344,7 @@ class MwaSessionHost(
             record(MwaSessionEvent.AUTHORIZE_REQUEST)
 
             authorizationScope.launch {
+                faultDecisionAt(faultSnapshot, FaultHook.AUTHORIZATION_DECISION)
                 val decision = try {
                     authorizationPolicy.evaluate(
                         chain = request.chain,
@@ -500,6 +511,7 @@ class MwaSessionHost(
                 request.completeWithDecline()
                 return
             }
+            val faultSnapshot = captureFaultRequest(ProtocolMethod.REAUTHORIZE, persistentSessionId, generation)
             val startedAt = System.currentTimeMillis()
             val requestSummary = mapOf(
                 "chain" to request.chain,
@@ -514,6 +526,7 @@ class MwaSessionHost(
             record(MwaSessionEvent.REAUTHORIZE_REQUEST)
             val allowed = NetworkPolicy.evaluate(request.chain) is NetworkDecision.Allowed &&
                 LabAuthorizationPolicy.isCurrentAuthorizationScope(request.authorizationScope)
+            faultDecisionAt(faultSnapshot, FaultHook.AUTHORIZATION_DECISION)
             if (allowed) {
                 markAuthorizationActive(generation)
                 request.completeWithReauthorize()
@@ -557,6 +570,7 @@ class MwaSessionHost(
                 request.completeWithDecline()
                 return
             }
+            val faultSnapshot = captureFaultRequest(ProtocolMethod.SIGN_TRANSACTIONS, persistentSessionId, generation)
             val startedAt = System.currentTimeMillis()
             val payloads = transactionInspection.ownPayloads(request.payloads)
             val requestSummary = signingRequestSummary(
@@ -583,6 +597,7 @@ class MwaSessionHost(
                 }
                 try {
                     handleSignTransactions(
+                        faultSnapshot = faultSnapshot,
                         request = request,
                         payloads = payloads,
                         diagnostics = diagnostics,
@@ -608,6 +623,7 @@ class MwaSessionHost(
                 request.completeWithDecline()
                 return
             }
+            val faultSnapshot = captureFaultRequest(ProtocolMethod.SIGN_MESSAGES, persistentSessionId, generation)
             val startedAt = System.currentTimeMillis()
             val requestSummary = signingRequestSummary(
                 method = ProtocolMethod.SIGN_MESSAGES,
@@ -624,6 +640,7 @@ class MwaSessionHost(
             record(MwaSessionEvent.SIGN_MESSAGES_REQUEST)
             authorizationScope.launch {
                 handleSignMessages(
+                    faultSnapshot = faultSnapshot,
                     request = request,
                     startedAt = startedAt,
                     generation = generation,
@@ -641,6 +658,7 @@ class MwaSessionHost(
                 request.completeWithDecline()
                 return
             }
+            val faultSnapshot = captureFaultRequest(ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS, persistentSessionId, generation)
             val startedAt = System.currentTimeMillis()
             val payloads = transactionInspection.ownPayloads(request.payloads)
             val requestSummary = signingRequestSummary(
@@ -674,6 +692,7 @@ class MwaSessionHost(
                 }
                 try {
                     handleSignAndSendTransactions(
+                        faultSnapshot = faultSnapshot,
                         request = request,
                         payloads = payloads,
                         diagnostics = diagnostics,
@@ -699,6 +718,7 @@ class MwaSessionHost(
                 event.complete()
                 return
             }
+            captureFaultRequest(ProtocolMethod.DEAUTHORIZE, persistentSessionId, generation)
             val startedAt = System.currentTimeMillis()
             val protocolHandle = beginPersistentProtocol(
                 sessionId = persistentSessionId,
@@ -757,6 +777,7 @@ class MwaSessionHost(
         chain: String,
         authorizationScopeBytes: ByteArray,
         minContextSlot: Int? = null,
+        faultSnapshot: FaultRequestSnapshot,
     ): TransactionPreparationResult {
         if (NetworkPolicy.evaluate(chain) !is NetworkDecision.Allowed ||
             !LabAuthorizationPolicy.isCurrentAuthorizationScope(authorizationScopeBytes)
@@ -799,6 +820,7 @@ class MwaSessionHost(
             )
         }
 
+        faultDecisionAt(faultSnapshot, FaultHook.TRANSACTION_BLOCKHASH_CHECK)
         parsed.forEachIndexed { index, transaction ->
             when (
                 val blockhashResult = rpcGateway.isBlockhashValid(
@@ -875,6 +897,7 @@ class MwaSessionHost(
         sessionId: String,
         protocolHandle: ProtocolEventHandle?,
         requestSummary: Map<String, String>,
+        faultSnapshot: FaultRequestSnapshot,
         approvalRequestId: String,
         simulationEnabled: Boolean,
     ) {
@@ -902,6 +925,8 @@ class MwaSessionHost(
             return
         }
 
+        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_VALIDATION)
+
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
             recordMigratedSigningProtocol(
@@ -922,6 +947,7 @@ class MwaSessionHost(
             authorizedPublicKeys = request.authorizedAccounts.map { it.publicKey },
             chain = request.chain,
             authorizationScopeBytes = request.authorizationScope,
+            faultSnapshot = faultSnapshot,
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
@@ -1011,6 +1037,7 @@ class MwaSessionHost(
             return
         }
 
+        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_PRE_APPROVAL)
         val simulationTargets = registerSimulationTargets(
             ready, sessionId, protocolHandle, approvalRequestId, generation, simulationEnabled,
             DevnetSimulationOptions.forSignTransactions(),
@@ -1137,6 +1164,7 @@ class MwaSessionHost(
         sessionId: String,
         protocolHandle: ProtocolEventHandle?,
         requestSummary: Map<String, String>,
+        faultSnapshot: FaultRequestSnapshot,
         approvalRequestId: String,
         simulationEnabled: Boolean,
     ) {
@@ -1163,6 +1191,8 @@ class MwaSessionHost(
             )
             return
         }
+
+        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_VALIDATION)
 
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
@@ -1205,6 +1235,7 @@ class MwaSessionHost(
             authorizedPublicKeys = request.authorizedAccounts.map { it.publicKey },
             chain = request.chain,
             authorizationScopeBytes = request.authorizationScope,
+            faultSnapshot = faultSnapshot,
             minContextSlot = sendOptions.minContextSlot,
         )
         if (!isCurrentGeneration(generation)) {
@@ -1295,6 +1326,7 @@ class MwaSessionHost(
             return
         }
 
+        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_PRE_APPROVAL)
         val simulationTargets = registerSimulationTargets(
             ready, sessionId, protocolHandle, approvalRequestId, generation, simulationEnabled,
             DevnetSimulationOptions.forSignAndSend(sendOptions),
@@ -1395,6 +1427,7 @@ class MwaSessionHost(
             return
         }
 
+        faultDecisionAt(faultSnapshot, FaultHook.SUBMISSION_PRE_RPC)
         val submissionResult = SignAndSendSubmissionExecutor(rpcGateway).execute(
             transactions = signed.map { transaction ->
                 SignAndSendSubmission(
@@ -1504,6 +1537,7 @@ class MwaSessionHost(
         sessionId: String,
         protocolHandle: ProtocolEventHandle?,
         requestSummary: Map<String, String>,
+        faultSnapshot: FaultRequestSnapshot,
     ) {
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
@@ -1548,6 +1582,8 @@ class MwaSessionHost(
             )
             return
         }
+
+        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_VALIDATION)
 
         if (payloads.isEmpty() || addresses.isEmpty()) {
             val valid = BooleanArray(payloads.size) { false }
@@ -1654,6 +1690,7 @@ class MwaSessionHost(
             return
         }
 
+        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_PRE_APPROVAL)
         val approval = approvalCoordinator.requestApproval(
             ApprovalRequest(
                 sessionId = sessionId,
@@ -1798,6 +1835,23 @@ class MwaSessionHost(
             responseSummary = responseSummary,
         )
     }
+
+    private fun captureFaultRequest(
+        method: ProtocolMethod,
+        sessionId: String,
+        generation: Long,
+    ): FaultRequestSnapshot =
+        faultEngine.capture(faultSelectionRepository, method, sessionId, generation)
+
+    /**
+     * Phase 6.5 only: a pure decision at a frozen seam. Phase 6.6+ translates
+     * decisions into pinned walletlib callbacks after method preconditions.
+     * No decision is applied or annotated by this foundation.
+     */
+    private fun faultDecisionAt(snapshot: FaultRequestSnapshot, hook: FaultHook): FaultDecision =
+        if (snapshot.belongsTo(activeSessionId, sessionGeneration.get()) &&
+            isCurrentGeneration(snapshot.generation)
+        ) faultEngine.evaluate(snapshot, hook) else FaultDecision.Continue
 
     private fun beginPersistentProtocol(
         sessionId: String,

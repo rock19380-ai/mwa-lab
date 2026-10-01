@@ -1,5 +1,6 @@
 package dev.mwalab.storage
 
+import dev.mwalab.faults.FaultEvidenceInvariant
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.session.MwaSession
 import dev.mwalab.session.SessionCloseReason
@@ -47,6 +48,7 @@ class RoomSessionRepository(
             "Protocol event requires an assigned event identity"
         }
         require(event.sequence > 0) { "Protocol event sequence must be positive" }
+        FaultEvidenceInvariant.requireValid(event)
         protocolEventDao.insert(event.toEntity())
     }
 

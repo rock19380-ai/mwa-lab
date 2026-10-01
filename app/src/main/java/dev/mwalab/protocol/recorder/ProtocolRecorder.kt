@@ -1,5 +1,6 @@
 package dev.mwalab.protocol.recorder
 
+import dev.mwalab.faults.FaultId
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
@@ -12,6 +13,14 @@ interface ProtocolRecorder {
         method: ProtocolMethod,
         requestSummary: Map<String, String> = emptyMap(),
     ): ProtocolEventHandle
+
+    /**
+     * Attach evidence only when a synthetic condition is actually applied.
+     * Implementations may reject completed, unknown, or conflicting handles.
+     */
+    suspend fun markInjectedFault(handle: ProtocolEventHandle, faultId: FaultId) {
+        throw UnsupportedOperationException("Fault annotation is not implemented")
+    }
 
     suspend fun complete(
         handle: ProtocolEventHandle,
