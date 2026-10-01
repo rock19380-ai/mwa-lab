@@ -9,6 +9,7 @@ on:
       - phase3-protocol-recorder-timeline
       - phase4-capability-transaction-diagnostics
       - phase5-simulation-diagnostic-classification
+      - phase6-deterministic-fault-engine
   pull_request:
 
 permissions:
@@ -38,10 +39,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle executable
-        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh
+        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh
 
       - name: Validate shell gate syntax
-        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh
+        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh
 
       - name: Lint
         run: ./gradlew lint
@@ -77,5 +78,9 @@ jobs:
         run: ./scripts/phase4_static.sh
 
       - name: Phase 5 simulation diagnostic classification gate
-        if: ${{ hashFiles('app/schemas/dev.mwalab.storage.MwaLabDatabase/3.json') != '' }}
+        if: ${{ hashFiles('app/schemas/dev.mwalab.storage.MwaLabDatabase/3.json') != '' && hashFiles('scripts/phase6_static.sh') == '' }}
         run: ./scripts/phase5_static.sh
+
+      - name: Phase 6 deterministic fault engine gate
+        if: ${{ hashFiles('scripts/phase6_static.sh') != '' }}
+        run: ./scripts/phase6_static.sh
