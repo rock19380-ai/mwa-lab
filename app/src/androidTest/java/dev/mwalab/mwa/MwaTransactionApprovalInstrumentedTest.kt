@@ -14,6 +14,10 @@ import com.solana.mobilewalletadapter.walletlib.protocol.MobileWalletAdapterServ
 import com.solana.mobilewalletadapter.walletlib.scenario.DeauthorizedEvent
 import com.solana.mobilewalletadapter.walletlib.scenario.LocalScenario
 import dev.mwalab.app.MwaLabComposition
+import dev.mwalab.faults.FaultCatalog
+import dev.mwalab.faults.FaultId
+import dev.mwalab.faults.FaultProfile
+import dev.mwalab.faults.FaultSelectionRepository
 import dev.mwalab.approval.*
 import dev.mwalab.identity.TestEndpointIdentity
 import dev.mwalab.mwa.evidence.MwaSessionEvidence
@@ -43,6 +47,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import org.bouncycastle.math.ec.rfc8032.Ed25519
 import org.junit.Assert.*
@@ -375,6 +381,251 @@ class MwaTransactionApprovalInstrumentedTest {
         }
     }
 
+    @Test
+    fun phase6AuthorizationFaultsUsePinnedCallbacksAndPreserveDevnetRequest() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.AUTH_REJECT)
+            assertRemoteError(f.authorizeAgain(), ProtocolContract.ERROR_AUTHORIZATION_FAILED)
+            f.assertInjectedEvent(ProtocolMethod.AUTHORIZE, FaultId.AUTH_REJECT,
+                ProtocolContract.ERROR_AUTHORIZATION_FAILED, "injected_auth_reject")
+            f.selectFault(FaultId.UNSUPPORTED_CHAIN)
+            assertRemoteError(f.authorizeAgain(), ProtocolContract.ERROR_CLUSTER_NOT_SUPPORTED)
+            f.assertInjectedEvent(ProtocolMethod.AUTHORIZE, FaultId.UNSUPPORTED_CHAIN,
+                ProtocolContract.ERROR_CLUSTER_NOT_SUPPORTED, "injected_unsupported_chain")
+            assertEquals(ProtocolContract.CHAIN_SOLANA_DEVNET,
+                f.awaitLatestEvent(ProtocolMethod.AUTHORIZE, "injected_unsupported_chain").requestSummary["chain"])
+            f.selectFault(FaultId.AUTH_REJECT)
+            assertRemoteError(f.authorizeAgain(f.latestAuthToken()), ProtocolContract.ERROR_AUTHORIZATION_FAILED)
+            f.assertInjectedEvent(ProtocolMethod.REAUTHORIZE, FaultId.AUTH_REJECT,
+                ProtocolContract.ERROR_AUTHORIZATION_FAILED, "injected_auth_reject")
+            f.selectFault(FaultId.NORMAL)
+            assertNotNull(f.authorizeAgain().get(10, TimeUnit.SECONDS))
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+        }
+    }
+
+    @Test
+    fun phase6ValidationFaultsKeepRealPayloadCountAcrossAllSigningMethods() {
+        Fixture().use { f ->
+            for ((id, code, result) in listOf(
+                Triple(FaultId.INVALID_PAYLOAD, ProtocolContract.ERROR_INVALID_PAYLOADS, "injected_invalid_payload"),
+                Triple(FaultId.TOO_MANY_PAYLOADS, ProtocolContract.ERROR_TOO_MANY_PAYLOADS, "injected_too_many_payloads"),
+            )) {
+                f.selectFault(id)
+                val message = "phase6-valid-message".encodeToByteArray()
+                @Suppress("DEPRECATION")
+                val messageRequest = f.client.signMessages(arrayOf(message), arrayOf(f.publicKey))
+                assertRemoteError(messageRequest, code)
+                f.assertInjectedEvent(ProtocolMethod.SIGN_MESSAGES, id, code, result, 1)
+                for (send in listOf(false, true)) {
+                    assertRemoteError(f.sign(send, arrayOf(f.transaction())), code)
+                    f.assertInjectedEvent(method(send), id, code, result, 1)
+                }
+                assertEquals(ApprovalState.Idle, f.approvals.state.value)
+            }
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+            f.selectFault(FaultId.NORMAL)
+            @Suppress("DEPRECATION")
+            val normal = f.client.signMessages(arrayOf("normal".encodeToByteArray()), arrayOf(f.publicKey))
+            assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+            assertNotNull(normal.get(10, TimeUnit.SECONDS))
+            assertNull(f.awaitLatestEvent(ProtocolMethod.SIGN_MESSAGES, "signed").injectedFaultId)
+        }
+    }
+
+    @Test
+    fun phase6SyntheticAndManualSigningRejectionHaveDifferentEvidence() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.SIGN_REJECT)
+            @Suppress("DEPRECATION")
+            val message = f.client.signMessages(arrayOf("valid".encodeToByteArray()), arrayOf(f.publicKey))
+            assertRemoteError(message, ProtocolContract.ERROR_NOT_SIGNED)
+            f.assertInjectedEvent(ProtocolMethod.SIGN_MESSAGES, FaultId.SIGN_REJECT,
+                ProtocolContract.ERROR_NOT_SIGNED, "injected_sign_reject")
+            for (send in listOf(false, true)) {
+                assertRemoteError(f.sign(send, arrayOf(f.transaction())), ProtocolContract.ERROR_NOT_SIGNED)
+                f.assertInjectedEvent(method(send), FaultId.SIGN_REJECT,
+                    ProtocolContract.ERROR_NOT_SIGNED, "injected_sign_reject")
+            }
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+            f.selectFault(FaultId.NORMAL)
+            @Suppress("DEPRECATION")
+            val manual = f.client.signMessages(arrayOf("valid".encodeToByteArray()), arrayOf(f.publicKey))
+            assertTrue(f.approvals.reject(f.awaitApproval().request.requestId))
+            assertRemoteError(manual, ProtocolContract.ERROR_NOT_SIGNED)
+            val observed = f.awaitLatestEvent(ProtocolMethod.SIGN_MESSAGES, "rejected")
+            assertEquals(ProtocolFailureSource.OBSERVED_PROTOCOL, observed.failureSource)
+            assertNull(observed.injectedFaultId)
+        }
+    }
+
+    @Test
+    fun phase6StaleBlockhashRejectsParsedTransactionsBeforeRpcOrSigning() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.STALE_BLOCKHASH)
+            for (send in listOf(false, true)) {
+                assertRemoteError(f.sign(send, arrayOf(f.transaction())), ProtocolContract.ERROR_INVALID_PAYLOADS)
+                f.assertInjectedEvent(method(send), FaultId.STALE_BLOCKHASH,
+                    ProtocolContract.ERROR_INVALID_PAYLOADS, "injected_stale_blockhash", 1)
+            }
+            assertFalse(f.order.contains("blockhash"))
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+            f.selectFault(FaultId.NORMAL)
+            val normal = f.sign(false, arrayOf(f.transaction()))
+            assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+            assertNotNull(normal.get(10, TimeUnit.SECONDS))
+            assertTrue(f.order.contains("blockhash"))
+        }
+    }
+
+    @Test
+    fun phase6SubmissionFaultsSignAfterApprovalButNeverSend() {
+        Fixture().use { f ->
+            for ((id, result) in listOf(
+                FaultId.RPC_UNAVAILABLE to "injected_rpc_unavailable",
+                FaultId.SUBMISSION_FAILURE to "injected_submission_failure",
+            )) {
+                f.selectFault(id)
+                val pending = f.sign(true, arrayOf(f.transaction()))
+                assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+                assertRemoteError(pending, ProtocolContract.ERROR_NOT_SUBMITTED)
+                f.assertInjectedEvent(ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS, id,
+                    ProtocolContract.ERROR_NOT_SUBMITTED, result, 1)
+                assertTrue(f.submitted.isEmpty())
+            }
+            assertEquals(2, f.signCount)
+            assertFalse(f.order.contains("send"))
+            f.selectFault(FaultId.NORMAL)
+            val normal = f.sign(true, arrayOf(f.transaction()))
+            assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+            assertNotNull(normal.get(10, TimeUnit.SECONDS))
+            assertEquals(1, f.submitted.size)
+        }
+    }
+
+    @Test
+    fun phase6DelayRetainsAppliedIdForSuccessAndObservedManualRejection() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.DELAY_5S)
+            @Suppress("DEPRECATION")
+            val success = f.client.signMessages(arrayOf("delay success".encodeToByteArray()), arrayOf(f.publicKey))
+            assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+            assertNotNull(success.get(10, TimeUnit.SECONDS))
+            val succeeded = f.awaitLatestEvent(ProtocolMethod.SIGN_MESSAGES, "signed")
+            assertEquals(FaultId.DELAY_5S.stableId, succeeded.injectedFaultId)
+            assertEquals(ProtocolOutcome.SUCCESS, succeeded.outcome)
+            assertEquals(ProtocolFailureSource.NONE, succeeded.failureSource)
+            assertTrue(succeeded.completedAtEpochMillis - succeeded.startedAtEpochMillis >= 4_900)
+            @Suppress("DEPRECATION")
+            val rejected = f.client.signMessages(arrayOf("delay reject".encodeToByteArray()), arrayOf(f.publicKey))
+            assertTrue(f.approvals.reject(f.awaitApproval().request.requestId))
+            assertRemoteError(rejected, ProtocolContract.ERROR_NOT_SIGNED)
+            val observed = f.awaitLatestEvent(ProtocolMethod.SIGN_MESSAGES, "rejected")
+            assertEquals(FaultId.DELAY_5S.stableId, observed.injectedFaultId)
+            assertEquals(ProtocolFailureSource.OBSERVED_PROTOCOL, observed.failureSource)
+        }
+    }
+
+    @Test
+    fun phase6DelayKeepsRequestSnapshotWhenSelectionChangesAndNextRequestIsNormal() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.DELAY_5S)
+            @Suppress("DEPRECATION")
+            val delayed = f.client.signMessages(arrayOf("snapshot first".encodeToByteArray()), arrayOf(f.publicKey))
+            f.awaitFaultMark(FaultId.DELAY_5S)
+            f.selectFault(FaultId.NORMAL)
+            assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+            assertNotNull(delayed.get(10, TimeUnit.SECONDS))
+            assertEquals(FaultId.DELAY_5S.stableId,
+                f.awaitLatestEvent(ProtocolMethod.SIGN_MESSAGES, "signed").injectedFaultId)
+            @Suppress("DEPRECATION")
+            val next = f.client.signMessages(arrayOf("snapshot next".encodeToByteArray()), arrayOf(f.publicKey))
+            assertTrue(f.approvals.approve(f.awaitApproval().request.requestId))
+            assertNotNull(next.get(10, TimeUnit.SECONDS))
+            assertNull(f.awaitLatestEvent(ProtocolMethod.SIGN_MESSAGES, "signed").injectedFaultId)
+        }
+    }
+
+    @Test
+    fun phase6SessionCloseDuringDelayPreservesFaultOnSingleCancelledEvent() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.DELAY_5S)
+            @Suppress("DEPRECATION")
+            val pending = f.client.signMessages(arrayOf("close during delay".encodeToByteArray()), arrayOf(f.publicKey))
+            f.awaitFaultMark(FaultId.DELAY_5S)
+            f.closeAssociation()
+            runCatching { pending.get(10, TimeUnit.SECONDS) }
+            val event = f.awaitLastEvent(ProtocolMethod.SIGN_MESSAGES)
+            assertEquals(FaultId.DELAY_5S.stableId, event.injectedFaultId)
+            assertEquals(ProtocolOutcome.CANCELLED, event.outcome)
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+            assertEquals(ApprovalState.Idle, f.approvals.state.value)
+        }
+    }
+
+    @Test
+    fun phase6HostDestroyDuringDelayCancelsWithoutSigning() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.DELAY_5S)
+            @Suppress("DEPRECATION")
+            val pending = f.client.signMessages(arrayOf("destroy during delay".encodeToByteArray()), arrayOf(f.publicKey))
+            f.awaitFaultMark(FaultId.DELAY_5S)
+            f.closeHost()
+            runCatching { pending.get(10, TimeUnit.SECONDS) }
+            val event = f.awaitLastEvent(ProtocolMethod.SIGN_MESSAGES)
+            assertEquals(FaultId.DELAY_5S.stableId, event.injectedFaultId)
+            assertEquals(ProtocolOutcome.CANCELLED, event.outcome)
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+        }
+    }
+
+    @Test
+    fun phase6AuthorizationRevocationDuringDelayCannotReachApprovalOrSigning() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.DELAY_5S)
+            @Suppress("DEPRECATION")
+            val pending = f.client.signMessages(arrayOf("revoke during delay".encodeToByteArray()), arrayOf(f.publicKey))
+            f.awaitFaultMark(FaultId.DELAY_5S)
+            f.revokeThroughPinnedWalletlibCallback(f.currentSessionId())
+            assertRemoteError(pending, ProtocolContract.ERROR_AUTHORIZATION_FAILED)
+            val event = f.awaitLatestEvent(ProtocolMethod.SIGN_MESSAGES, "authorization_revoked_after_fault_delay")
+            assertEquals(FaultId.DELAY_5S.stableId, event.injectedFaultId)
+            assertEquals(ProtocolFailureSource.OBSERVED_PROTOCOL, event.failureSource)
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+            assertEquals(ApprovalState.Idle, f.approvals.state.value)
+        }
+    }
+
+    @Test
+    fun phase6ReplacedAssociationCannotReceiveOldDelayedRequest() {
+        Fixture().use { f ->
+            f.selectFault(FaultId.DELAY_5S)
+            @Suppress("DEPRECATION")
+            val old = f.client.signMessages(arrayOf("old association".encodeToByteArray()), arrayOf(f.publicKey))
+            f.awaitFaultMark(FaultId.DELAY_5S)
+            f.selectFault(FaultId.NORMAL)
+            val replacement = f.replaceAssociation()
+            val newAuth = replacement.authorize(Uri.parse("https://phase6-replacement.invalid"), Uri.parse("icon.png"),
+                "Phase 6 replacement", ProtocolContract.CHAIN_SOLANA_DEVNET,
+                null, null, null, null).get(10, TimeUnit.SECONDS)
+            assertTrue(newAuth.authToken.isNotEmpty())
+            runCatching { old.get(10, TimeUnit.SECONDS) }
+            val oldEvent = f.awaitFaultEvent(ProtocolMethod.SIGN_MESSAGES, FaultId.DELAY_5S)
+            assertEquals(ProtocolOutcome.CANCELLED, oldEvent.outcome)
+            assertEquals(0, f.signCount)
+            assertTrue(f.submitted.isEmpty())
+            assertEquals(ApprovalState.Idle, f.approvals.state.value)
+            assertTrue(f.sessionIds().size >= 2)
+        }
+    }
+
     private fun method(send: Boolean) = if (send) ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS else ProtocolMethod.SIGN_TRANSACTIONS
 
     private fun assertRemoteError(future: Future<*>, code: Int) {
@@ -400,6 +651,12 @@ class MwaTransactionApprovalInstrumentedTest {
         private val diagnosticWorkerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         private val simulationWorkerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         val approvals = ApprovalCoordinator()
+        private val selectedFault = MutableStateFlow(FaultCatalog.get(FaultId.NORMAL))
+        private val faultSelection = object : FaultSelectionRepository {
+            override val selected: StateFlow<FaultProfile> = selectedFault
+            override fun select(id: FaultId) { selectedFault.value = FaultCatalog.get(id) }
+        }
+        fun selectFault(id: FaultId) = faultSelection.select(id)
         val order = CopyOnWriteArrayList<String>()
         val inspected = CopyOnWriteArrayList<TransactionSummary>()
         val submitted = CopyOnWriteArrayList<ByteArray>()
@@ -427,6 +684,10 @@ class MwaTransactionApprovalInstrumentedTest {
                 requestSummary: Map<String, String>): ProtocolEventHandle {
                 order += "begin:" + method.name
                 return delegateRecorder.begin(sessionId, method, requestSummary)
+            }
+            override suspend fun markInjectedFault(handle: ProtocolEventHandle, faultId: FaultId) {
+                delegateRecorder.markInjectedFault(handle, faultId)
+                order += "fault:" + faultId.stableId
             }
         }
         private val rpc = object : DevnetRpcGateway {
@@ -459,6 +720,7 @@ class MwaTransactionApprovalInstrumentedTest {
             { result -> simulationSettlement.record(result) }, simulationWorkerScope)
         private val host = MwaSessionHost(context, signingService = countingSigner, approvalCoordinator = approvals,
             rpcGateway = rpc, evidenceSink = { evidence += it }, protocolEvidenceSink = {}, protocolRecorder = recorder,
+            faultSelectionRepository = faultSelection,
             sessionLifecycleCoordinator = SessionLifecycleCoordinator(repo, recorder),
             capabilitySnapshotRepository = RoomCapabilitySnapshotRepository(db.capabilitySnapshotDao()),
             transactionDiagnosticSettlement = TransactionDiagnosticSettlement(repo, RoomTransactionDiagnosticRepository(db.transactionDiagnosticDao()), diagnosticWorkerScope),
@@ -470,6 +732,8 @@ class MwaTransactionApprovalInstrumentedTest {
                 }
             }, onSessionFinished = { sessionFinished.countDown() })
         private val association = LocalAssociationScenario(Scenario.DEFAULT_CLIENT_TIMEOUT_MS)
+        private val replacementAssociations = CopyOnWriteArrayList<LocalAssociationScenario>()
+        private var hostClosedExplicitly = false
         val client: MobileWalletAdapterClient
         lateinit var publicKey: ByteArray
         init {
@@ -534,6 +798,60 @@ class MwaTransactionApprovalInstrumentedTest {
                 assertEquals(event, runBlocking { repo.getSession(event.sessionId) }!!.events.single { it.eventId == event.eventId })
             }
 
+        }
+        fun assertInjectedEvent(method: ProtocolMethod, id: FaultId, code: Int, result: String,
+            payloadCount: Int? = null) {
+            val event = await {
+                runBlocking { repo.observeSessions().first() }.single().events.lastOrNull {
+                    it.method == method && it.responseSummary["result"] == result
+                }
+            }
+            assertEquals(ProtocolOutcome.FAILURE, event.outcome)
+            assertEquals(code, event.protocolErrorCode)
+            assertEquals(ProtocolFailureSource.INJECTED, event.failureSource)
+            assertEquals(id.stableId, event.injectedFaultId)
+            payloadCount?.let { assertEquals(it.toString(), event.requestSummary["payload_count"]) }
+            assertEquals(1, runBlocking { repo.getSession(event.sessionId) }!!.events.count { it.eventId == event.eventId })
+        }
+        fun awaitLatestEvent(method: ProtocolMethod, result: String): ProtocolEvent = await {
+            runBlocking { repo.observeSessions().first() }.single().events.lastOrNull {
+                it.method == method && it.responseSummary["result"] == result
+            }
+        }
+        fun authorizeAgain(token: String? = null): Future<*> =
+            client.authorize(Uri.parse("https://phase48-test.invalid"), Uri.parse("icon.png"),
+                "Phase 4.8 approval fixture", ProtocolContract.CHAIN_SOLANA_DEVNET,
+                token, null, null, null)
+        fun latestAuthToken(): String = authTokens.last()
+        fun awaitFaultMark(id: FaultId) {
+            await { order.lastOrNull { it == "fault:" + id.stableId } }
+        }
+        fun currentSessionId(): String = runBlocking { repo.observeSessions().first() }.single().session.id
+        fun sessionIds(): Set<String> = runBlocking { repo.observeSessions().first() }.map { it.session.id }.toSet()
+        fun awaitFaultEvent(method: ProtocolMethod, id: FaultId): ProtocolEvent = await {
+            runBlocking { repo.observeSessions().first() }.flatMap { it.events }.singleOrNull {
+                it.method == method && it.injectedFaultId == id.stableId
+            }
+        }
+        fun replaceAssociation(): MobileWalletAdapterClient {
+            val replacement = LocalAssociationScenario(Scenario.DEFAULT_CLIENT_TIMEOUT_MS)
+            replacementAssociations += replacement
+            val uri = LocalAssociationIntentCreator.createAssociationIntent(
+                null, replacement.port, replacement.session,
+            ).data
+            assertTrue(host.openAssociation(uri) is AssociationOpenResult.Accepted)
+            return replacement.start().get(30, TimeUnit.SECONDS)
+        }
+        fun closeAssociation() {
+            association.close().get(10, TimeUnit.SECONDS)
+            assertTrue(sessionFinished.await(10, TimeUnit.SECONDS))
+        }
+        fun closeHost() {
+            hostClosedExplicitly = true
+            host.close()
+        }
+        fun awaitLastEvent(method: ProtocolMethod): ProtocolEvent = await {
+            runBlocking { repo.observeSessions().first() }.single().events.lastOrNull { it.method == method }
         }
         fun awaitSimulation(ref: SimulationTargetRef): SimulationResult = await {
             (simulator.state.value[ref] as? SimulationUiState.Completed)?.result
@@ -611,8 +929,11 @@ class MwaTransactionApprovalInstrumentedTest {
             throw AssertionError("Timed out awaiting request-bound state")
         }
         override fun close() {
+            replacementAssociations.forEach { runCatching { it.close().get(10, TimeUnit.SECONDS) } }
             runCatching { association.close().get(10, TimeUnit.SECONDS) }
-            assertTrue("Natural walletlib teardown did not finish", sessionFinished.await(10, TimeUnit.SECONDS))
+            if (!hostClosedExplicitly) {
+                assertTrue("Natural walletlib teardown did not finish", sessionFinished.await(10, TimeUnit.SECONDS))
+            }
             host.close()
             // Drain handler-finally and diagnostic jobs before closing their disposable Room database.
             // A visible committed row does not prove its background coroutine has returned yet.
