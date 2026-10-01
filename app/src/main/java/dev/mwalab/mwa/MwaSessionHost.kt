@@ -72,6 +72,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
@@ -344,7 +345,48 @@ class MwaSessionHost(
             record(MwaSessionEvent.AUTHORIZE_REQUEST)
 
             authorizationScope.launch {
-                faultDecisionAt(faultSnapshot, FaultHook.AUTHORIZATION_DECISION)
+                // Apply only to a supported, otherwise ordinary Devnet authorization.
+                val faultEligible =
+                    NetworkPolicy.evaluate(request.chain) is NetworkDecision.Allowed &&
+                        request.features.isNullOrEmpty() &&
+                        request.addresses.isNullOrEmpty() &&
+                        request.signInPayload == null
+                if (faultEligible && isCurrentGeneration(generation)) {
+                    val injected = when (faultDecisionAt(faultSnapshot, FaultHook.AUTHORIZATION_DECISION)) {
+                        FaultDecision.RejectAuthorization -> Triple(
+                            ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                            "injected_auth_reject",
+                            { request.completeWithDecline() },
+                        )
+                        FaultDecision.UnsupportedChain -> Triple(
+                            ProtocolContract.ERROR_CLUSTER_NOT_SUPPORTED,
+                            "injected_unsupported_chain",
+                            { request.completeWithClusterNotSupported() },
+                        )
+                        else -> null
+                    }
+                    if (injected != null) {
+                        markAppliedFault(protocolHandle, faultSnapshot)
+                        injected.third()
+                        completePersistentProtocol(
+                            handle = protocolHandle,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = injected.first,
+                            failureSource = ProtocolFailureSource.INJECTED,
+                            responseSummary = mapOf("result" to injected.second),
+                        )
+                        recordProtocol(
+                            method = ProtocolMethod.AUTHORIZE,
+                            startedAt = startedAt,
+                            outcome = ProtocolOutcome.FAILURE,
+                            protocolErrorCode = injected.first,
+                            failureSource = ProtocolFailureSource.INJECTED,
+                            requestSummary = requestSummary,
+                            responseSummary = mapOf("result" to injected.second),
+                        )
+                        return@launch
+                    }
+                }
                 val decision = try {
                     authorizationPolicy.evaluate(
                         chain = request.chain,
@@ -526,7 +568,31 @@ class MwaSessionHost(
             record(MwaSessionEvent.REAUTHORIZE_REQUEST)
             val allowed = NetworkPolicy.evaluate(request.chain) is NetworkDecision.Allowed &&
                 LabAuthorizationPolicy.isCurrentAuthorizationScope(request.authorizationScope)
-            faultDecisionAt(faultSnapshot, FaultHook.AUTHORIZATION_DECISION)
+            if (allowed &&
+                faultDecisionAt(faultSnapshot, FaultHook.AUTHORIZATION_DECISION) ==
+                FaultDecision.RejectAuthorization
+            ) {
+                markAppliedFaultBlocking(protocolHandle, faultSnapshot)
+                request.completeWithDecline()
+                record(MwaSessionEvent.REAUTHORIZE_REJECTED)
+                completePersistentProtocolBlocking(
+                    handle = protocolHandle,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                    failureSource = ProtocolFailureSource.INJECTED,
+                    responseSummary = mapOf("result" to "injected_auth_reject"),
+                )
+                recordProtocol(
+                    method = ProtocolMethod.REAUTHORIZE,
+                    startedAt = startedAt,
+                    outcome = ProtocolOutcome.FAILURE,
+                    protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                    failureSource = ProtocolFailureSource.INJECTED,
+                    requestSummary = requestSummary,
+                    responseSummary = mapOf("result" to "injected_auth_reject"),
+                )
+                return
+            }
             if (allowed) {
                 markAuthorizationActive(generation)
                 request.completeWithReauthorize()
@@ -778,6 +844,7 @@ class MwaSessionHost(
         authorizationScopeBytes: ByteArray,
         minContextSlot: Int? = null,
         faultSnapshot: FaultRequestSnapshot,
+        protocolHandle: ProtocolEventHandle?,
     ): TransactionPreparationResult {
         if (NetworkPolicy.evaluate(chain) !is NetworkDecision.Allowed ||
             !LabAuthorizationPolicy.isCurrentAuthorizationScope(authorizationScopeBytes)
@@ -820,7 +887,16 @@ class MwaSessionHost(
             )
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.TRANSACTION_BLOCKHASH_CHECK)
+        if (faultDecisionAt(faultSnapshot, FaultHook.TRANSACTION_BLOCKHASH_CHECK) ==
+            FaultDecision.StaleBlockhash
+        ) {
+            markAppliedFault(protocolHandle, faultSnapshot)
+            return TransactionPreparationResult.Invalid(
+                valid = BooleanArray(payloads.size) { false },
+                reason = "injected_stale_blockhash",
+                failureSource = ProtocolFailureSource.INJECTED,
+            )
+        }
         parsed.forEachIndexed { index, transaction ->
             when (
                 val blockhashResult = rpcGateway.isBlockhashValid(
@@ -925,8 +1001,6 @@ class MwaSessionHost(
             return
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_VALIDATION)
-
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
             recordMigratedSigningProtocol(
@@ -942,12 +1016,23 @@ class MwaSessionHost(
             return
         }
 
+        if (payloads.isNotEmpty() &&
+            NetworkPolicy.evaluate(request.chain) is NetworkDecision.Allowed &&
+            LabAuthorizationPolicy.isCurrentAuthorizationScope(request.authorizationScope) &&
+            validationFault(
+                protocolHandle, faultSnapshot, startedAt, requestSummary,
+                completeInvalid = { request.completeWithInvalidPayloads(BooleanArray(payloads.size) { false }) },
+                completeTooMany = { request.completeWithTooManyPayloads() },
+            )
+        ) return
+
         val preparation = prepareLegacyTransactions(
             payloads = payloads,
             authorizedPublicKeys = request.authorizedAccounts.map { it.publicKey },
             chain = request.chain,
             authorizationScopeBytes = request.authorizationScope,
             faultSnapshot = faultSnapshot,
+            protocolHandle = protocolHandle,
         )
         if (!isCurrentGeneration(generation)) {
             request.completeWithDecline()
@@ -1037,7 +1122,36 @@ class MwaSessionHost(
             return
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_PRE_APPROVAL)
+        if (preApprovalFault(
+                protocolHandle, faultSnapshot, startedAt, requestSummary,
+                completeDecline = { request.completeWithDecline() },
+            )
+        ) return
+        // A suspended delay can outlive its association or authorization.
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_after_fault_delay"),
+            )
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
+                method = ProtocolMethod.SIGN_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "authorization_revoked_after_fault_delay"),
+            )
+            return
+        }
         val simulationTargets = registerSimulationTargets(
             ready, sessionId, protocolHandle, approvalRequestId, generation, simulationEnabled,
             DevnetSimulationOptions.forSignTransactions(),
@@ -1192,8 +1306,6 @@ class MwaSessionHost(
             return
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_VALIDATION)
-
         if (payloads.size > MwaCapabilityProfile.MAX_TRANSACTIONS_PER_SIGNING_REQUEST) {
             request.completeWithTooManyPayloads()
             recordMigratedSigningProtocol(
@@ -1230,12 +1342,23 @@ class MwaSessionHost(
             return
         }
 
+        if (payloads.isNotEmpty() &&
+            NetworkPolicy.evaluate(request.chain) is NetworkDecision.Allowed &&
+            LabAuthorizationPolicy.isCurrentAuthorizationScope(request.authorizationScope) &&
+            validationFault(
+                protocolHandle, faultSnapshot, startedAt, requestSummary,
+                completeInvalid = { request.completeWithInvalidSignatures(BooleanArray(payloads.size) { false }) },
+                completeTooMany = { request.completeWithTooManyPayloads() },
+            )
+        ) return
+
         val preparation = prepareLegacyTransactions(
             payloads = payloads,
             authorizedPublicKeys = request.authorizedAccounts.map { it.publicKey },
             chain = request.chain,
             authorizationScopeBytes = request.authorizationScope,
             faultSnapshot = faultSnapshot,
+            protocolHandle = protocolHandle,
             minContextSlot = sendOptions.minContextSlot,
         )
         if (!isCurrentGeneration(generation)) {
@@ -1326,7 +1449,36 @@ class MwaSessionHost(
             return
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_PRE_APPROVAL)
+        if (preApprovalFault(
+                protocolHandle, faultSnapshot, startedAt, requestSummary,
+                completeDecline = { request.completeWithDecline() },
+            )
+        ) return
+        // A suspended delay can outlive its association or authorization.
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_after_fault_delay"),
+            )
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
+                method = ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "authorization_revoked_after_fault_delay"),
+            )
+            return
+        }
         val simulationTargets = registerSimulationTargets(
             ready, sessionId, protocolHandle, approvalRequestId, generation, simulationEnabled,
             DevnetSimulationOptions.forSignAndSend(sendOptions),
@@ -1427,7 +1579,23 @@ class MwaSessionHost(
             return
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.SUBMISSION_PRE_RPC)
+        when (val decision = faultDecisionAt(faultSnapshot, FaultHook.SUBMISSION_PRE_RPC)) {
+            FaultDecision.RpcUnavailable, FaultDecision.SubmissionFailure -> {
+                val result = when (decision) {
+                    FaultDecision.RpcUnavailable -> "injected_rpc_unavailable"
+                    FaultDecision.SubmissionFailure -> "injected_submission_failure"
+                    else -> error("Unexpected submission fault")
+                }
+                injectedSigningFailure(
+                    protocolHandle, faultSnapshot, startedAt, requestSummary,
+                    ProtocolContract.ERROR_NOT_SUBMITTED, result,
+                ) {
+                    request.completeWithNotSubmitted(arrayOfNulls<ByteArray>(signed.size))
+                }
+                return
+            }
+            else -> Unit
+        }
         val submissionResult = SignAndSendSubmissionExecutor(rpcGateway).execute(
             transactions = signed.map { transaction ->
                 SignAndSendSubmission(
@@ -1583,8 +1751,6 @@ class MwaSessionHost(
             return
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_VALIDATION)
-
         if (payloads.isEmpty() || addresses.isEmpty()) {
             val valid = BooleanArray(payloads.size) { false }
             request.completeWithInvalidPayloads(valid)
@@ -1675,6 +1841,13 @@ class MwaSessionHost(
             return
         }
 
+        if (validationFault(
+                protocolHandle, faultSnapshot, startedAt, requestSummary,
+                completeInvalid = { request.completeWithInvalidPayloads(BooleanArray(payloads.size) { false }) },
+                completeTooMany = { request.completeWithTooManyPayloads() },
+            )
+        ) return
+
         if (!isAuthorizationActive(generation)) {
             request.completeWithAuthorizationNotValid()
             recordMigratedSigningProtocol(
@@ -1690,7 +1863,36 @@ class MwaSessionHost(
             return
         }
 
-        faultDecisionAt(faultSnapshot, FaultHook.SIGNING_PRE_APPROVAL)
+        if (preApprovalFault(
+                protocolHandle, faultSnapshot, startedAt, requestSummary,
+                completeDecline = { request.completeWithDecline() },
+            )
+        ) return
+        // A suspended delay can outlive its association or authorization.
+        if (!isCurrentGeneration(generation)) {
+            request.completeWithDecline()
+            completePersistentProtocol(
+                handle = protocolHandle,
+                outcome = ProtocolOutcome.CANCELLED,
+                failureSource = ProtocolFailureSource.UNKNOWN,
+                responseSummary = mapOf("result" to "stale_after_fault_delay"),
+            )
+            return
+        }
+        if (!isAuthorizationActive(generation)) {
+            request.completeWithAuthorizationNotValid()
+            recordMigratedSigningProtocol(
+                handle = protocolHandle,
+                method = ProtocolMethod.SIGN_MESSAGES,
+                startedAt = startedAt,
+                outcome = ProtocolOutcome.FAILURE,
+                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                failureSource = ProtocolFailureSource.OBSERVED_PROTOCOL,
+                requestSummary = requestSummary,
+                responseSummary = mapOf("result" to "authorization_revoked_after_fault_delay"),
+            )
+            return
+        }
         val approval = approvalCoordinator.requestApproval(
             ApprovalRequest(
                 sessionId = sessionId,
@@ -1843,15 +2045,102 @@ class MwaSessionHost(
     ): FaultRequestSnapshot =
         faultEngine.capture(faultSelectionRepository, method, sessionId, generation)
 
-    /**
-     * Phase 6.5 only: a pure decision at a frozen seam. Phase 6.6+ translates
-     * decisions into pinned walletlib callbacks after method preconditions.
-     * No decision is applied or annotated by this foundation.
-     */
+    /** Only the captured request profile is evaluated; global selection is never read here. */
     private fun faultDecisionAt(snapshot: FaultRequestSnapshot, hook: FaultHook): FaultDecision =
         if (snapshot.belongsTo(activeSessionId, sessionGeneration.get()) &&
             isCurrentGeneration(snapshot.generation)
         ) faultEngine.evaluate(snapshot, hook) else FaultDecision.Continue
+
+    private suspend fun markAppliedFault(
+        handle: ProtocolEventHandle?,
+        snapshot: FaultRequestSnapshot,
+    ) {
+        if (handle == null) return
+        try {
+            protocolRecorder.markInjectedFault(handle, snapshot.profile.id)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "protocol_fault_${handle.method.wireName}")
+        }
+    }
+
+    private fun markAppliedFaultBlocking(
+        handle: ProtocolEventHandle?,
+        snapshot: FaultRequestSnapshot,
+    ) = runBlocking(Dispatchers.IO) { markAppliedFault(handle, snapshot) }
+
+    /** One path for synthetic signing failures: annotate, answer, then terminalize. */
+    private suspend fun injectedSigningFailure(
+        handle: ProtocolEventHandle?,
+        snapshot: FaultRequestSnapshot,
+        startedAt: Long,
+        requestSummary: Map<String, String>,
+        protocolErrorCode: Int,
+        result: String,
+        completeWire: () -> Unit,
+    ) {
+        markAppliedFault(handle, snapshot)
+        completeWire()
+        recordMigratedSigningProtocol(
+            handle = handle,
+            method = snapshot.method,
+            startedAt = startedAt,
+            outcome = ProtocolOutcome.FAILURE,
+            protocolErrorCode = protocolErrorCode,
+            failureSource = ProtocolFailureSource.INJECTED,
+            requestSummary = requestSummary,
+            responseSummary = mapOf("result" to result),
+        )
+    }
+
+    private suspend fun validationFault(
+        handle: ProtocolEventHandle?,
+        snapshot: FaultRequestSnapshot,
+        startedAt: Long,
+        requestSummary: Map<String, String>,
+        completeInvalid: () -> Unit,
+        completeTooMany: () -> Unit,
+    ): Boolean = when (faultDecisionAt(snapshot, FaultHook.SIGNING_VALIDATION)) {
+        FaultDecision.InvalidPayload -> {
+            injectedSigningFailure(
+                handle, snapshot, startedAt, requestSummary,
+                ProtocolContract.ERROR_INVALID_PAYLOADS, "injected_invalid_payload", completeInvalid,
+            )
+            true
+        }
+        FaultDecision.TooManyPayloads -> {
+            injectedSigningFailure(
+                handle, snapshot, startedAt, requestSummary,
+                ProtocolContract.ERROR_TOO_MANY_PAYLOADS, "injected_too_many_payloads", completeTooMany,
+            )
+            true
+        }
+        else -> false
+    }
+
+    /** A delay is evidence of timing, while its later terminal source stays independent. */
+    private suspend fun preApprovalFault(
+        handle: ProtocolEventHandle?,
+        snapshot: FaultRequestSnapshot,
+        startedAt: Long,
+        requestSummary: Map<String, String>,
+        completeDecline: () -> Unit,
+    ): Boolean = when (val decision = faultDecisionAt(snapshot, FaultHook.SIGNING_PRE_APPROVAL)) {
+        FaultDecision.RejectSigning -> {
+            injectedSigningFailure(
+                handle, snapshot, startedAt, requestSummary,
+                ProtocolContract.ERROR_NOT_SIGNED, "injected_sign_reject", completeDecline,
+            )
+            true
+        }
+        is FaultDecision.Delay -> {
+            markAppliedFault(handle, snapshot)
+            delay(decision.milliseconds)
+            false
+        }
+        else -> false
+    }
 
     private fun beginPersistentProtocol(
         sessionId: String,
