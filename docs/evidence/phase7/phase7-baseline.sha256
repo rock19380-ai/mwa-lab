@@ -1,0 +1,8 @@
+# Frozen Phase 6 predecessor source hashes at Phase 7.0, before edits.
+60c7ce28015bf738c57b6aad3fa2058a09278416f9f42076a0b4b29575cb91ef  app/src/main/java/dev/mwalab/storage/MwaLabDatabase.kt
+4f03510b4052868811590692bf6398569c0dcd5f9988c3f41f54cfb9206fa9ec  app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt
+ce43b30e787ee2575146336415be279cbe42d6229c320e365384763e734d6c98  app/src/main/java/dev/mwalab/protocol/recorder/PersistentProtocolRecorder.kt
+a3dbcf896b88793853c3422e5f543e9fbf91fef472d14cef5943934ec74c8c96  app/src/main/java/dev/mwalab/transaction/SolanaWireTransactionParser.kt
+2d683328612d86e4f1556a013894ba1698c5b5b32d916a9b4cb0175f967f523e  app/src/main/java/dev/mwalab/simulation/TransactionSimulationCoordinator.kt
+9ed773f28d04ecad86479a3c612f9f4f0e815c795e8853aafbb79c93278ee775  gradle/libs.versions.toml
+1d297e00bd21de3ace22b4d7f2de1f9dfa858883d66bbf7c1ccbecccec8f4f3b  gradlew.bat
