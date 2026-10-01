@@ -42,6 +42,7 @@ docs/DEMO.md
 docs/evidence/phase6/phase6-baseline.sha256
 docs/evidence/phase6/phase6-concrete-faults-verification.md
 docs/evidence/phase6/phase6-foundation-verification.md
+docs/evidence/phase6/phase6-live-normal-regression.md
 docs/evidence/phase6/phase6-prefreeze-verification.md
 docs/evidence/phase6/phase6-ui-vectors-acceptance-verification.md
 docs/evidence/phase6/README.md
@@ -53,5 +54,10 @@ docs/TESTING.md
 PHASE_6_FILES.txt
 PHASE_6_REPORT.md
 README.md
+scripts/phase6_design_check.py
+scripts/phase6_security_scan.py
+scripts/phase6_static.py
+scripts/phase6_static.sh
+scripts/verify_phase6_fault_vectors.py
 test-vectors/faults/faults.properties
 test-vectors/faults/README.md
