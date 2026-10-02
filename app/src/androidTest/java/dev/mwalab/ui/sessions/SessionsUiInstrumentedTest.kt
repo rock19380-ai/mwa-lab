@@ -88,6 +88,39 @@ class SessionsUiInstrumentedTest {
     }
 
     @Test
+    fun reportEntryLabelsPartialAndIntentionalFaultWithIndependentFailureSource() {
+        val id = "partial-fault"
+        val injected = event(id, 1, ProtocolOutcome.FAILURE).copy(
+            protocolErrorCode = -3, failureSource = ProtocolFailureSource.INJECTED,
+            injectedFaultId = "FAULT_SIGN_REJECT")
+        val summary = SessionSummary(MwaSession(id, 100, dappIdentityName = "Fault demo"), listOf(injected))
+        var markdown = 0
+        var json = 0
+        var copy = 0
+        compose.setContent { MWALabTheme {
+            SessionDetailScreen(SessionDetailUiState.Ready(summary), {}, {},
+                reportExportState = ReportExportUiState.Idle,
+                onShareMarkdown = { markdown++ }, onShareJson = { json++ }, onCopySummary = { copy++ })
+        } }
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasTestTag("export-report"))
+        compose.onNodeWithText("SANITIZED DIAGNOSTIC REPORT").assertExists()
+        compose.onNodeWithText("NO PRIVATE KEYS OR AUTH TOKENS").assertExists()
+        compose.onNodeWithText("PARTIAL REPORT").assertExists()
+        compose.onAllNodesWithText("INTENTIONAL TEST CONDITION").assertCountEquals(2)
+        compose.onNodeWithText("FAULT_SIGN_REJECT").assertExists()
+        compose.onNodeWithText("Recorded failure source: INJECTED").assertExists()
+        compose.onNodeWithTag("export-report").performClick()
+        compose.onNodeWithTag("share-markdown").performClick()
+        compose.onNodeWithTag("share-json").performClick()
+        compose.onNodeWithTag("copy-summary").performClick()
+        compose.runOnIdle {
+            assertEquals(1, markdown)
+            assertEquals(1, json)
+            assertEquals(1, copy)
+        }
+    }
+
+    @Test
     fun databaseReopenLoadsHistoryThroughViewModelAndNavigationUsesPersistentTimeline() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val name = "phase3-ui-reopen-${UUID.randomUUID()}.db"

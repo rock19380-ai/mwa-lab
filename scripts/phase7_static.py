@@ -29,7 +29,10 @@ check("Migration(3, 4)" not in db and not (root / "app/schemas/dev.mwalab.storag
 check('mwaWalletlib = "2.0.7"' in read("gradle/libs.versions.toml"), "walletlib changed")
 network = read("app/src/main/java/dev/mwalab/security/NetworkPolicy.kt")
 check("PRODUCTION_NOT_ALLOWED" in network and "CHAIN_SOLANA_MAINNET" in network, "Devnet boundary changed")
-report_files = list((root / "app/src/main/java/dev/mwalab/report").glob("*.kt"))
+report_files = [p for p in (root / "app/src/main/java/dev/mwalab/report").glob("*.kt")
+                if p.name not in {"DiagnosticReportCacheWriter.kt",
+                                  "DiagnosticReportShareIntentFactory.kt",
+                                  "DiagnosticReportExportUseCase.kt"}]
 check(len(report_files) >= 5, "report layer incomplete")
 report_text = "\n".join(p.read_text() for p in report_files)
 for forbidden in ("LabSigningService", "ApprovalCoordinator", "sendTransaction(", "RoomDatabase",

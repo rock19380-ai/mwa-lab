@@ -11,8 +11,11 @@ import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 class DiagnosticReportTest {
+    @get:Rule val temporary = TemporaryFolder()
     private val id = "11111111-1111-4111-8111-111111111111"
     private fun event(n: Long = 1, outcome: ProtocolOutcome = ProtocolOutcome.SUCCESS,
         source: ProtocolFailureSource = ProtocolFailureSource.NONE, fault: String? = null,
@@ -67,7 +70,11 @@ class DiagnosticReportTest {
         assertEquals(1, parsed.getInt("version"))
         assertEquals("COMPLETE", parsed.getJSONObject("session").getString("completeness"))
         assertEquals("SUCCESS", parsed.getJSONArray("events").getJSONObject(0).getString("outcome"))
-        assertTrue(MarkdownDiagnosticReportRenderer().render(report).contains("Outcome: SUCCESS"))
+        val markdown = MarkdownDiagnosticReportRenderer().render(report)
+        assertTrue(markdown.contains("Outcome: SUCCESS"))
+        assertTrue(markdown.contains("## Reproduction Context"))
+        assertTrue(markdown.contains("1970-01-01T00:00:00.500Z"))
+        assertTrue(markdown.contains("byte-for-byte reproduction is not available"))
     }
     @Test fun failureTruthPreservesFiveIndependentCases() {
         val cases = listOf(
@@ -187,6 +194,78 @@ class DiagnosticReportTest {
         val policy = ReportSanitizationPolicy()
         assertEquals("badlabel", policy.label("bad\u0001label"))
         assertTrue(policy.truncated)
+    }
+
+    @Test fun cacheFilesAndClipboardDeriveFromCanonicalReport() {
+        val source = source(listOf(event(outcome = ProtocolOutcome.FAILURE,
+            source = ProtocolFailureSource.INJECTED, fault = "FAULT_SIGN_REJECT", error = -3)))
+        val report = build(source)
+        val directory = temporary.newFolder("cache")
+        val writer = DiagnosticReportCacheWriter(directory)
+        val markdown = writer.write(report, DiagnosticReportFormat.MARKDOWN)
+        val json = writer.write(report, DiagnosticReportFormat.JSON)
+        assertEquals("diagnostic_reports", requireNotNull(markdown.parentFile).name)
+        assertEquals(requireNotNull(markdown.parentFile).canonicalFile,
+            requireNotNull(json.parentFile).canonicalFile)
+        assertTrue(markdown.name.matches(Regex("mwa-lab-[a-f0-9-]+-[0-9]+\\.md")))
+        assertEquals(MarkdownDiagnosticReportRenderer().render(report), markdown.readText())
+        assertEquals(JsonDiagnosticReportRenderer().render(report), json.readText())
+        assertEquals("ERROR_NOT_SIGNED", JSONObject(json.readText())
+            .getJSONArray("events").getJSONObject(0).getString("protocol_error_name"))
+        val summary = DiagnosticReportSummaryRenderer().render(report)
+        listOf(markdown.readText(), json.readText(), summary).forEach {
+            assertTrue(it.contains("FAULT_SIGN_REJECT"))
+            assertTrue(it.contains("ERROR_NOT_SIGNED"))
+            assertTrue(it.contains("INJECTED"))
+        }
+        assertEquals(2, source.reads)
+    }
+
+    @Test fun successfulReportFocusSkipsTrailingDeauthorize() {
+        val report = build(source(listOf(event(1), event(2).copy(
+            method = ProtocolMethod.DEAUTHORIZE, requestSummary = emptyMap(),
+            responseSummary = emptyMap()))))
+        val markdown = MarkdownDiagnosticReportRenderer().render(report)
+        val summary = DiagnosticReportSummaryRenderer().render(report)
+        assertTrue(markdown.contains("Method to compare: SIGN"))
+        assertFalse(markdown.contains("Method to compare: DEAUTHORIZE"))
+        assertTrue(summary.contains("Method: SIGN_AND_SEND_TRANSACTIONS"))
+        assertFalse(summary.contains("Method: DEAUTHORIZE"))
+        assertTrue(summary.contains("Failure source: NONE"))
+    }
+
+    @Test fun hostileSentinelsNeverReachModelFilesOrClipboard() {
+        val sentinels = listOf("raw-auth-secret-SENTINEL", "private-key-secret-SENTINEL",
+            "seed-secret-SENTINEL", "association-token-secret-SENTINEL",
+            "raw-message-secret-SENTINEL", "raw-transaction-secret-SENTINEL",
+            "signature-secret-SENTINEL")
+        val source = source(listOf(event(request = sentinels.mapIndexed { index, value ->
+            "unknown_$index" to value }.toMap() + mapOf("result" to sentinels.first()))),
+            label = sentinels[1])
+        val report = build(source)
+        val writer = DiagnosticReportCacheWriter(temporary.newFolder("hostile-cache"))
+        val outputs = listOf(report.toString(), MarkdownDiagnosticReportRenderer().render(report),
+            JsonDiagnosticReportRenderer().render(report),
+            writer.write(report, DiagnosticReportFormat.MARKDOWN).readText(),
+            writer.write(report, DiagnosticReportFormat.JSON).readText(),
+            DiagnosticReportSummaryRenderer().render(report))
+        outputs.forEach { output -> sentinels.forEach { sentinel ->
+            assertFalse("Leaked $sentinel", output.contains(sentinel))
+        } }
+    }
+
+    @Test fun cacheFilenameCannotContainSessionPathAndPartialSummaryIsTruthful() {
+        val report = build(source(listOf(event(fault = "FAULT_DELAY_5S")), open = true))
+        val unsafeId = report.copy(session = report.session.copy(sessionId = "<redacted-id>"))
+        val writer = DiagnosticReportCacheWriter(temporary.newFolder("path-cache"))
+        val file = writer.write(unsafeId, DiagnosticReportFormat.JSON)
+        assertEquals(writer.reportDirectory().canonicalFile, file.canonicalFile.parentFile)
+        assertFalse(file.name.contains(".."))
+        val summary = DiagnosticReportSummaryRenderer().render(report)
+        assertTrue(summary.contains("PARTIAL"))
+        assertTrue(summary.contains("This session may still receive additional diagnostic evidence."))
+        assertTrue(summary.contains("FAULT_DELAY_5S"))
+        assertTrue(summary.contains("Failure source: NONE"))
     }
 
     private fun fixture(name: String, index: Int): TransactionSummary {
