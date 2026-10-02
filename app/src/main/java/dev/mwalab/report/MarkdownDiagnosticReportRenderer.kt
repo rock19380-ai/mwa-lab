@@ -1,6 +1,11 @@
 package dev.mwalab.report
 
+import dev.mwalab.protocol.ProtocolMethod
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 /** Stable UTF-8/LF issue-attachment rendering of one canonical report. */
 class MarkdownDiagnosticReportRenderer {
@@ -13,6 +18,7 @@ class MarkdownDiagnosticReportRenderer {
             line("Format", report.format)
             line("Version", report.version)
             line("Generated at (epoch ms)", report.generatedAtEpochMillis)
+            line("Generated at (UTC)", utc(report.generatedAtEpochMillis))
             line("Truncated", report.truncated)
             appendLine()
             appendLine("## Environment")
@@ -24,7 +30,9 @@ class MarkdownDiagnosticReportRenderer {
             line("Session ID", report.session.sessionId)
             line("dApp label", report.session.dappDisplayName)
             line("Started at (epoch ms)", report.session.startedAtEpochMillis)
+            line("Started at (UTC)", utc(report.session.startedAtEpochMillis))
             line("Completed at (epoch ms)", report.session.completedAtEpochMillis)
+            line("Completed at (UTC)", report.session.completedAtEpochMillis?.let(::utc))
             line("Duration (ms)", report.session.durationMillis)
             line("Status", report.session.status.name)
             line("Close reason", report.session.closeReason)
@@ -35,6 +43,7 @@ class MarkdownDiagnosticReportRenderer {
             if (capability == null) appendLine("No persisted capability snapshot.") else {
                 line("Source", capability.source)
                 line("Captured at (epoch ms)", capability.capturedAtEpochMillis)
+                line("Captured at (UTC)", utc(capability.capturedAtEpochMillis))
                 line("Max transactions/request", capability.maxTransactionsPerSigningRequest)
                 line("Max messages/request", capability.maxMessagesPerSigningRequest)
                 line("Supported transaction versions", capability.supportedTransactionVersions.joinToString())
@@ -47,10 +56,13 @@ class MarkdownDiagnosticReportRenderer {
                 appendLine("### Event ${e.sequence}: ${e.method.name}")
                 line("Event ID", e.eventId)
                 line("Started at (epoch ms)", e.startedAtEpochMillis)
+                line("Started at (UTC)", utc(e.startedAtEpochMillis))
                 line("Completed at (epoch ms)", e.completedAtEpochMillis)
+                line("Completed at (UTC)", utc(e.completedAtEpochMillis))
                 line("Duration (ms)", e.durationMillis)
                 line("Outcome", e.outcome.name)
                 line("Protocol error code", e.protocolErrorCode)
+                line("Protocol error name", e.protocolErrorName)
                 line("Failure source", e.failureSource.name)
                 line("Injected fault ID", e.injectedFaultId)
                 if (e.injectedFaultId != null) appendLine("Intentional test condition applied; terminal source is shown separately.")
@@ -64,8 +76,23 @@ class MarkdownDiagnosticReportRenderer {
             if (failures.isEmpty()) appendLine("No terminal protocol failure was recorded.")
             failures.forEach { e ->
                 appendLine("- Event ${e.sequence}: ${e.method.name}; source ${e.failureSource.name}; " +
-                    "protocol error ${e.protocolErrorCode?.toString() ?: "unknown"}; " +
+                    "protocol error ${e.protocolErrorName ?: "none recorded"} " +
+                    "(${e.protocolErrorCode?.toString() ?: "none recorded"}); " +
                     "fault ${e.injectedFaultId ?: "none"}.")
+            }
+            appendLine()
+            appendLine("## Reproduction Context")
+            val focus = failures.firstOrNull() ?:
+                report.events.lastOrNull { it.method != ProtocolMethod.DEAUTHORIZE } ?: report.events.lastOrNull()
+            if (focus == null) appendLine("No observed method was recorded.")
+            else {
+                line("Recorded dApp", report.session.dappDisplayName)
+                line("Cluster", report.environment.cluster)
+                line("Method to compare", focus.method.name)
+                line("Observed outcome", focus.outcome.name)
+                line("Recorded fault selection", focus.injectedFaultId)
+                appendLine("The timeline contains the available safe request summary.")
+                appendLine("Exact request and payload bytes are excluded; byte-for-byte reproduction is not available from this report alone.")
             }
             appendLine()
             appendLine("## Transaction Diagnostics")
@@ -127,8 +154,13 @@ class MarkdownDiagnosticReportRenderer {
         return out
     }
 
+    private fun utc(epochMillis: Long): String =
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ROOT).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(Date(epochMillis))
+
     private fun StringBuilder.line(label: String, value: Any?) {
-        appendLine("- $label: ${escape(value?.toString() ?: "unknown")}")
+        appendLine("- $label: ${escape(value?.toString() ?: "none recorded")}")
     }
 
     private fun StringBuilder.fields(label: String, fields: Map<String, String>?) {

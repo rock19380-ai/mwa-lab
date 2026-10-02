@@ -7,8 +7,15 @@ import dev.mwalab.protocol.ProtocolMethod
 import dev.mwalab.session.SessionRepository
 import dev.mwalab.transaction.TransactionDiagnosticRepository
 import dev.mwalab.simulation.SimulationRepository
+import dev.mwalab.report.DiagnosticReportExportUseCase
+import dev.mwalab.report.DiagnosticReportFormat
+import dev.mwalab.report.ReportCompleteness
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -18,12 +25,19 @@ class SessionDetailViewModel(
     scope: CoroutineScope? = null,
     transactionRepository: TransactionDiagnosticRepository? = null,
     simulationRepository: SimulationRepository? = null,
+    private val reportExports: DiagnosticReportExportUseCase? = null,
 ) : ViewModel() {
     private data class Selection(val id: String? = null, val attempt: Int = 0)
     private val selection = MutableStateFlow(Selection())
     private val capabilityAttempt = MutableStateFlow(0)
     private val transactionAttempts = MutableStateFlow<Map<String, Int>>(emptyMap())
     private val simulationAttempts = MutableStateFlow<Map<String, Int>>(emptyMap())
+    private val actionScope = scope ?: viewModelScope
+    private var reportJob: Job? = null
+    private val mutableReportState = MutableStateFlow<ReportExportUiState>(ReportExportUiState.Idle)
+    val reportState: StateFlow<ReportExportUiState> = mutableReportState.asStateFlow()
+    private val reportEffectChannel = Channel<ReportExportEffect>(Channel.BUFFERED)
+    val reportEffects = reportEffectChannel.receiveAsFlow()
     val state: StateFlow<SessionDetailUiState> = selection.flatMapLatest { selected ->
         val id = selected.id
         if (id == null) flowOf(SessionDetailUiState.Missing)
@@ -96,7 +110,56 @@ class SessionDetailViewModel(
         }
     }.stateIn(scope ?: viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionDetailUiState.Loading)
 
-    fun selectSession(id: String) { selection.value = Selection(id) }
+    fun selectSession(id: String) {
+        if (selection.value.id != id) {
+            reportJob?.cancel()
+            mutableReportState.value = ReportExportUiState.Idle
+        }
+        selection.value = Selection(id)
+    }
+    fun shareReport(format: DiagnosticReportFormat) {
+        val id = selection.value.id ?: return
+        val exporter = reportExports ?: return
+        reportJob?.cancel()
+        reportJob = actionScope.launch {
+            mutableReportState.value = ReportExportUiState.Building
+            try {
+                val artifact = exporter.export(id, format)
+                if (selection.value.id != id) return@launch
+                mutableReportState.value = ReportExportUiState.Sharing(format, artifact.completeness, artifact.truncated)
+                reportEffectChannel.send(ReportExportEffect.Share(artifact))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                if (selection.value.id == id) mutableReportState.value = ReportExportUiState.Error
+            }
+        }
+    }
+    fun copyReportSummary() {
+        val id = selection.value.id ?: return
+        val exporter = reportExports ?: return
+        reportJob?.cancel()
+        reportJob = actionScope.launch {
+            mutableReportState.value = ReportExportUiState.Building
+            try {
+                val summary = exporter.copySummary(id)
+                if (selection.value.id != id) return@launch
+                reportEffectChannel.send(ReportExportEffect.Copy(summary.sessionId, summary.text, summary.completeness, summary.truncated))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                if (selection.value.id == id) mutableReportState.value = ReportExportUiState.Error
+            }
+        }
+    }
+    fun reportShareLaunched(format: DiagnosticReportFormat, completeness: ReportCompleteness, truncated: Boolean) {
+        mutableReportState.value = ReportExportUiState.Ready(format, completeness, truncated)
+    }
+    fun reportCopied(completeness: ReportCompleteness, truncated: Boolean) {
+        mutableReportState.value = ReportExportUiState.Copied(completeness, truncated)
+    }
+    fun reportDeliveryFailed() { mutableReportState.value = ReportExportUiState.Error }
+    fun isSelectedSession(id: String): Boolean = selection.value.id == id
     fun retry() { selection.update { it.copy(attempt = it.attempt + 1) } }
     fun retryCapabilities() { capabilityAttempt.update { it + 1 } }
     fun retryTransactions(eventId: String) {

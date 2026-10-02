@@ -20,6 +20,7 @@ enum class Phase6AcceptanceScenario(val expectedCode: Int?, val operation: Opera
     AUTH_REJECT(ProtocolContract.ERROR_AUTHORIZATION_FAILED, Operation.AUTHORIZE),
     UNSUPPORTED_CHAIN(ProtocolContract.ERROR_CLUSTER_NOT_SUPPORTED, Operation.AUTHORIZE),
     SIGN_REJECT(ProtocolContract.ERROR_NOT_SIGNED, Operation.SIGN_MESSAGE),
+    SIGN_AND_SEND_REJECT(ProtocolContract.ERROR_NOT_SIGNED, Operation.SIGN_AND_SEND),
     DELAY_5S(null, Operation.SIGN_MESSAGE),
     INVALID_PAYLOAD(ProtocolContract.ERROR_INVALID_PAYLOADS, Operation.SIGN_MESSAGE),
     TOO_MANY_PAYLOADS(ProtocolContract.ERROR_TOO_MANY_PAYLOADS, Operation.SIGN_MESSAGE),

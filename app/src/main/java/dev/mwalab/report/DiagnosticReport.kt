@@ -66,7 +66,9 @@ data class ReportProtocolEvent(
     val capabilityContext: Map<String, String>?,
     val transactions: List<ReportTransactionDiagnostic>,
     val simulations: List<ReportSimulationAttempt>,
-)
+) {
+    val protocolErrorName: String? get() = ReportProtocolErrorName.forCode(protocolErrorCode)
+}
 data class ReportTransactionDiagnostic(
     val payloadIndex: Int,
     val fingerprintSha256: String,

@@ -16,6 +16,8 @@ import dev.mwalab.protocol.ProtocolMethod
 import dev.mwalab.ui.transaction.transactionInspectorContent
 import dev.mwalab.security.DiagnosticSanitizer
 import dev.mwalab.ui.simulation.SimulationResultContent
+import dev.mwalab.report.ReportCompleteness
+import dev.mwalab.faults.FaultCatalog
 
 @Composable
 fun SessionDetailScreen(
@@ -25,6 +27,10 @@ fun SessionDetailScreen(
     onRetryCapabilities: () -> Unit = onRetry,
     onRetryTransactions: (String) -> Unit = { onRetry() },
     onRetrySimulations: (String) -> Unit = { onRetry() },
+    reportExportState: ReportExportUiState = ReportExportUiState.Idle,
+    onShareMarkdown: () -> Unit = {},
+    onShareJson: () -> Unit = {},
+    onCopySummary: () -> Unit = {},
 ) {
     var expandedTransactions by rememberSaveable { mutableStateOf(emptyList<String>()) }
     LazyColumn(Modifier.fillMaxSize().testTag("protocol-timeline"), contentPadding = PaddingValues(16.dp),
@@ -52,6 +58,9 @@ fun SessionDetailScreen(
                     }
                 }
                 item {
+                    ReportExportSection(state, reportExportState, onShareMarkdown, onShareJson, onCopySummary)
+                }
+                item {
                     CapabilitySnapshotSection(state.capabilities, onRetryCapabilities)
                 }
                 if (summary.events.isEmpty()) item { Text("No observed protocol methods in this session.") }
@@ -74,6 +83,71 @@ fun SessionDetailScreen(
                             { onRetrySimulations(event.eventId) })
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReportExportSection(
+    detail: SessionDetailUiState.Ready,
+    export: ReportExportUiState,
+    onShareMarkdown: () -> Unit,
+    onShareJson: () -> Unit,
+    onCopySummary: () -> Unit,
+) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    val isPartial = detail.summary.session.completedAtEpochMillis == null ||
+        when (export) {
+            is ReportExportUiState.Ready -> export.completeness == ReportCompleteness.PARTIAL
+            is ReportExportUiState.Sharing -> export.completeness == ReportCompleteness.PARTIAL
+            is ReportExportUiState.Copied -> export.completeness == ReportCompleteness.PARTIAL
+            else -> false
+        }
+    Card(Modifier.fillMaxWidth().testTag("sanitized-report-export")) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("SANITIZED DIAGNOSTIC REPORT", style = MaterialTheme.typography.titleMedium)
+            Text("NO PRIVATE KEYS OR AUTH TOKENS", style = MaterialTheme.typography.labelLarge)
+            if (isPartial) {
+                Text("PARTIAL REPORT", color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.titleSmall)
+                Text("This session may still receive additional diagnostic evidence.")
+            }
+            val faultIds = detail.summary.events.mapNotNull { event ->
+                event.injectedFaultId?.takeIf { it != "NORMAL" && FaultCatalog.find(it) != null }
+            }.distinct().sorted()
+            if (faultIds.isNotEmpty()) {
+                Text("INTENTIONAL TEST CONDITION", color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.titleSmall)
+                Text(faultIds.joinToString())
+                val sources = detail.summary.events.filter { it.injectedFaultId != null }
+                    .map { it.failureSource.name }.distinct().sorted()
+                Text("Recorded failure source: ${sources.joinToString()}")
+            }
+            OutlinedButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("export-report")) {
+                Text("EXPORT REPORT")
+            }
+            if (expanded) {
+                val busy = export == ReportExportUiState.Building || export is ReportExportUiState.Sharing
+                OutlinedButton(onClick = onShareMarkdown, enabled = !busy,
+                    modifier = Modifier.testTag("share-markdown")) { Text("Share Markdown") }
+                OutlinedButton(onClick = onShareJson, enabled = !busy,
+                    modifier = Modifier.testTag("share-json")) { Text("Share JSON") }
+                OutlinedButton(onClick = onCopySummary, enabled = !busy,
+                    modifier = Modifier.testTag("copy-summary")) { Text("Copy Summary") }
+                when (export) {
+                    ReportExportUiState.Building -> Text("Building report from persisted evidence…")
+                    is ReportExportUiState.Sharing -> Text("Opening Android Share Sheet…")
+                    is ReportExportUiState.Ready -> Text("Share Sheet opened for ${export.format.name}.")
+                    is ReportExportUiState.Copied -> Text("Sanitized summary copied.")
+                    ReportExportUiState.Error -> Text("Report action failed. Please retry.")
+                    ReportExportUiState.Idle -> Unit
+                }
+                if (export is ReportExportUiState.Ready && export.truncated ||
+                    export is ReportExportUiState.Copied && export.truncated) {
+                    Text("Report is truncated; see warnings in the full report.")
+                }
+                Text("Simulation is diagnostic evidence only, not a guarantee of submission success.")
             }
         }
     }

@@ -42,7 +42,8 @@ class JsonDiagnosticReportRenderer {
         "event_id" to e.eventId, "sequence" to e.sequence, "method" to e.method.name,
         "started_at" to e.startedAtEpochMillis, "completed_at" to e.completedAtEpochMillis,
         "duration_ms" to e.durationMillis, "outcome" to e.outcome.name,
-        "protocol_error_code" to e.protocolErrorCode, "failure_source" to e.failureSource.name,
+        "protocol_error_code" to e.protocolErrorCode, "protocol_error_name" to e.protocolErrorName,
+        "failure_source" to e.failureSource.name,
         "injected_fault_id" to e.injectedFaultId, "request_summary" to e.requestSummary.toSortedMap(),
         "response_summary" to e.responseSummary.toSortedMap(), "capability_context" to e.capabilityContext?.toSortedMap(),
         "transactions" to e.transactions.map { t -> linkedMapOf(

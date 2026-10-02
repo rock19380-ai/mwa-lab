@@ -85,7 +85,9 @@ class ReportSanitizationPolicy {
     }
 
     fun safeCapabilityValue(value: String): Boolean =
-        value.length <= ReportLimits.MAX_TEXT_LENGTH && !looksSensitive(value)
+        value.length <= ReportLimits.MAX_TEXT_LENGTH && !looksSensitive(value) &&
+            (value.matches(Regex("[a-z][a-z0-9._-]{0,31}")) ||
+                value.matches(Regex("[a-z][a-z0-9+.-]*:[A-Za-z0-9._/-]+")))
 
     fun event(event: ProtocolEvent, transactions: List<TransactionSummary>, simulations: List<SimulationResult>):
         ReportProtocolEvent {

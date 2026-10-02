@@ -1,6 +1,9 @@
 package dev.mwalab
 
 import android.os.Bundle
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -17,6 +20,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mwalab.app.MwaLabComposition
+import dev.mwalab.report.DiagnosticReportCacheWriter
+import dev.mwalab.report.DiagnosticReportExportUseCase
+import dev.mwalab.report.DiagnosticReportFormat
+import dev.mwalab.report.DiagnosticReportShareIntentFactory
+import dev.mwalab.report.DiagnosticReportSnapshotAssembler
 import dev.mwalab.ui.sessions.*
 import dev.mwalab.ui.faults.FaultLabScreen
 import dev.mwalab.ui.theme.MWALabTheme
@@ -27,15 +35,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val repository = MwaLabComposition.sessionRepository(applicationContext)
         val faultSelection = MwaLabComposition.faultSelectionRepository(applicationContext)
+        val capabilities = MwaLabComposition.capabilitySnapshotRepository(applicationContext)
+        val transactions = MwaLabComposition.transactionDiagnosticRepository(applicationContext)
+        val simulations = MwaLabComposition.simulationRepository(applicationContext)
+        val reportExports = DiagnosticReportExportUseCase(
+            DiagnosticReportSnapshotAssembler(repository, capabilities, transactions, simulations),
+            DiagnosticReportCacheWriter(applicationContext.cacheDir),
+        )
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val model = when (modelClass) {
                     HomeViewModel::class.java -> HomeViewModel(MwaLabComposition.identityRepository(applicationContext), repository)
                     SessionsViewModel::class.java -> SessionsViewModel(repository)
                     SessionDetailViewModel::class.java -> SessionDetailViewModel(
-                        repository, MwaLabComposition.capabilitySnapshotRepository(applicationContext),
-                        transactionRepository = MwaLabComposition.transactionDiagnosticRepository(applicationContext),
-                        simulationRepository = MwaLabComposition.simulationRepository(applicationContext),
+                        repository, capabilities,
+                        transactionRepository = transactions,
+                        simulationRepository = simulations,
+                        reportExports = reportExports,
                     )
                     else -> error("Unknown screen model")
                 }
@@ -55,6 +71,31 @@ class MainActivity : ComponentActivity() {
                 val activeFault by faultSelection.selected.collectAsStateWithLifecycle()
                 val sessionsState by sessions.state.collectAsStateWithLifecycle()
                 val detailState by detail.state.collectAsStateWithLifecycle()
+                val reportState by detail.reportState.collectAsStateWithLifecycle()
+                LaunchedEffect(detail) {
+                    detail.reportEffects.collect { effect ->
+                        try {
+                            when (effect) {
+                                is ReportExportEffect.Share -> {
+                                    if (!detail.isSelectedSession(effect.artifact.sessionId)) return@collect
+                                    val chooser = DiagnosticReportShareIntentFactory(applicationContext)
+                                        .create(effect.artifact.file, effect.artifact.format)
+                                    startActivity(chooser)
+                                    detail.reportShareLaunched(effect.artifact.format,
+                                        effect.artifact.completeness, effect.artifact.truncated)
+                                }
+                                is ReportExportEffect.Copy -> {
+                                    if (!detail.isSelectedSession(effect.sessionId)) return@collect
+                                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    clipboard.setPrimaryClip(ClipData.newPlainText("Sanitized diagnostic summary", effect.text))
+                                    detail.reportCopied(effect.completeness, effect.truncated)
+                                }
+                            }
+                        } catch (_: Exception) {
+                            detail.reportDeliveryFailed()
+                        }
+                    }
+                }
                 LaunchedEffect(selectedSession) { selectedSession?.let(detail::selectSession) }
                 val openSession: (String) -> Unit = { selectedSession = it; detail.selectSession(it); screen = "Detail" }
                 BackHandler(enabled = screen != "Home") {
@@ -79,6 +120,8 @@ class MainActivity : ComponentActivity() {
                                 "Detail" -> SessionDetailScreen(
                                     detailState, { screen = "Sessions" }, detail::retry, detail::retryCapabilities,
                                     detail::retryTransactions, detail::retrySimulations,
+                                    reportState, { detail.shareReport(DiagnosticReportFormat.MARKDOWN) },
+                                    { detail.shareReport(DiagnosticReportFormat.JSON) }, detail::copyReportSummary,
                                 )
                                 else -> HomeScreen(homeState, { screen = "Sessions" }, openSession, home::retry,
                                     activeFault, { screen = "Fault Lab" })

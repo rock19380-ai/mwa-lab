@@ -1,6 +1,6 @@
 # Phase 7 sanitized diagnostic reports: design freeze
 
-Baseline: Phase 6 commit `f5eaec53d911fc2423efdb3051e8316ce9e1032d` and its annotated tag. Phase 7.0–7.10 only: canonical domain, snapshot, sanitization, renderers, and bounds. Cache files, FileProvider, Share Sheet, clipboard, and live device acceptance are later batches.
+Baseline: Phase 6 commit `f5eaec53d911fc2423efdb3051e8316ce9e1032d` and its annotated tag. Phase 7.0–7.10 froze the canonical domain, snapshot, sanitization, renderers, and bounds. The Phase 7.11–7.21 export boundary is specified below.
 
 ## Authority and sources
 
@@ -20,10 +20,22 @@ Private keys, seeds and mnemonics, authorization and association tokens/secrets,
 
 ## Renderer and bounds contract
 
-Markdown and JSON take the same immutable canonical report. Markdown uses fixed sections, LF newlines, UTF-8 and escaped untrusted inline text. JSON uses fixed snake-case keys and stable ordering; no renderer reads a repository. The report records `truncated=true` and a warning when any collection or string is omitted or shortened. Limits: 64 events, 10 transactions per event and 40 per report, 20 simulation attempts per event and 80 per report, 8 instructions per transaction, 24 summary fields per map, 128 characters per free-text field, 16 log lines of at most 128 characters, and 1 MiB per rendered output. Renderer byte limits fail closed if a caller constructs an oversized report outside the assembler.
+Markdown and JSON take the same immutable canonical report. Markdown uses fixed sections, LF newlines, UTF-8 and escaped untrusted inline text. It shows UTC alongside epoch timestamps and a reproduction-context section derived only from recorded method, dApp, cluster, outcome and fault marker; it explicitly says exact request bytes cannot be reconstructed from the sanitized report. JSON uses fixed snake-case keys and stable ordering; no renderer reads a repository. The report records `truncated=true` and a warning when any collection or string is omitted or shortened. Limits: 64 events, 10 transactions per event and 40 per report, 20 simulation attempts per event and 80 per report, 8 instructions per transaction, 24 summary fields per map, 128 characters per free-text field, 16 log lines of at most 128 characters, and 1 MiB per rendered output. Renderer byte limits fail closed if a caller constructs an oversized report outside the assembler.
 
 Future file sharing may use only internal cache artifacts and a cache-scoped non-exported FileProvider with temporary read grants. That layer has no protocol or database authority.
 
 ## Verification
 
 JVM tests cover normal/failed/injected/delayed outcomes, observed later failures, capabilities, known and unknown transaction semantics, all simulation classifications, multiple children, open and empty sessions, ordering, escaping, Unicode/control characters, hostile summary fields, bounds and renderer parity. The design checker and baseline hash manifest guard frozen decisions and predecessor source files. Full `test`, `lint`, and `assembleDebug` are required before a green implementation checkpoint. No Phase 7 freeze tag is created in this batch.
+
+## Phase 7.11–7.21 Android export boundary
+
+The Markdown reproduction section and clipboard summary focus the first failed method when one exists; otherwise they focus the last method other than DEAUTHORIZE, falling back to the last event for an authorization-only session. The application use case rereads repositories through the snapshot assembler for each export or copy action. The UI owns only action state and platform delivery. It never serializes report data or queries diagnostic child repositories. An action is cancelled on session selection change, and delivered effects carry the session ID so stale effects cannot share another session's artifact.
+
+The cache writer renders a validated canonical report to UTF-8 bytes capped at 1 MiB, writes a temporary file under `cacheDir/diagnostic_reports/`, flushes and syncs it, then renames it to a generated `mwa-lab-<safe token>-<timestamp>.md|json` artifact. A UUID is used when already canonical; otherwise a SHA-256 prefix is used. No user string becomes a directory component. Cleanup selects only generated names and limits deletion work per write. Cache artifacts have no authority after the persisted repositories change.
+
+The sole FileProvider has authority `${applicationId}.diagnosticreports`, `exported=false`, `grantUriPermissions=true`, and one `cache-path` mapping for `diagnostic_reports/`. The Share Sheet uses one `ACTION_SEND` content URI with temporary read permission, text/plain for Markdown or application/json for JSON. The Intent contains no report body or raw wallet data. Clipboard text comes from `DiagnosticReportSummaryRenderer`, which validates the same canonical report and is bounded to 4096 UTF-8 bytes.
+
+Session Detail offers an export entry point, both file formats, and Copy Summary. It labels sanitized reports, intentional injected conditions, partial sessions, and the diagnostic-only status of simulation. The existing Session Detail timeline remains the persisted authority for on-screen facts.
+
+Phase 7 security verification includes source checks for the exact provider path, JVM hostile sentinel tests across model/renderers/files/clipboard, Android provider and content URI tests, Room close/reopen export tests, UI action tests, and live cross-app acceptance where the device can execute it. Device acceptance records distinguish automation from visible user approval; no synthetic failure is described as organic. No Phase 7 freeze tag is created by this batch.
