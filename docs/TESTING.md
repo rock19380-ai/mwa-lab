@@ -347,3 +347,27 @@ restart persistence. The repaired settlement commit passed exact-head CI run
 
 Phase 6 adds catalog/engine tests, selection persistence tests, recorder fault invariants, concrete walletlib callback tests, delay cancellation and association-replacement tests, Fault Lab Activity-recreation coverage, session-presentation truthfulness tests, independent machine-readable fault vectors, and a client-side acceptance runner. Historical Phase 5 full static gating is not reused because it intentionally freezes the pre-Phase-6 recorder hash; Phase 6 CI runs the still-applicable Phase 5 design/vector/parser checks plus the dedicated Phase 6 gate.
 <!-- PHASE6:TESTING:END -->
+
+## Phase 7 report verification
+
+The Phase 7 JVM suite tests report identity and parse-back, failure truth,
+capability and transaction projection, known and unknown program semantics,
+simulation PASS/FAIL/network unavailability, ordering, partial sessions,
+escaping, hostile sentinels, truncation, cache writes, and clipboard parity.
+Android tests cover Room close/reopen export, FileProvider scope and URI grants,
+share metadata, and Session Detail labels/actions.
+
+Run local non-device gates from the repository root:
+
+```bash
+./gradlew lint test assembleDebug :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
+./scripts/phase7_static.sh
+```
+
+When an emulator is available, run connected tests and both canonical live
+Devnet scenarios. `scripts/phase7_device_report_verify.py` compares generated
+Markdown/JSON cache artifacts with the persisted Room rows read-only. Device
+approval is recorded as manually observed; automated parity is reported
+separately. Exact results are under `docs/evidence/phase7/`. Historical Phase 6
+static scope checks still apply to Phase 6 checkouts; Phase 7 CI routes to its
+own gate because Phase 6 intentionally prohibited pre-Phase-7 sharing.

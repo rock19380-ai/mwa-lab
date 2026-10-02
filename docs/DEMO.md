@@ -23,3 +23,18 @@ Canonical story:
 
 The production demo client never silently configures wallet fault state.
 <!-- PHASE6:DEMO:END -->
+
+## Phase 7 report demo
+
+1. Leave Fault Lab at NORMAL and run the demo client's supported Devnet
+   sign-and-send action. Approve in MWA Lab and verify the client result.
+2. Force-stop/reopen MWA Lab, open that historical session, and use EXPORT REPORT
+   to Share Markdown, Share JSON, and Copy Summary.
+3. Select FAULT_SIGN_REJECT, repeat the same sign-and-send operation, and verify
+   `ERROR_NOT_SIGNED (-3)` plus `INJECTED / FAULT_SIGN_REJECT` in the persisted
+   session and both exports. The UI labels it an intentional test condition.
+4. Return Fault Lab to NORMAL.
+
+Generated reports are sanitized. Simulation results, when present, are
+diagnostic evidence only, never submission guarantees. This Devnet test path does
+not establish production-wallet compatibility.

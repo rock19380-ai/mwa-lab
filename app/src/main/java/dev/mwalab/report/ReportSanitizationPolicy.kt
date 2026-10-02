@@ -39,13 +39,17 @@ class ReportSanitizationPolicy {
     /** Only producer-known keys with typed value shapes are copied. */
     fun summary(fields: Map<String, String>?): Map<String, String>? {
         if (fields == null) return null
-        val output = sortedMapOf<String, String>()
-        // Filter before sorting: untrusted maps must not force an unbounded copy.
-        val candidates = fields.entries.asSequence().mapNotNull { (key, value) ->
-            safeSummaryValue(key, value)?.let { key to it }
-        }.sortedBy { it.first }.toList()
-        if (candidates.size != fields.size || candidates.size > ReportLimits.MAX_SUMMARY_FIELDS) omitted()
-        for ((key, value) in candidates.take(ReportLimits.MAX_SUMMARY_FIELDS)) output[key] = value
+        val output = java.util.TreeMap<String, String>()
+        var accepted = 0
+        // Keep only the lexical first N safe fields while visiting the map once.
+        // A hostile stored map cannot force another unbounded list or sort.
+        for ((key, value) in fields) {
+            val safe = safeSummaryValue(key, value) ?: continue
+            accepted++
+            output[key] = safe
+            if (output.size > ReportLimits.MAX_SUMMARY_FIELDS) output.pollLastEntry()
+        }
+        if (accepted != fields.size || accepted > ReportLimits.MAX_SUMMARY_FIELDS) omitted()
         return java.util.Collections.unmodifiableMap(LinkedHashMap(output))
     }
 

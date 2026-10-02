@@ -196,6 +196,23 @@ class DiagnosticReportTest {
         assertTrue(policy.truncated)
     }
 
+    @Test fun excessiveSafeSummaryFieldsKeepDeterministicFirstKeys() {
+        val fields = (0..9).flatMap { index ->
+            listOf("payload_${index}_sha256" to "a".repeat(64),
+                "payload_${index}_length" to "123")
+        } + listOf("payload_count" to "10", "address_count" to "1",
+            "submitted_count" to "1", "requested_feature_count" to "0",
+            "signed_payload_count" to "1", "requested_address_count" to "0")
+        val first = build(source(listOf(event(request = fields.toMap()))))
+        val reversed = build(source(listOf(event(request = fields.reversed().toMap()))))
+        val firstKeys = first.events.single().requestSummary.keys.toList()
+        assertEquals(ReportLimits.MAX_SUMMARY_FIELDS, firstKeys.size)
+        assertEquals(firstKeys.sorted(), firstKeys)
+        assertEquals(first.events.single().requestSummary, reversed.events.single().requestSummary)
+        assertTrue(first.truncated)
+        assertTrue(first.warnings.any { it.code == "OMITTED_UNSAFE_OR_EXCESS_EVIDENCE" })
+    }
+
     @Test fun cacheFilesAndClipboardDeriveFromCanonicalReport() {
         val source = source(listOf(event(outcome = ProtocolOutcome.FAILURE,
             source = ProtocolFailureSource.INJECTED, fault = "FAULT_SIGN_REJECT", error = -3)))

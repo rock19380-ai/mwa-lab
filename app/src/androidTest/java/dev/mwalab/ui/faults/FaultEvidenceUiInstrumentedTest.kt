@@ -59,6 +59,9 @@ class FaultEvidenceUiInstrumentedTest {
         compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 SIGN_MESSAGES"))
         compose.onNodeWithText("Failure source: OBSERVED_PROTOCOL").assertExists()
         compose.onNodeWithText("Injected condition: Delay 5 seconds (FAULT_DELAY_5S)").assertExists()
-        compose.onNodeWithText("INTENTIONAL TEST CONDITION").assertExists()
+        // Phase 7 repeats the intentional-condition label in the export card;
+        // verify its independent observed-source statement as well.
+        compose.onAllNodesWithText("INTENTIONAL TEST CONDITION").onFirst().assertExists()
+        compose.onNodeWithText("Recorded failure source: OBSERVED_PROTOCOL").assertExists()
     }
 }

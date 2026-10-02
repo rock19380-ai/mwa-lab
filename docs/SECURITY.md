@@ -276,3 +276,19 @@ search for unknown secret values.
 
 Fault selection persists only a stable profile ID in app-private preferences. No exported production API can silently select a fault. Synthetic terminal failures are explicitly classified as `INJECTED` and require a valid injected fault ID. An applied nonterminal condition may coexist with `NONE` or `OBSERVED_PROTOCOL` terminal source. Room remains schema 3; no private keys, seeds, raw auth tokens, association secrets, or raw transactions are added to fault vectors or diagnostics. Mainnet remains rejected.
 <!-- PHASE6:SECURITY:END -->
+
+## Phase 7 report export security boundary
+
+Only allowlisted structured evidence enters `DiagnosticReport` v1. Private keys,
+seed material, authorization and association tokens, raw transaction/message
+bytes, raw signatures, raw RPC bodies, and uncontrolled exception text are not
+report fields. Both renderers and Copy Summary validate the canonical model.
+Hostile sentinel tests cover canonical output, both file formats, clipboard,
+cache artifacts, and share metadata.
+
+Files are bounded UTF-8 artifacts under app-private
+`cacheDir/diagnostic_reports/`. The non-exported FileProvider exposes only that
+path and grants temporary read access to one `content://` report URI through
+Android Share Sheet. No broad external storage, `file://` sharing, cloud upload,
+or backend is used. Session Detail labels synthetic fault conditions explicitly;
+a fault marker never implies the terminal failure source.

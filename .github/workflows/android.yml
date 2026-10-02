@@ -10,6 +10,7 @@ on:
       - phase4-capability-transaction-diagnostics
       - phase5-simulation-diagnostic-classification
       - phase6-deterministic-fault-engine
+      - phase7-sanitized-diagnostic-reports
   pull_request:
 
 permissions:
@@ -23,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Phase 5 verifies that the frozen Phase 4 commit is an ancestor.
+          # Phase gates verify frozen predecessor ancestry.
           fetch-depth: 0
 
       - name: Set up Java 25
@@ -39,10 +40,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle executable
-        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh
+        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh
 
       - name: Validate shell gate syntax
-        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh
+        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh
 
       - name: Lint
         run: ./gradlew lint
@@ -82,5 +83,9 @@ jobs:
         run: ./scripts/phase5_static.sh
 
       - name: Phase 6 deterministic fault engine gate
-        if: ${{ hashFiles('scripts/phase6_static.sh') != '' }}
+        if: ${{ hashFiles('scripts/phase6_static.sh') != '' && hashFiles('scripts/phase7_static.sh') == '' }}
         run: ./scripts/phase6_static.sh
+
+      - name: Phase 7 sanitized diagnostic reports gate
+        if: ${{ hashFiles('scripts/phase7_static.sh') != '' }}
+        run: ./scripts/phase7_static.sh

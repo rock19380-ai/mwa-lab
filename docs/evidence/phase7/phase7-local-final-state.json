@@ -1,0 +1,40 @@
+{
+  "timestamp_utc": "2026-10-02T08:00:15.851160+00:00",
+  "checkpoint_head": "8523a95536f48d469bf6f9974560a54de89b53ef",
+  "phase7_static": "PASS",
+  "phase7_design_check": "PASS",
+  "phase7_export_security": "PASS",
+  "phase7_security_scan": "PASS",
+  "gradle_non_device": "PASS",
+  "jvm": {
+    "app": {
+      "tests": 281,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 42
+    },
+    "demo_client": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    }
+  },
+  "app_connected": {
+    "tests": 128,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 1
+  },
+  "demo_client_connected": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 1
+  },
+  "git_diff_check": "PASS"
+}

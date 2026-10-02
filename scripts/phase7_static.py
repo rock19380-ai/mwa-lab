@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Phase 7.0–7.10 source and predecessor guard; later export/UI gates are separate."""
+"""Phase 7 source and predecessor guard; Phase 6 scope gate stays historical."""
 from pathlib import Path
 import hashlib
 import re
 import subprocess
+
+import phase6_static as predecessor
 
 root = Path(__file__).resolve().parents[1]
 base = "f5eaec53d911fc2423efdb3051e8316ce9e1032d"
@@ -20,6 +22,9 @@ for line in read("docs/evidence/phase7/phase7-baseline.sha256").splitlines():
     if not line or line.startswith("#"):
         continue
     expected, rel = line.split(None, 1)
+    base_blob = subprocess.check_output(["git", "show", f"{base}:{rel}"], cwd=root)
+    base_hash = hashlib.sha256(base_blob).hexdigest()
+    check(base_hash == expected, f"baseline manifest is not the canonical Phase 6 Git blob: {rel}")
     actual = hashlib.sha256((root / rel).read_bytes()).hexdigest()
     check(actual == expected, f"frozen predecessor changed: {rel}")
 db = read("app/src/main/java/dev/mwalab/storage/MwaLabDatabase.kt")
@@ -44,4 +49,17 @@ for renderer in ("MarkdownDiagnosticReportRenderer.kt", "JsonDiagnosticReportRen
           f"renderer lacks canonical input or bounds: {renderer}")
 check("getSession(sessionId)" in read("app/src/main/java/dev/mwalab/report/DiagnosticReportSnapshotAssembler.kt"),
       "assembler does not read persisted session")
-print("PHASE 7.0–7.10 STATIC CHECK: PASS")
+# Preserve every applicable Phase 6 assertion. Its scope() deliberately forbids
+# ACTION_SEND before Phase 7 and must remain unchanged for Phase 6 checkouts.
+for assertion in (predecessor.ancestry, predecessor.baseline_manifest,
+                  predecessor.schema, predecessor.deps, predecessor.fault_contract,
+                  predecessor.ui_and_vectors, predecessor.phase5_separation,
+                  predecessor.ci, predecessor.docs):
+    assertion()
+workflow = read(".github/workflows/android.yml")
+check("phase7-sanitized-diagnostic-reports" in workflow and
+      "hashFiles('scripts/phase7_static.sh') == ''" in workflow and
+      "hashFiles('scripts/phase7_static.sh') != ''" in workflow,
+      "Phase-aware CI routing missing")
+check((root / "scripts/phase7_static.sh").is_file(), "Phase 7 static entrypoint missing")
+print("PHASE 7 STATIC CHECK: PASS")

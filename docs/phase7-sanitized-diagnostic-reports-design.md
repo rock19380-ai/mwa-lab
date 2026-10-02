@@ -22,11 +22,11 @@ Private keys, seeds and mnemonics, authorization and association tokens/secrets,
 
 Markdown and JSON take the same immutable canonical report. Markdown uses fixed sections, LF newlines, UTF-8 and escaped untrusted inline text. It shows UTC alongside epoch timestamps and a reproduction-context section derived only from recorded method, dApp, cluster, outcome and fault marker; it explicitly says exact request bytes cannot be reconstructed from the sanitized report. JSON uses fixed snake-case keys and stable ordering; no renderer reads a repository. The report records `truncated=true` and a warning when any collection or string is omitted or shortened. Limits: 64 events, 10 transactions per event and 40 per report, 20 simulation attempts per event and 80 per report, 8 instructions per transaction, 24 summary fields per map, 128 characters per free-text field, 16 log lines of at most 128 characters, and 1 MiB per rendered output. Renderer byte limits fail closed if a caller constructs an oversized report outside the assembler.
 
-Future file sharing may use only internal cache artifacts and a cache-scoped non-exported FileProvider with temporary read grants. That layer has no protocol or database authority.
+File sharing uses only internal cache artifacts and a cache-scoped non-exported FileProvider with temporary read grants. That layer has no protocol or database authority.
 
 ## Verification
 
-JVM tests cover normal/failed/injected/delayed outcomes, observed later failures, capabilities, known and unknown transaction semantics, all simulation classifications, multiple children, open and empty sessions, ordering, escaping, Unicode/control characters, hostile summary fields, bounds and renderer parity. The design checker and baseline hash manifest guard frozen decisions and predecessor source files. Full `test`, `lint`, and `assembleDebug` are required before a green implementation checkpoint. No Phase 7 freeze tag is created in this batch.
+JVM tests cover normal/failed/injected/delayed outcomes, observed later failures, capabilities, known and unknown transaction semantics, all simulation classifications, multiple children, open and empty sessions, ordering, escaping, Unicode/control characters, hostile summary fields, bounds and renderer parity. The design checker and baseline hash manifest guard frozen decisions and predecessor source files. Full `test`, `lint`, `assembleDebug`, both AndroidTest APK builds, connected device checks where available, and the Phase 7 static/security gate are required before freeze. The annotated freeze tag requires exact-head GitHub Actions success.
 
 ## Phase 7.11–7.21 Android export boundary
 
@@ -38,4 +38,19 @@ The sole FileProvider has authority `${applicationId}.diagnosticreports`, `expor
 
 Session Detail offers an export entry point, both file formats, and Copy Summary. It labels sanitized reports, intentional injected conditions, partial sessions, and the diagnostic-only status of simulation. The existing Session Detail timeline remains the persisted authority for on-screen facts.
 
-Phase 7 security verification includes source checks for the exact provider path, JVM hostile sentinel tests across model/renderers/files/clipboard, Android provider and content URI tests, Room close/reopen export tests, UI action tests, and live cross-app acceptance where the device can execute it. Device acceptance records distinguish automation from visible user approval; no synthetic failure is described as organic. No Phase 7 freeze tag is created by this batch.
+Phase 7 security verification includes source checks for the exact provider path, JVM hostile sentinel tests across model/renderers/files/clipboard, Android provider and content URI tests, Room close/reopen export tests, UI action tests, and live cross-app acceptance where the device can execute it. Device acceptance records distinguish automation from visible user approval; no synthetic failure is described as organic. Final freeze is permitted only after complete local, device, security, documentation, and exact-head CI evidence.
+
+## Phase 7.22–7.28 gate routing and freeze
+
+The historical Phase 6 gate still rejects `ACTION_SEND` because sharing was out
+of scope at that freeze. Phase 7 CI selects `phase7_static.sh` when its tracked
+marker exists; Phase 6 CI selects `phase6_static.sh` only without that marker.
+The Phase 7 gate reuses applicable Phase 5 and Phase 6 assertions, checks frozen
+predecessor hashes and exact ancestry, and validates report, export, provider,
+security, and evidence boundaries. It never changes the Phase 6 script or its
+historical meaning.
+
+The implementation/evidence commit must include docs and prefreeze results.
+After pushing that exact commit, its GitHub Actions run must finish successfully
+with a matching head SHA before an annotated Phase 7 tag is created or pushed.
+The tag records CI provenance. Phase 8 remains outside this freeze.

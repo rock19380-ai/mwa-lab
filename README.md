@@ -137,8 +137,8 @@ authoritative rejection through the real cross-package path, then verified all
 four diagnostic tables across force-stop/restart. See
 [PHASE_4_REPORT.md](PHASE_4_REPORT.md) and
 [Phase 4 evidence](docs/evidence/phase4/). At that Phase 4 checkpoint,
-simulation was still Phase 5 work. Phase 6 fault injection and Phase 7 report
-export remain outside the current implementation.
+simulation was still Phase 5 work. Fault injection and report export were
+outside that historical Phase 4 checkpoint.
 
 ## Historical Phase 2 exclusions
 
@@ -162,16 +162,12 @@ protocol boundary.
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
-./scripts/phase4_static.sh
+./scripts/phase7_static.sh
 ```
 
-GitHub Actions runs deterministic non-device gates and routes the current Phase 4
-schema to `phase4_static.sh`. The historical Phase 2 and Phase 3 gates remain
-unchanged evidence for their frozen scopes; Phase 4 does not execute the obsolete
-Phase 3 assertion that future transaction diagnostics must be absent. Real Android
-association, approval, transaction inspection, and restart/UI acceptance are
-recorded separately under `docs/evidence/phase4/`. Historical live Devnet evidence
-from Phase 2 is not relabelled as fresh Phase 4 network evidence.
+GitHub Actions runs deterministic non-device gates and routes Phase 7 to
+`phase7_static.sh`. Historical phase gates remain unchanged for their frozen
+scopes; connected-device and live Devnet evidence are recorded separately.
 
 ## Modules
 
@@ -235,8 +231,8 @@ storage fields. Free-form RPC log content is redacted before public/durable
 results while bounded runtime structure is retained.
 
 Legacy simulation is the P0 scope. Versioned v0 transactions remain detectable
-for diagnostics but are not simulatable/signable in this release. Phase 6 fault
-injection and Phase 7 Markdown/JSON report export remain out of scope.
+for diagnostics but are not simulatable/signable in this release. Fault injection
+and report export were outside the historical Phase 5 checkpoint.
 
 Real cross-package Devnet acceptance on Android 16 passed GOOD_PASS_APPROVE,
 BAD_FAIL_APPROVE, and GOOD_PASS_REJECT after the user funded the exact installed
@@ -253,5 +249,21 @@ succeeds on the evidence commit.
 
 MWA Lab now supports deterministic fault profiles for authorization rejection, signing rejection, fixed delay, unsupported chain, invalid payload, payload-limit rejection, stale transaction, RPC unavailability, and submission failure. Fault selection is internal to MWA Lab and visible in Fault Lab. Persisted protocol events keep an applied `injectedFaultId` separate from the terminal `failureSource`, so synthetic conditions cannot be confused with observed failures.
 
-Phase 7 sanitized Markdown/JSON report export and Android Share Sheet are **not implemented yet**. MWA Lab remains a Solana Devnet-only protocol debugger/test endpoint, not a production wallet.
+At the Phase 6 freeze, sanitized report export was still pending. MWA Lab remains a Solana Devnet-only protocol debugger/test endpoint, not a production wallet.
 <!-- PHASE6:SUMMARY:END -->
+
+## Phase 7 — Sanitized Diagnostic Reports
+
+Session Detail now builds a typed, read-only report from persisted Room evidence.
+The same sanitized report produces deterministic Markdown, JSON, and a concise
+clipboard summary. Share Markdown and Share JSON use app-private cache files, a
+narrow FileProvider, and the Android Share Sheet. Open or changing sessions are
+marked PARTIAL; injected fault markers remain separate from observed failure
+sources. Simulation is diagnostic evidence only and does not guarantee later
+submission success.
+
+MWA Lab is a Devnet-only protocol debugger and failure simulator. It does not
+import production wallet secrets, export raw payloads or authorization tokens,
+or claim independent production-wallet compatibility. See
+[PHASE_7_REPORT.md](PHASE_7_REPORT.md) and
+[Phase 7 evidence](docs/evidence/phase7/).

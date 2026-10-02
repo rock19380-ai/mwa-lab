@@ -1,0 +1,149 @@
+{
+  "timestamp_utc": "2026-10-02T08:02:58Z",
+  "device_serial": "emulator-5554",
+  "normal_session_id": "8cfe5721-9674-4a2e-b73c-26895bfb98b5",
+  "fault_session_id": "340ce109-f6bb-45d2-a492-b069f3742ecb",
+  "normal": {
+    "status": "PASS",
+    "completeness": "COMPLETE",
+    "event_count": 3,
+    "target": {
+      "event_id": "8cfe5721-9674-4a2e-b73c-26895bfb98b5:2",
+      "sequence": 2,
+      "method": "SIGN_AND_SEND_TRANSACTIONS",
+      "started_at": 1790928050961,
+      "completed_at": 1790928056736,
+      "duration_ms": 5775,
+      "outcome": "SUCCESS",
+      "protocol_error_code": null,
+      "protocol_error_name": null,
+      "failure_source": "NONE",
+      "injected_fault_id": null,
+      "request_summary": {
+        "address_count": "1",
+        "chain": "solana:devnet",
+        "commitment": "confirmed",
+        "max_retries_present": "true",
+        "method": "sign_and_send_transactions",
+        "min_context_slot_present": "false",
+        "payload_0_length": "207",
+        "payload_0_sha256": "f4cf598cf0baf91c05fe2c8f1f30c908e42d703a2c23c9406795a84b42af03e3",
+        "payload_count": "1",
+        "skip_preflight": "false",
+        "wait_for_commitment": "false"
+      },
+      "response_summary": {
+        "commitment_verified": "true",
+        "result": "submitted",
+        "rpc_network": "solana_devnet",
+        "submitted_count": "1"
+      },
+      "capability_context": null,
+      "transactions": [
+        {
+          "payload_index": 0,
+          "fingerprint_sha256": "f4cf598cf0baf91c05fe2c8f1f30c908e42d703a2c23c9406795a84b42af03e3",
+          "wire_length": 207,
+          "transaction_version": "LEGACY",
+          "inspection_status": "PARSED",
+          "signature_count": 1,
+          "fee_payer": "8u3XMxFwZ7NmpSKk619MsrmZkMTskzrrcq5LwFA1TEqb",
+          "instruction_count": 1,
+          "instructions": [
+            {
+              "index": 0,
+              "program_id": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+              "program_name": "Memo Program",
+              "decoded_kind": "MEMO",
+              "exact_amount": null,
+              "source": null,
+              "destination": null
+            }
+          ],
+          "limitations": [
+            "BLOCKHASH_NOT_VALIDATED",
+            "HEADER_PRIVILEGES_ONLY",
+            "LIMITED_PROGRAM_DECODING",
+            "SIGNATURES_NOT_VERIFIED"
+          ],
+          "error": null
+        }
+      ],
+      "simulations": []
+    }
+  },
+  "fault": {
+    "status": "FAIL",
+    "completeness": "COMPLETE",
+    "event_count": 3,
+    "target": {
+      "event_id": "340ce109-f6bb-45d2-a492-b069f3742ecb:2",
+      "sequence": 2,
+      "method": "SIGN_AND_SEND_TRANSACTIONS",
+      "started_at": 1790928119833,
+      "completed_at": 1790928121354,
+      "duration_ms": 1521,
+      "outcome": "FAILURE",
+      "protocol_error_code": -3,
+      "protocol_error_name": "ERROR_NOT_SIGNED",
+      "failure_source": "INJECTED",
+      "injected_fault_id": "FAULT_SIGN_REJECT",
+      "request_summary": {
+        "address_count": "1",
+        "chain": "solana:devnet",
+        "commitment": "confirmed",
+        "max_retries_present": "true",
+        "method": "sign_and_send_transactions",
+        "min_context_slot_present": "false",
+        "payload_0_length": "206",
+        "payload_0_sha256": "8cf2d5d204cf8e5b7bd58b18dab6b5aa199b39c1cc143ab72bcb5c7823d87a35",
+        "payload_count": "1",
+        "skip_preflight": "false",
+        "wait_for_commitment": "false"
+      },
+      "response_summary": {
+        "result": "injected_sign_reject"
+      },
+      "capability_context": null,
+      "transactions": [
+        {
+          "payload_index": 0,
+          "fingerprint_sha256": "8cf2d5d204cf8e5b7bd58b18dab6b5aa199b39c1cc143ab72bcb5c7823d87a35",
+          "wire_length": 206,
+          "transaction_version": "LEGACY",
+          "inspection_status": "PARSED",
+          "signature_count": 1,
+          "fee_payer": "8u3XMxFwZ7NmpSKk619MsrmZkMTskzrrcq5LwFA1TEqb",
+          "instruction_count": 1,
+          "instructions": [
+            {
+              "index": 0,
+              "program_id": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+              "program_name": "Memo Program",
+              "decoded_kind": "MEMO",
+              "exact_amount": null,
+              "source": null,
+              "destination": null
+            }
+          ],
+          "limitations": [
+            "BLOCKHASH_NOT_VALIDATED",
+            "HEADER_PRIVILEGES_ONLY",
+            "LIMITED_PROGRAM_DECODING",
+            "SIGNATURES_NOT_VERIFIED"
+          ],
+          "error": null
+        }
+      ],
+      "simulations": []
+    }
+  },
+  "normal_visible_approval_taps": 1,
+  "fault_visible_approval_taps": 0,
+  "device_verifier": "PASS",
+  "markdown_share": "PASS",
+  "json_share": "PASS",
+  "copy_summary": "PASS",
+  "restart_export": "PASS",
+  "fault_restored_to_normal": true
+}

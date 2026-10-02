@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Phase 7 — Sanitized Diagnostic Reports
+
+- Added canonical typed report v1 over persisted session, event, capability,
+  transaction, simulation, and fault evidence without changing Room schema 3.
+- Added bounded allowlist sanitization and deterministic Markdown, JSON, and
+  clipboard summary projections with explicit partial-session and injected vs
+  observed failure semantics.
+- Added app-private cache export, a report-only non-exported FileProvider,
+  Android Share Sheet actions, and Session Detail export controls.
+- Added hostile-value, restart, provider, renderer, and device report parity
+  verification plus a dedicated Phase 7 CI/static/security gate.
+- Preserved walletlib 2.0.7, Devnet-only execution, and predecessor protocol,
+  signing, fault, and simulation authorities.
+
 ### Added
 
 - Phase 5 user-triggered legacy transaction simulation through the fixed Solana Devnet RPC boundary.
@@ -62,5 +76,5 @@
 - Added canonical injected-fault evidence and injected-vs-observed truthfulness.
 - Added Fault Lab, global/request snapshot visibility, session fault presentation, machine-readable vectors, and Phase 6 demo acceptance runner.
 - Kept Room at schema 3, walletlib at 2.0.7, Devnet-only execution, and Phase 5 simulation authority unchanged.
-- Phase 7 sanitized report export remains pending.
+- At the Phase 6 freeze, Phase 7 sanitized report export remained pending.
 <!-- PHASE6:CHANGELOG:END -->

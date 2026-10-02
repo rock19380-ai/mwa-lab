@@ -198,3 +198,19 @@ production fault toggle or a claimed live outage.
 
 Supported deterministic profiles reproduce the pinned walletlib 2.0.7 error families `ERROR_AUTHORIZATION_FAILED (-1)`, `ERROR_INVALID_PAYLOADS (-2)`, `ERROR_NOT_SIGNED (-3)`, `ERROR_NOT_SUBMITTED (-4)`, `ERROR_TOO_MANY_PAYLOADS (-6)`, and the walletlib legacy-named `ERROR_CLUSTER_NOT_SUPPORTED (-7)`. RPC-unavailable and submission-failure profiles intentionally remain distinct diagnostic IDs despite sharing `-4`. `FAULT_DELAY_5S` is an injected timing condition, not a forced terminal failure.
 <!-- PHASE6:PROTOCOL:END -->
+
+## Phase 7 current reporting status
+
+| Capability | Current status |
+|---|---|
+| Markdown diagnostic export | supported from canonical persisted report |
+| JSON diagnostic export | supported from the same report |
+| Copy Summary | supported from the same report |
+| Android Share Sheet | supported with one cache-only content URI |
+| open/changing session | explicit PARTIAL report and warning |
+| injected fault and failure source | independent persisted dimensions |
+| transaction diagnostics | fingerprint and verified public metadata only |
+| simulation diagnostics | evidence only; no future submission guarantee |
+| raw secrets/payloads/signatures | excluded from report model and outputs |
+| mainnet | unavailable |
+| production-wallet compatibility | requires independent verification |

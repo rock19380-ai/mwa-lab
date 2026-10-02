@@ -272,3 +272,24 @@ process restart without reclassification or rebinding.
 
 `PersistentFaultSelectionRepository` is the single process-wide selection authority. `MwaSessionHost` captures an immutable `FaultRequestSnapshot` at request start and evaluates `DeterministicFaultEngine` only at explicit hooks. Applied conditions are annotated on the canonical pending `ProtocolEvent`; Compose screens only project structured state. Phase 5 simulation remains a diagnostic child branch and is not used as fault authority.
 <!-- PHASE6:ARCH:END -->
+
+## Phase 7 sanitized report projection
+
+```text
+SessionRepository + CapabilitySnapshotRepository
++ TransactionDiagnosticRepository + SimulationRepository
+  -> bounded consistent snapshot reads
+  -> ReportSanitizationPolicy allowlist
+  -> DiagnosticReport v1
+  -> Markdown / JSON / Copy Summary
+  -> app-private diagnostic_reports cache (file outputs only)
+  -> non-exported report-only FileProvider -> Android Share Sheet
+```
+
+The snapshot assembler reads persisted structured evidence and never writes
+protocol/session rows. Closed sessions require matching bounded reads to be
+COMPLETE; open or changing sessions are PARTIAL. Renderer and clipboard output
+share the canonical model. Transaction and simulation diagnostics remain
+observational; unknown decoded semantics stay unknown. The exporter has no
+approval, signing, submission, fault, simulation, or RPC execution authority.
+Room stays at schema 3 and walletlib stays at 2.0.7.
