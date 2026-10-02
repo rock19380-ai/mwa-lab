@@ -8,5 +8,7 @@ Allowed states:
 - NOT VERIFIED
 - NOT APPLICABLE
 
-No current production-wallet compatibility claim has been verified for this
-release yet.
+Phase 8 status: **NOT VERIFIED IN THIS RELEASE**. The 2026-10-02
+implementation environment had only an Android emulator and no installed
+production wallet path. See
+[Phase 8 compatibility smoke](evidence/phase8/phase8-production-wallet-smoke.md).

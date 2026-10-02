@@ -66,8 +66,12 @@ fun HomeScreen(
                         Text(if (address.length > 14) "${address.take(7)}…${address.takeLast(7)}" else address,
                             style = MaterialTheme.typography.titleMedium)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { onCopyAddress(address) }) { Text(stringResource(R.string.copy_address)) }
-                            OutlinedButton(onClick = onIdentity) { Text("View identity") }
+                            OutlinedButton(onClick = { onCopyAddress(address) }, modifier = Modifier.weight(1f)) {
+                                Text(stringResource(R.string.copy_address))
+                            }
+                            OutlinedButton(onClick = onIdentity, modifier = Modifier.weight(1f)) {
+                                Text("View identity")
+                            }
                         }
                     }
                 }

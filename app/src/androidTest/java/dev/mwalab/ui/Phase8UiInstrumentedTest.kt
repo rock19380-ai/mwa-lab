@@ -21,6 +21,7 @@ import dev.mwalab.ui.settings.ThemeMode
 import dev.mwalab.ui.settings.UiPreferences
 import dev.mwalab.ui.theme.MWALabTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,9 +37,9 @@ class Phase8UiInstrumentedTest {
         } }
         compose.onNodeWithText("MWA Lab").assertExists()
         compose.onNodeWithText("Mobile Wallet Adapter protocol debugger", substring = true).assertExists()
-        compose.onNodeWithText("DEVNET ONLY").assertExists()
-        compose.onNodeWithText("NO REAL FUNDS").assertExists()
-        compose.onNodeWithText("NORMAL").assertExists()
+        compose.onNodeWithText("DEVNET ONLY").assertIsDisplayed()
+        compose.onNodeWithText("NO REAL FUNDS").assertIsDisplayed()
+        compose.onNodeWithText("NORMAL").assertIsDisplayed()
         compose.onAllNodesWithText("READY FOR DAPP CONNECTION").assertCountEquals(0)
     }
 
@@ -56,6 +57,9 @@ class Phase8UiInstrumentedTest {
         compose.onNodeWithText("INJECTED").assertExists()
         compose.onNodeWithText("Delay 5 seconds (FAULT_DELAY_5S)").assertExists()
         compose.onAllNodesWithText("Request summary").assertCountEquals(0)
+        val failureTop = compose.onNodeWithText("SESSION FAILED").fetchSemanticsNode().boundsInRoot.top
+        val timelineTop = compose.onNodeWithText("PROTOCOL TIMELINE").fetchSemanticsNode().boundsInRoot.top
+        assertTrue(failureTop < timelineTop)
     }
 
     @Test fun activeFaultStatesItsTargetExpectedResultAndReturnToNormal() {
@@ -89,19 +93,31 @@ class Phase8UiInstrumentedTest {
         compose.onNodeWithTag("settings-list").performScrollToNode(hasText("Unavailable"))
         compose.onNodeWithText("Unavailable").assertExists()
         compose.onAllNodesWithText("Custom RPC").assertCountEquals(0)
+        val lightChoice = compose.onNodeWithTag("theme-mode-LIGHT").assertHasClickAction()
+        val targetHeightDp = lightChoice.fetchSemanticsNode().boundsInRoot.height /
+            InstrumentationRegistry.getInstrumentation().targetContext.resources.displayMetrics.density
+        assertTrue("Theme choice should meet a 48dp touch target", targetHeightDp >= 48f)
     }
 
     @Test fun uiPreferencePersistsThemeWithoutSessionOrWalletAuthority() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val prefs = UiPreferences(context)
         val prior = prefs.themeMode
+        val priorOnboarding = prefs.onboardingSeen
         try {
+            prefs.onboardingSeen = false
+            assertEquals(false, UiPreferences(context).onboardingSeen)
+            prefs.onboardingSeen = true
+            assertEquals(true, UiPreferences(context).onboardingSeen)
             prefs.themeMode = ThemeMode.LIGHT
             assertEquals(ThemeMode.LIGHT, UiPreferences(context).themeMode)
             prefs.themeMode = ThemeMode.DARK
             assertEquals(ThemeMode.DARK, UiPreferences(context).themeMode)
             val keys = context.getSharedPreferences("mwa_lab_ui", android.content.Context.MODE_PRIVATE).all.keys
             assertEquals(true, keys.all { it == "theme_mode" || it == "onboarding_seen_v1" })
-        } finally { prefs.themeMode = prior }
+        } finally {
+            prefs.themeMode = prior
+            prefs.onboardingSeen = priorOnboarding
+        }
     }
 }

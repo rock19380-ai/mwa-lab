@@ -5,7 +5,7 @@
 Trace protocol sessions.
 Reproduce wallet failure paths.
 Inspect signing/submission behavior.
-Build toward safe, shareable diagnostics.
+Share sanitized diagnostic reports.
 
 > ⚠️ DEVNET-ONLY LAB TOOL — NEVER USE REAL FUNDS.
 
@@ -163,11 +163,12 @@ protocol boundary.
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
 ./scripts/phase7_static.sh
+./scripts/phase8_static.sh
 ```
 
-GitHub Actions runs deterministic non-device gates and routes Phase 7 to
-`phase7_static.sh`. Historical phase gates remain unchanged for their frozen
-scopes; connected-device and live Devnet evidence are recorded separately.
+GitHub Actions runs deterministic non-device gates and routes each checkout
+by its Phase 7 or Phase 8 script marker. Historical phase gates retain their
+frozen scope; connected-device and live Devnet evidence are recorded separately.
 
 ## Modules
 
@@ -267,3 +268,18 @@ import production wallet secrets, export raw payloads or authorization tokens,
 or claim independent production-wallet compatibility. See
 [PHASE_7_REPORT.md](PHASE_7_REPORT.md) and
 [Phase 7 evidence](docs/evidence/phase7/).
+
+
+## Phase 8 — UX and positioning checkpoint
+
+The current Phase 8 branch presents MWA Lab as a Mobile Wallet Adapter protocol
+debugger and deterministic failure simulator. Its Home, Sessions, Fault Lab,
+Lab Identity, Settings, and signing approval surfaces visibly state the
+Solana Devnet / no-real-funds boundary. Session Detail keeps protocol outcomes
+separate from injected fault markers and child simulation evidence. Reports
+remain sanitized. Identity Reset is not exposed.
+
+This is an open implementation checkpoint, not a Phase 8 freeze or an
+independent production-wallet compatibility claim. See the
+[Phase 8 design](docs/phase8-world-class-ux-positioning-design.md) and
+[Phase 8 evidence](docs/evidence/phase8/).

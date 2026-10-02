@@ -3,6 +3,9 @@ package dev.mwalab.ui.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
@@ -34,9 +37,12 @@ fun SettingsScreen(mode: ThemeMode, onMode: (ThemeMode) -> Unit, version: String
         item { LabSafetyBanner() }
         item { SectionCard("Appearance") {
             ThemeMode.entries.forEach { option ->
-                androidx.compose.material3.Surface(Modifier.selectable(selected = mode == option,
-                    role = Role.RadioButton, onClick = { onMode(option) })) {
-                    androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                androidx.compose.material3.Surface(Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("theme-mode-${option.name}")
+                    .selectable(selected = mode == option,
+                        role = Role.RadioButton, onClick = { onMode(option) })) {
+                    androidx.compose.foundation.layout.Row(Modifier.padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                         StatusBadge(if (mode == option) "SELECTED" else "CHOOSE")
                         Text(option.name.lowercase().replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodyLarge)

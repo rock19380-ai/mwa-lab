@@ -25,8 +25,10 @@ fun LabSafetyBanner(modifier: Modifier = Modifier) {
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = RoundedCornerShape(16.dp)) {
         Row(Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.devnet_only), style = MaterialTheme.typography.labelLarge)
-            Text(stringResource(R.string.no_real_funds), style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.devnet_only), Modifier.weight(1f),
+                style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.no_real_funds), Modifier.weight(1f),
+                style = MaterialTheme.typography.labelLarge)
         }
     }
 }

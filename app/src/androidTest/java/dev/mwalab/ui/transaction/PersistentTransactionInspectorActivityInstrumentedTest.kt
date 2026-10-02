@@ -66,7 +66,14 @@ class PersistentTransactionInspectorActivityInstrumentedTest {
         compose.activityRule.scenario.recreate()
         compose.waitForIdle()
         waitForDiagnostics(eventId)
-        compose.onNodeWithText("Session Detail").assertIsDisplayed()
+        // Phase 8 removed the redundant fixed app-bar title and the LazyColumn may
+        // restore its pre-recreation scroll position. Verify the child destination
+        // through its stable root, then explicitly scroll to identity/header evidence.
+        compose.onNodeWithTag("protocol-timeline").assertIsDisplayed()
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("Back to sessions"))
+        compose.onNodeWithText("Back to sessions").assertIsDisplayed()
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText(dappName))
+        compose.onNodeWithText(dappName).assertIsDisplayed()
         compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("SOLANA DEVNET", substring = true))
         compose.onNodeWithText("SOLANA DEVNET", substring = true).assertExists()
         scroll("Collapse transaction 1")

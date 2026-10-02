@@ -11,6 +11,7 @@ on:
       - phase5-simulation-diagnostic-classification
       - phase6-deterministic-fault-engine
       - phase7-sanitized-diagnostic-reports
+      - phase8-world-class-ux-positioning
   pull_request:
 
 permissions:
@@ -40,10 +41,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle executable
-        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh
+        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh
 
       - name: Validate shell gate syntax
-        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh
+        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh
 
       - name: Lint
         run: ./gradlew lint
@@ -87,5 +88,9 @@ jobs:
         run: ./scripts/phase6_static.sh
 
       - name: Phase 7 sanitized diagnostic reports gate
-        if: ${{ hashFiles('scripts/phase7_static.sh') != '' }}
+        if: ${{ hashFiles('scripts/phase7_static.sh') != '' && hashFiles('scripts/phase8_static.sh') == '' }}
         run: ./scripts/phase7_static.sh
+
+      - name: Phase 8 UX and protected-boundary gate
+        if: ${{ hashFiles('scripts/phase8_static.sh') != '' }}
+        run: ./scripts/phase8_static.sh

@@ -2,6 +2,12 @@ package dev.mwalab.approval
 
 import androidx.compose.ui.test.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import dev.mwalab.faults.FaultId
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.mwalab.security.DiagnosticSanitizer
@@ -132,6 +138,31 @@ class SigningApprovalUiInstrumentedTest {
         } }
         compose.onAllNodesWithTag("simulate-button-0").assertCountEquals(0)
         warningsAndButtons()
+    }
+
+    @Test
+    fun largeFontDarkApprovalKeepsFaultWarningAndDecisionsReachableOnSmallViewport() {
+        val bytes = TransactionApprovalTestVectors.systemTransfer()
+        val request = request(arrayOf(bytes)).copy(faultSnapshotId = FaultId.SIGN_REJECT)
+        compose.setContent {
+            val deviceDensity = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(deviceDensity.density, 1.3f)) {
+                MWALabTheme(darkTheme = true) {
+                    Box(androidx.compose.ui.Modifier.size(360.dp, 640.dp)) {
+                        SigningApprovalScreen(ApprovalState.Pending(request), {}, {})
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("SOLANA DEVNET").assertIsDisplayed()
+        compose.onNodeWithText("NO REAL FUNDS").assertIsDisplayed()
+        compose.onNodeWithTag("request-fault-banner").assertIsDisplayed()
+        compose.onNodeWithText("FAULT ACTIVE", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("APPROVE").assertIsDisplayed().assertHasClickAction()
+        compose.onNodeWithText("REJECT").assertIsDisplayed().assertHasClickAction()
+        compose.onNodeWithText("Method: sign_transactions").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("APPROVE").assertIsDisplayed()
+        compose.onNodeWithText("REJECT").assertIsDisplayed()
     }
 
     private fun result(ref: SimulationTargetRef, outcome: SimulationOutcome,
