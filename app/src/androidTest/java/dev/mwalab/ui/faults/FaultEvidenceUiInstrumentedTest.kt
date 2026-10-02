@@ -62,6 +62,7 @@ class FaultEvidenceUiInstrumentedTest {
         // Phase 7 repeats the intentional-condition label in the export card;
         // verify its independent observed-source statement as well.
         compose.onAllNodesWithText("INTENTIONAL TEST CONDITION").onFirst().assertExists()
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasTestTag("export-report"))
         compose.onNodeWithText("Recorded failure source: OBSERVED_PROTOCOL").assertExists()
     }
 }

@@ -1,19 +1,29 @@
 package dev.mwalab
 
-import android.os.Bundle
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.ViewModel
@@ -25,14 +35,23 @@ import dev.mwalab.report.DiagnosticReportExportUseCase
 import dev.mwalab.report.DiagnosticReportFormat
 import dev.mwalab.report.DiagnosticReportShareIntentFactory
 import dev.mwalab.report.DiagnosticReportSnapshotAssembler
-import dev.mwalab.ui.sessions.*
 import dev.mwalab.ui.faults.FaultLabScreen
+import dev.mwalab.ui.identity.LabIdentityScreen
+import dev.mwalab.ui.navigation.AppDestination
+import dev.mwalab.ui.navigation.LabNavigationIcon
+import dev.mwalab.ui.onboarding.OnboardingScreen
+import dev.mwalab.ui.sessions.*
+import dev.mwalab.ui.settings.SettingsScreen
+import dev.mwalab.ui.settings.ThemeMode
+import dev.mwalab.ui.settings.UiPreferences
 import dev.mwalab.ui.theme.MWALabTheme
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val uiPreferences = UiPreferences(applicationContext)
         val repository = MwaLabComposition.sessionRepository(applicationContext)
         val faultSelection = MwaLabComposition.faultSelectionRepository(applicationContext)
         val capabilities = MwaLabComposition.capabilitySnapshotRepository(applicationContext)
@@ -48,10 +67,8 @@ class MainActivity : ComponentActivity() {
                     HomeViewModel::class.java -> HomeViewModel(MwaLabComposition.identityRepository(applicationContext), repository)
                     SessionsViewModel::class.java -> SessionsViewModel(repository)
                     SessionDetailViewModel::class.java -> SessionDetailViewModel(
-                        repository, capabilities,
-                        transactionRepository = transactions,
-                        simulationRepository = simulations,
-                        reportExports = reportExports,
+                        repository, capabilities, transactionRepository = transactions,
+                        simulationRepository = simulations, reportExports = reportExports,
                     )
                     else -> error("Unknown screen model")
                 }
@@ -63,9 +80,25 @@ class MainActivity : ComponentActivity() {
         val home = provider[HomeViewModel::class.java]
         val sessions = provider[SessionsViewModel::class.java]
         val detail = provider[SessionDetailViewModel::class.java]
+        @Suppress("DEPRECATION")
+        val version = packageManager.getPackageInfo(packageName, 0).let {
+            "${it.versionName ?: "Unknown"} · build ${it.versionCode}"
+        }
+        val copyAddress: (String) -> Unit = { address ->
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.setPrimaryClip(ClipData.newPlainText("Devnet test address", address))
+            Toast.makeText(this, R.string.address_copied, Toast.LENGTH_SHORT).show()
+        }
         setContent {
-            MWALabTheme {
-                var screen by rememberSaveable { mutableStateOf("Home") }
+            var themeMode by remember { mutableStateOf(uiPreferences.themeMode) }
+            val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
+            MWALabTheme(darkTheme = when (themeMode) {
+                ThemeMode.SYSTEM -> systemDark
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }) {
+                var onboardingSeen by remember { mutableStateOf(uiPreferences.onboardingSeen) }
+                var destination by rememberSaveable { mutableStateOf(AppDestination.HOME) }
                 var selectedSession by rememberSaveable { mutableStateOf<String?>(null) }
                 val homeState by home.state.collectAsStateWithLifecycle()
                 val activeFault by faultSelection.selected.collectAsStateWithLifecycle()
@@ -91,40 +124,67 @@ class MainActivity : ComponentActivity() {
                                     detail.reportCopied(effect.completeness, effect.truncated)
                                 }
                             }
-                        } catch (_: Exception) {
-                            detail.reportDeliveryFailed()
-                        }
+                        } catch (_: Exception) { detail.reportDeliveryFailed() }
                     }
                 }
                 LaunchedEffect(selectedSession) { selectedSession?.let(detail::selectSession) }
-                val openSession: (String) -> Unit = { selectedSession = it; detail.selectSession(it); screen = "Detail" }
-                BackHandler(enabled = screen != "Home") {
-                    screen = if (screen == "Detail") "Sessions" else "Home"
+                val openSession: (String) -> Unit = { id ->
+                    selectedSession = id
+                    detail.selectSession(id)
+                    destination = AppDestination.SESSION_DETAIL
                 }
-                Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    Column(Modifier.fillMaxSize().padding(padding).semantics { testTagsAsResourceId = true }) {
-                        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                            Text("MWA LAB TEST ENDPOINT", style = MaterialTheme.typography.titleLarge)
-                            Text("SOLANA DEVNET · NO REAL FUNDS", style = MaterialTheme.typography.labelLarge)
-                            Row {
-                                TextButton(onClick = { screen = "Home" }) { Text("Home") }
-                                TextButton(onClick = { screen = "Sessions" }) { Text("Sessions") }
-                                TextButton(onClick = { screen = "Fault Lab" }) { Text("Fault Lab") }
+                BackHandler(enabled = onboardingSeen && destination != AppDestination.HOME) {
+                    destination = destination.backDestination()
+                }
+                if (!onboardingSeen) {
+                    OnboardingScreen(activeFault) {
+                        uiPreferences.onboardingSeen = true
+                        onboardingSeen = true
+                    }
+                } else {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize().semantics { testTagsAsResourceId = true },
+                        topBar = {
+                            if (destination != AppDestination.HOME) TopAppBar(title = {
+                                Text(destination.label, style = MaterialTheme.typography.titleLarge)
+                            })
+                        },
+                        bottomBar = {
+                            NavigationBar {
+                                AppDestination.topLevel.forEach { item ->
+                                    NavigationBarItem(
+                                        modifier = Modifier.testTag("nav-${item.name}").semantics { contentDescription = item.label },
+                                        selected = destination == item ||
+                                            destination == AppDestination.SESSION_DETAIL && item == AppDestination.SESSIONS,
+                                        onClick = { destination = item },
+                                        icon = { LabNavigationIcon(item) },
+                                        label = { Text(if (item == AppDestination.LAB_IDENTITY) "Identity" else item.label, maxLines = 1) },
+                                        alwaysShowLabel = true,
+                                    )
+                                }
                             }
-                        }
-                        HorizontalDivider()
-                        Box(Modifier.weight(1f)) {
-                            when (screen) {
-                                "Sessions" -> SessionsScreen(sessionsState, openSession, sessions::retry)
-                                "Fault Lab" -> FaultLabScreen(activeFault, faultSelection::select)
-                                "Detail" -> SessionDetailScreen(
-                                    detailState, { screen = "Sessions" }, detail::retry, detail::retryCapabilities,
-                                    detail::retryTransactions, detail::retrySimulations,
+                        },
+                    ) { padding ->
+                        Box(Modifier.fillMaxSize().padding(padding)) {
+                            when (destination) {
+                                AppDestination.HOME -> HomeScreen(homeState,
+                                    { destination = AppDestination.SESSIONS }, openSession, home::retry,
+                                    activeFault, { destination = AppDestination.FAULT_LAB },
+                                    onIdentity = { destination = AppDestination.LAB_IDENTITY },
+                                    onCopyAddress = copyAddress)
+                                AppDestination.SESSIONS -> SessionsScreen(sessionsState, openSession, sessions::retry)
+                                AppDestination.FAULT_LAB -> FaultLabScreen(activeFault, faultSelection::select)
+                                AppDestination.LAB_IDENTITY -> LabIdentityScreen(homeState.identity, copyAddress, home::retry)
+                                AppDestination.SETTINGS -> SettingsScreen(themeMode, { mode ->
+                                    themeMode = mode
+                                    uiPreferences.themeMode = mode
+                                }, version)
+                                AppDestination.SESSION_DETAIL -> SessionDetailScreen(
+                                    detailState, { destination = AppDestination.SESSIONS }, detail::retry,
+                                    detail::retryCapabilities, detail::retryTransactions, detail::retrySimulations,
                                     reportState, { detail.shareReport(DiagnosticReportFormat.MARKDOWN) },
                                     { detail.shareReport(DiagnosticReportFormat.JSON) }, detail::copyReportSummary,
                                 )
-                                else -> HomeScreen(homeState, { screen = "Sessions" }, openSession, home::retry,
-                                    activeFault, { screen = "Fault Lab" })
                             }
                         }
                     }

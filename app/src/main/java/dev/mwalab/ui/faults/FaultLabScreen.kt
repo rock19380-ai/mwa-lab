@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import dev.mwalab.faults.FaultCatalog
 import dev.mwalab.faults.FaultId
 import dev.mwalab.faults.FaultProfile
+import dev.mwalab.ui.components.LabSafetyBanner
+import dev.mwalab.ui.components.StatusBadge
 import dev.mwalab.ui.sessions.protocolErrorText
 
 /** A projection of the process-wide selection authority. No protocol decisions live here. */
@@ -33,44 +35,48 @@ fun FaultLabScreen(selected: FaultProfile, onSelect: (FaultId) -> Unit) {
             FaultId.TOO_MANY_PAYLOADS, FaultId.STALE_BLOCKHASH),
         "NETWORK" to listOf(FaultId.RPC_UNAVAILABLE, FaultId.SUBMISSION_FAILURE),
     )
-    LazyColumn(Modifier.fillMaxSize().testTag("fault-lab"),
-        contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item {
-            Text("Fault Lab", style = MaterialTheme.typography.headlineSmall)
-            Text("MWA Lab is a testing and debugging tool. Solana Devnet only.")
-            Text("Faults are intentional synthetic conditions, not evidence of a production wallet defect.")
-        }
-        if (selected.id != FaultId.NORMAL) item {
+    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("Fault Lab", style = MaterialTheme.typography.headlineSmall)
+        LabSafetyBanner()
+        if (selected.id != FaultId.NORMAL) {
             Card(Modifier.fillMaxWidth().testTag("fault-active-card")) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Text("FAULT ACTIVE", color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.titleLarge)
                     Text(selected.displayName, style = MaterialTheme.typography.titleMedium)
-                    Text("This is an intentional test condition.")
-                    Text("Injected condition: ${selected.description}")
-                    if (selected.expectedProtocolCode == null) {
-                        Text("Terminal result: continues through normal flow afterward")
-                    } else {
-                        Text("Expected protocol result: ${protocolErrorText(selected.expectedProtocolCode)}")
+                    Text("INTENTIONAL TEST CONDITION")
+                    Text("Expected protocol result: " + (selected.expectedProtocolCode?.let(::protocolErrorText)
+                        ?: "Continues through normal flow"))
+                    Button(onClick = { onSelect(FaultId.NORMAL) }, modifier = Modifier.testTag("return-to-normal")) {
+                        Text("RETURN TO NORMAL")
                     }
-                    Button(onClick = { onSelect(FaultId.NORMAL) },
-                        modifier = Modifier.testTag("return-to-normal")) { Text("RETURN TO NORMAL") }
                 }
             }
+        } else {
+            Text("NORMAL · no intentional fault selected", style = MaterialTheme.typography.labelLarge)
         }
-        groups.forEach { (label, ids) ->
-            item { Text(label, style = MaterialTheme.typography.titleMedium) }
-            ids.forEach { id ->
-                item(key = id.stableId) {
-                    val profile = FaultCatalog.get(id)
-                    Card(Modifier.fillMaxWidth().testTag("fault-${id.stableId}")
-                        .selectable(selected = selected.id == id, role = Role.RadioButton,
-                            onClick = { onSelect(id) })) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(profile.displayName, style = MaterialTheme.typography.titleSmall)
-                            Text(profile.description)
-                            Text(id.stableId, style = MaterialTheme.typography.labelSmall)
-                            Text(if (selected.id == id) "SELECTED" else "Select fault")
+        LazyColumn(Modifier.weight(1f).testTag("fault-lab"), contentPadding = PaddingValues(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            item { Text("Faults are intentional synthetic conditions, not evidence of a production wallet defect.") }
+            groups.forEach { (label, ids) ->
+                item { Text(label, style = MaterialTheme.typography.titleMedium) }
+                ids.forEach { id ->
+                    item(key = id.stableId) {
+                        val profile = FaultCatalog.get(id)
+                        Card(Modifier.fillMaxWidth().testTag("fault-${id.stableId}")
+                            .selectable(selected = selected.id == id, role = Role.RadioButton,
+                                onClick = { onSelect(id) })) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                Text(profile.displayName, style = MaterialTheme.typography.titleSmall)
+                                Text(profile.description)
+                                Text("Target: " + profile.targetMethods.joinToString { it.name }.ifEmpty { "Normal protocol flow" })
+                                Text("Layer: ${profile.hook?.name ?: "NONE"}")
+                                Text("Expected protocol result: " + (profile.expectedProtocolCode?.let(::protocolErrorText)
+                                    ?: "Continues through normal flow"))
+                                Text(id.stableId, style = MaterialTheme.typography.labelSmall)
+                                StatusBadge(if (selected.id == id) "SELECTED" else "ACTIVATE",
+                                    alert = selected.id == id && id != FaultId.NORMAL)
+                            }
                         }
                     }
                 }

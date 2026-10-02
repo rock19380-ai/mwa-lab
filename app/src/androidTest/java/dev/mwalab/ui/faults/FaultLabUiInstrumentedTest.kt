@@ -22,8 +22,11 @@ class FaultLabUiInstrumentedTest {
         try {
             selection.select(FaultId.NORMAL)
             compose.waitForIdle()
+            if (compose.onAllNodesWithText("ENTER LAB").fetchSemanticsNodes().isNotEmpty()) {
+                compose.onNodeWithText("ENTER LAB").performClick()
+            }
             compose.onNodeWithText("Active fault").assertExists()
-            compose.onNodeWithText("Normal").assertExists()
+            compose.onNodeWithText("NORMAL").assertExists()
             compose.onNodeWithText("Fault Lab").performClick()
             compose.onNodeWithTag("fault-lab").performScrollToNode(hasTestTag("fault-FAULT_SIGN_REJECT"))
             compose.onNodeWithTag("fault-FAULT_SIGN_REJECT").performClick()
@@ -33,7 +36,7 @@ class FaultLabUiInstrumentedTest {
             compose.activityRule.scenario.recreate()
             compose.waitForIdle()
             compose.onNodeWithTag("fault-active-card").assertExists()
-            compose.onNodeWithText("Reject signing").assertExists()
+            compose.onAllNodesWithText("Reject signing").onFirst().assertExists()
             assertEquals(FaultId.SIGN_REJECT, selection.selected.value.id)
             compose.onNodeWithText("Home").performClick()
             compose.onNodeWithText("FAULT ACTIVE · INTENTIONAL TEST CONDITION").assertExists()

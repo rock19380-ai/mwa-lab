@@ -22,6 +22,8 @@ fun LazyListScope.transactionInspectorContent(
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("Transaction ${summary.payloadIndex + 1}", style = MaterialTheme.typography.titleMedium)
                 Text("Version: ${TransactionPresentation.version(summary)} · ${TransactionPresentation.status(summary)}")
+                summary.instructions?.firstOrNull()?.programName?.let { Text(it) }
+                Text("${summary.instructionCount ?: 0} instructions · read-only diagnostic metadata")
                 OutlinedButton(onClick = onToggle) {
                     Text("${if (expanded) "Collapse" else "Inspect"} transaction ${summary.payloadIndex + 1}")
                 }

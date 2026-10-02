@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.mwalab.simulation.SimulationOutcome
 import dev.mwalab.simulation.SimulationResult
+import dev.mwalab.ui.components.StatusBadge
 
 const val SIMULATION_PASS_WARNING =
     "Simulation passed on Devnet at the recorded context. This does not guarantee later signing, submission, confirmation, or unchanged chain state."
@@ -26,6 +27,8 @@ fun SimulationResultContent(result: SimulationResult, tagPrefix: String) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text("Simulation ${result.outcome.name}", Modifier.testTag("$tagPrefix-${result.outcome.name.lowercase()}"),
             style = MaterialTheme.typography.titleSmall)
+        StatusBadge("SIMULATION ${result.outcome.name}", alert = result.outcome == SimulationOutcome.FAIL)
+        Text("Diagnostic evidence only")
         Text("Simulation failure source: ${result.failureSource.name}")
         Text("Attempt ${result.attemptNumber} · ${result.durationMillis} ms")
         Text("Commitment: ${result.commitment}")

@@ -2,6 +2,8 @@ package dev.mwalab.approval
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +21,8 @@ import dev.mwalab.simulation.SimulationTargetRef
 import dev.mwalab.simulation.SimulationUiState
 import dev.mwalab.ui.simulation.SimulationResultContent
 import dev.mwalab.faults.FaultCatalog
+import dev.mwalab.ui.components.LabSafetyBanner
+import dev.mwalab.ui.components.SectionCard
 
 /** Renders metadata; decision callbacks receive the original request ID. */
 @Composable
@@ -29,10 +33,10 @@ fun SigningApprovalScreen(
     simulationStates: Map<SimulationTargetRef, SimulationUiState> = emptyMap(),
     onSimulate: (SimulationTargetRef) -> Unit = {},
 ) {
-    Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("MWA LAB TEST ENDPOINT", style = MaterialTheme.typography.headlineSmall)
-        Text("SOLANA DEVNET")
-        Text("NO REAL FUNDS")
+        Text("SOLANA DEVNET", style = MaterialTheme.typography.labelLarge)
+        LabSafetyBanner()
         when (state) {
             ApprovalState.Idle -> {
                 Text("Local Mobile Wallet Adapter session host")
@@ -40,21 +44,22 @@ fun SigningApprovalScreen(
             }
             is ApprovalState.Pending -> {
                 val request = state.request
-                Column(Modifier.weight(1f).testTag("approval-content").verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    request.faultSnapshotId?.let { faultId ->
-                        val profile = FaultCatalog.get(faultId)
-                        Text("FAULT ACTIVE · INTENTIONAL TEST CONDITION",
-                            Modifier.testTag("request-fault-banner"),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.titleMedium)
+                request.faultSnapshotId?.let { faultId ->
+                    val profile = FaultCatalog.get(faultId)
+                    SectionCard("FAULT ACTIVE · INTENTIONAL TEST CONDITION",
+                        Modifier.testTag("request-fault-banner")) {
                         Text("Request fault snapshot: ${profile.displayName} (${faultId.stableId})")
                     }
+                }
+                Column(Modifier.weight(1f).testTag("approval-content").verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("SIGNING APPROVAL", style = MaterialTheme.typography.titleLarge)
-                    Text("dApp: ${request.dappIdentityName ?: "Unknown dApp"}")
-                    Text("Method: ${request.method}")
-                    Text("Chain: ${request.chain}")
-                    Text("Payloads: ${request.payloadFingerprints.size}")
+                    SectionCard("Request") {
+                        Text("dApp: ${request.dappIdentityName ?: "Unknown dApp"}")
+                        Text("Method: ${request.method}")
+                        Text("Chain: ${request.chain}")
+                        Text("Payloads: ${request.payloadFingerprints.size}")
+                    }
                     val diagnostics = request.transactionSummaries
                     if (diagnostics == null) {
                         request.payloadFingerprints.forEachIndexed { index, fingerprint ->
@@ -98,8 +103,14 @@ fun SigningApprovalScreen(
                     }
                 }
                 // Warnings and decision buttons remain visible while scrolling the request.
-                Button(onClick = { onApprove(request.requestId) }) { Text("APPROVE") }
-                OutlinedButton(onClick = { onReject(request.requestId) }) { Text("REJECT") }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(onClick = { onReject(request.requestId) }, modifier = Modifier.weight(1f)) {
+                        Text("REJECT")
+                    }
+                    Button(onClick = { onApprove(request.requestId) }, modifier = Modifier.weight(1f)) {
+                        Text("APPROVE")
+                    }
+                }
             }
         }
     }

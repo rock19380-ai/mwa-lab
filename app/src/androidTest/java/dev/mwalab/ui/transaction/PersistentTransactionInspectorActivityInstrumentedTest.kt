@@ -46,8 +46,11 @@ class PersistentTransactionInspectorActivityInstrumentedTest {
             MwaLabComposition.transactionDiagnosticRepository(context).recordForEvent(id, eventId, listOf(summary))
         }
 
+        if (compose.onAllNodesWithText("ENTER LAB").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithText("ENTER LAB").performClick()
+        }
         assertLabIdentity()
-        compose.onNodeWithText("Sessions").performClick()
+        compose.onNodeWithTag("nav-SESSIONS").performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithText(dappName).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("sessions-list").performScrollToNode(hasText(dappName))
         compose.onNodeWithText(dappName).performClick()
@@ -63,7 +66,9 @@ class PersistentTransactionInspectorActivityInstrumentedTest {
         compose.activityRule.scenario.recreate()
         compose.waitForIdle()
         waitForDiagnostics(eventId)
-        assertLabIdentity()
+        compose.onNodeWithText("Session Detail").assertIsDisplayed()
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("SOLANA DEVNET", substring = true))
+        compose.onNodeWithText("SOLANA DEVNET", substring = true).assertExists()
         scroll("Collapse transaction 1")
         scroll("Lamports: 10000000")
         scroll("Raw metadata")
@@ -78,8 +83,9 @@ class PersistentTransactionInspectorActivityInstrumentedTest {
         }
     }
     private fun assertLabIdentity() {
-        compose.onNodeWithText("MWA LAB TEST ENDPOINT").assertIsDisplayed()
-        compose.onNodeWithText("SOLANA DEVNET · NO REAL FUNDS").assertIsDisplayed()
+        compose.onAllNodesWithText("MWA Lab").onFirst().assertIsDisplayed()
+        compose.onNodeWithText("DEVNET ONLY").assertIsDisplayed()
+        compose.onNodeWithText("NO REAL FUNDS").assertIsDisplayed()
     }
     private fun scroll(text: String) {
         compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText(text))

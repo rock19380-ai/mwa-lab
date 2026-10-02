@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">MWA Lab</string>
+    <string name="product_subtitle">Mobile Wallet Adapter protocol debugger and deterministic failure simulator</string>
+    <string name="devnet_only">DEVNET ONLY</string>
+    <string name="solana_devnet">SOLANA DEVNET</string>
+    <string name="no_real_funds">NO REAL FUNDS</string>
+    <string name="fault_active">FAULT ACTIVE</string>
+    <string name="intentional_test_condition">INTENTIONAL TEST CONDITION</string>
+    <string name="sanitized_report">Sanitized diagnostic report</string>
+    <string name="copy_address">Copy Address</string>
+    <string name="address_copied">Address copied</string>
+    <string name="identity_unavailable">Lab identity unavailable. Protocol signing remains fail-closed.</string>
+    <string name="onboarding_enter">ENTER LAB</string>
+    <string name="onboarding_title">Trace the MWA boundary</string>
+    <string name="onboarding_trace">Trace Mobile Wallet Adapter sessions and inspect protocol outcomes.</string>
+    <string name="onboarding_faults">Reproduce deterministic failure paths with one selected fault at a time.</string>
+    <string name="onboarding_reports">Export sanitized diagnostic evidence without raw secrets.</string>
 </resources>

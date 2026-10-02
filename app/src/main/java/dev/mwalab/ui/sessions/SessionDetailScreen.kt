@@ -18,6 +18,13 @@ import dev.mwalab.security.DiagnosticSanitizer
 import dev.mwalab.ui.simulation.SimulationResultContent
 import dev.mwalab.report.ReportCompleteness
 import dev.mwalab.faults.FaultCatalog
+import dev.mwalab.protocol.ProtocolOutcome
+import dev.mwalab.session.SessionStatus
+import dev.mwalab.session.SessionSummary
+import dev.mwalab.ui.components.DiagnosticValue
+import dev.mwalab.ui.components.SectionCard
+import dev.mwalab.ui.components.StateNotice
+import dev.mwalab.ui.components.StatusBadge
 
 @Composable
 fun SessionDetailScreen(
@@ -37,54 +44,75 @@ fun SessionDetailScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { TextButton(onClick = onBack) { Text("Back to sessions") } }
         when (state) {
-            SessionDetailUiState.Loading -> item { Text("Loading persisted timeline…") }
-            SessionDetailUiState.Missing -> item { Text("Session not found") }
+            SessionDetailUiState.Loading -> item { StateNotice("Loading timeline", "Loading persisted protocol history…") }
+            SessionDetailUiState.Missing -> item { StateNotice("Session not found", "This persisted session is unavailable.", "Retry", onRetry) }
             SessionDetailUiState.Error -> item {
-                Text("Protocol timeline unavailable. Try loading it again.")
-                OutlinedButton(onClick = onRetry) { Text("Retry") }
+                StateNotice("Protocol timeline unavailable", "Try loading this session again.", "Retry", onRetry)
             }
             is SessionDetailUiState.Ready -> {
                 val summary = state.summary
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(summary.session.dappIdentityName ?: "Unknown dApp", style = MaterialTheme.typography.headlineSmall)
-                        Text("SESSION ${sessionStatusText(summary.status)}", style = MaterialTheme.typography.titleMedium)
                         Text("SOLANA DEVNET · ${summary.session.cluster}")
-                        Text("Started ${timestampText(summary.session.startedAtEpochMillis)}")
-                        Text(summary.session.completedAtEpochMillis?.let { "Completed ${timestampText(it)}" }
-                            ?: "Recorded open. Connection liveness is unknown; process interruption may leave unfinished history.")
-                        Text("${summary.eventCount} events · ${summary.durationMillis?.let { "$it ms" } ?: "No recorded end"}")
-                        summary.session.closeReason?.let { Text("Close reason: ${it.name}") }
                     }
                 }
-                item {
-                    ReportExportSection(state, reportExportState, onShareMarkdown, onShareJson, onCopySummary)
-                }
-                item {
-                    CapabilitySnapshotSection(state.capabilities, onRetryCapabilities)
-                }
-                if (summary.events.isEmpty()) item { Text("No observed protocol methods in this session.") }
-                if (summary.events.none { it.method == ProtocolMethod.SIGN_TRANSACTIONS ||
-                    it.method == ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS }) {
-                    item { Text("Transaction diagnostics were not recorded for this session.") }
-                }
+                item { SessionHero(summary) }
+                item { Text("PROTOCOL TIMELINE", style = MaterialTheme.typography.titleLarge) }
+                if (summary.events.isEmpty()) item { StateNotice("No observed methods",
+                    "No protocol method was recorded for this session.") }
                 summary.events.forEach { event ->
                     item(key = "event-${event.eventId}") { ProtocolEventCard(event) }
-                    if (event.method == ProtocolMethod.SIGN_TRANSACTIONS ||
-                        event.method == ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS) {
-                        transactionEventDiagnostics(event,
-                            state.transactions[event.eventId] ?: SessionTransactionUiState.Missing,
-                            expandedTransactions, { key ->
-                                expandedTransactions = if (key in expandedTransactions) expandedTransactions - key
-                                    else expandedTransactions + key
-                            }, { onRetryTransactions(event.eventId) })
-                        simulationEventDiagnostics(event,
-                            state.simulations[event.eventId] ?: SessionSimulationUiState.Missing,
-                            { onRetrySimulations(event.eventId) })
-                    }
                 }
+                item { CapabilitySnapshotSection(state.capabilities, onRetryCapabilities) }
+                val transactionEvents = summary.events.filter {
+                    it.method == ProtocolMethod.SIGN_TRANSACTIONS ||
+                        it.method == ProtocolMethod.SIGN_AND_SEND_TRANSACTIONS
+                }
+                if (transactionEvents.isEmpty()) item {
+                    Text("Transaction diagnostics were not recorded for this session.")
+                }
+                transactionEvents.forEach { event ->
+                    transactionEventDiagnostics(event,
+                        state.transactions[event.eventId] ?: SessionTransactionUiState.Missing,
+                        expandedTransactions, { key ->
+                            expandedTransactions = if (key in expandedTransactions) expandedTransactions - key
+                                else expandedTransactions + key
+                        }, { onRetryTransactions(event.eventId) })
+                    simulationEventDiagnostics(event,
+                        state.simulations[event.eventId] ?: SessionSimulationUiState.Missing,
+                        { onRetrySimulations(event.eventId) })
+                }
+                item { SectionCard("Session metadata") {
+                    Text("Started ${timestampText(summary.session.startedAtEpochMillis)}")
+                    Text(summary.session.completedAtEpochMillis?.let { "Completed ${timestampText(it)}" }
+                        ?: "Recorded open. Connection liveness is unknown; process interruption may leave unfinished history.")
+                    summary.session.closeReason?.let { Text("Close reason: ${it.name}") }
+                } }
+                item { ReportExportSection(state, reportExportState, onShareMarkdown, onShareJson, onCopySummary) }
             }
         }
+    }
+}
+
+@Composable
+private fun SessionHero(summary: SessionSummary) {
+    val hero = sessionHeroPresentation(summary)
+    SectionCard(if (summary.status == SessionStatus.FAIL) "SESSION FAILED" else "SESSION ${hero.status}") {
+        StatusBadge("SESSION ${hero.status}", alert = summary.status == SessionStatus.FAIL)
+        if (summary.status == SessionStatus.FAIL) {
+            DiagnosticValue("Failed at", hero.failedMethod ?: "No failed method recorded")
+            DiagnosticValue("Protocol result", hero.protocolResult ?: "No protocol error recorded")
+            DiagnosticValue("Failure source", hero.failureSource ?: "UNKNOWN")
+            hero.injectedFault?.let {
+                StatusBadge("INJECTED", alert = true)
+                DiagnosticValue("Injected fault", it)
+            }
+        } else if (summary.status == SessionStatus.ACTIVE) {
+            Text("Recorded open · connection liveness unknown. History may be incomplete.")
+        }
+        DiagnosticValue("Duration", hero.duration)
+        Text("${hero.eventCount} protocol events", style = MaterialTheme.typography.labelMedium)
     }
 }
 
@@ -187,24 +215,36 @@ private fun CapabilitySnapshotSection(state: SessionCapabilityUiState, onRetry: 
 
 @Composable
 private fun ProtocolEventCard(event: ProtocolEvent) {
+    var detailsExpanded by rememberSaveable(event.eventId) { mutableStateOf(false) }
     Card(Modifier.fillMaxWidth().testTag("event-${event.sequence}")) {
         SelectionContainer {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                 Text("#${event.sequence} ${event.method.name}", style = MaterialTheme.typography.titleMedium)
+                StatusBadge(when (event.outcome) {
+                    ProtocolOutcome.SUCCESS -> "PASS"
+                    ProtocolOutcome.FAILURE -> "FAIL"
+                    ProtocolOutcome.CANCELLED -> "CANCELLED"
+                }, alert = event.outcome == ProtocolOutcome.FAILURE)
                 Text("${event.outcome.name} · ${event.durationMillis} ms", style = MaterialTheme.typography.labelLarge)
-                Text("Started ${timestampText(event.startedAtEpochMillis)}")
-                Text("Completed ${timestampText(event.completedAtEpochMillis)}")
-                Text(protocolErrorText(event.protocolErrorCode))
+                if (event.protocolErrorCode != null) Text(protocolErrorText(event.protocolErrorCode))
                 Text("Failure source: ${event.failureSource.name}")
                 injectedConditionText(event)?.let { condition ->
                     Text("INTENTIONAL TEST CONDITION", color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.titleSmall)
                     Text(condition)
                 }
-                SafeSummary("Request summary", event.requestSummary)
-                SafeSummary("Response summary", event.responseSummary)
-                event.capabilityContext?.takeIf { it.isNotEmpty() }?.let {
-                    SafeSummary("Recorded capability context", it)
+                TextButton(onClick = { detailsExpanded = !detailsExpanded },
+                    modifier = Modifier.testTag("event-details-${event.sequence}")) {
+                    Text(if (detailsExpanded) "Hide event details" else "Show event details")
+                }
+                if (detailsExpanded) {
+                    Text("Started ${timestampText(event.startedAtEpochMillis)}")
+                    Text("Completed ${timestampText(event.completedAtEpochMillis)}")
+                    SafeSummary("Request summary", event.requestSummary)
+                    SafeSummary("Response summary", event.responseSummary)
+                    event.capabilityContext?.takeIf { it.isNotEmpty() }?.let {
+                        SafeSummary("Recorded capability context", it)
+                    }
                 }
             }
         }

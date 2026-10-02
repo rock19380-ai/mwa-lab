@@ -37,12 +37,12 @@ class SessionsUiInstrumentedTest {
             summary("cancel", SessionCloseReason.HOST_CLOSED, ProtocolOutcome.CANCELLED))
         var opened: String? = null
         compose.setContent { MWALabTheme { SessionsScreen(SessionsUiState.Ready(summaries), { opened = it }, {}) } }
-        compose.onNodeWithText("ACTIVE · recorded open").assertExists()
+        compose.onNodeWithText("ACTIVE").assertExists()
         compose.onNodeWithTag("sessions-list").performScrollToNode(hasText("Test dApp fail"))
         compose.onNodeWithText("Test dApp fail").performClick()
         compose.runOnIdle { assertEquals("fail", opened) }
-        compose.onNodeWithTag("sessions-list").performScrollToNode(hasText("CANCELLED / INTERRUPTED"))
-        compose.onNodeWithText("CANCELLED / INTERRUPTED").assertExists()
+        compose.onNodeWithTag("sessions-list").performScrollToNode(hasText("CANCELLED"))
+        compose.onNodeWithText("CANCELLED").assertExists()
     }
 
     @Test
@@ -57,9 +57,10 @@ class SessionsUiInstrumentedTest {
         compose.onNodeWithText("SESSION FAIL").assertExists()
         compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 SIGN_MESSAGES"))
         compose.onNodeWithText("#1 SIGN_MESSAGES").assertExists()
-        compose.onNodeWithText("Protocol error: ERROR_NOT_SIGNED (-3)").assertExists()
+        compose.onAllNodesWithText("Protocol error: ERROR_NOT_SIGNED (-3)").onFirst().assertExists()
         compose.onNodeWithText("Failure source: OBSERVED_PROTOCOL").assertExists()
         compose.onNodeWithText("FAILURE · 40 ms").assertExists()
+        compose.onNodeWithTag("event-details-1").performClick()
         compose.onNodeWithText("auth_token: <redacted>").assertExists()
         compose.onAllNodesWithText("SECRET_UI_SENTINEL", substring = true).assertCountEquals(0)
         compose.onNodeWithText("result: rejected").assertExists()
@@ -75,7 +76,7 @@ class SessionsUiInstrumentedTest {
         compose.onNodeWithText("walletlib 2.0.7 handles get_capabilities internally.", substring = true).assertExists()
         compose.onAllNodesWithText("#2 GET_CAPABILITIES").assertCountEquals(0)
         compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 SIGN_MESSAGES"))
-        compose.onNodeWithText("Protocol error: -12345 (Unknown protocol error)").assertExists()
+        compose.onAllNodesWithText("Protocol error: -12345 (Unknown protocol error)").onFirst().assertExists()
     }
 
     @Test
@@ -102,17 +103,19 @@ class SessionsUiInstrumentedTest {
                 reportExportState = ReportExportUiState.Idle,
                 onShareMarkdown = { markdown++ }, onShareJson = { json++ }, onCopySummary = { copy++ })
         } }
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 SIGN_MESSAGES"))
+        compose.onAllNodesWithText("INTENTIONAL TEST CONDITION").onFirst().assertExists()
         compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasTestTag("export-report"))
         compose.onNodeWithText("SANITIZED DIAGNOSTIC REPORT").assertExists()
         compose.onNodeWithText("NO PRIVATE KEYS OR AUTH TOKENS").assertExists()
         compose.onNodeWithText("PARTIAL REPORT").assertExists()
-        compose.onAllNodesWithText("INTENTIONAL TEST CONDITION").assertCountEquals(2)
+        compose.onAllNodesWithText("INTENTIONAL TEST CONDITION").onFirst().assertExists()
         compose.onNodeWithText("FAULT_SIGN_REJECT").assertExists()
         compose.onNodeWithText("Recorded failure source: INJECTED").assertExists()
         compose.onNodeWithTag("export-report").performClick()
-        compose.onNodeWithTag("share-markdown").performClick()
-        compose.onNodeWithTag("share-json").performClick()
-        compose.onNodeWithTag("copy-summary").performClick()
+        compose.onNodeWithTag("share-markdown").performScrollTo().performClick()
+        compose.onNodeWithTag("share-json").performScrollTo().performClick()
+        compose.onNodeWithTag("copy-summary").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals(1, markdown)
             assertEquals(1, json)
@@ -159,7 +162,7 @@ class SessionsUiInstrumentedTest {
             compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#1 AUTHORIZE"))
             compose.onNodeWithText("#1 AUTHORIZE").assertExists()
             compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasText("#2 SIGN_MESSAGES"))
-            compose.onNodeWithText("Protocol error: ERROR_NOT_SIGNED (-3)").assertExists()
+            compose.onAllNodesWithText("Protocol error: ERROR_NOT_SIGNED (-3)").onFirst().assertExists()
             compose.onNodeWithText("Failure source: OBSERVED_PROTOCOL").assertExists()
         } finally { reopened.close(); context.deleteDatabase(name) }
     }
