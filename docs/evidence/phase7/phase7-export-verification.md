@@ -7,6 +7,7 @@ Checkpoint: `phase7-sanitized-diagnostic-reports`, based on Phase 7.0–7.10 com
 | `python3 scripts/phase7_export_security.py` | PASS |
 | `python3 scripts/phase7_static.py` | PASS |
 | `python3 scripts/phase7_design_check.py` | PASS |
+| `sha256sum -c docs/evidence/phase7/phase7-baseline.sha256` | PASS, seven frozen files |
 | `./gradlew test lint assembleDebug :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest --offline` | PASS, 280 app JVM tests and 10 demo-client JVM tests, zero failures or skips; lint and all requested APK builds passed |
 | Connected `DiagnosticReportExportInstrumentedTest` on `emulator-5554` | AUTOMATED PASS, 2 tests, zero failures |
 | Connected `SessionsUiInstrumentedTest` on `emulator-5554` | AUTOMATED PASS, 10 tests, zero failures |
@@ -20,3 +21,5 @@ On `emulator-5554`, the funded Devnet test identity completed the canonical NORM
 With `FAULT_SIGN_REJECT` selected, the demo client requested the same sign-and-send operation and received `ERROR_NOT_SIGNED` (`-3`). After force-stop/relaunch, the wallet session recorded `SIGN_AND_SEND_TRANSACTIONS / FAILURE / INJECTED / FAULT_SIGN_REJECT`. Session Detail displayed `INTENTIONAL TEST CONDITION`; Markdown and JSON opened Android Share Sheet, and Copy Summary reported success. This is **MANUALLY OBSERVED PASS** for the live flow, with automated persisted-report parity above. Fault Lab was then returned to `NORMAL` and visibly showed `SELECTED`.
 
 Both generated Markdown reports were inspected directly. They include ordered methods, event durations, outcomes, protocol errors and sources, the active fault marker where present, capability values, transaction SHA-256 and parsed public metadata, completeness, reproduction context, simulation evidence limits, and a security notice. No simulation attempt was recorded in these live sessions, which the reports say explicitly. The reports exclude raw payloads and cannot reproduce exact transaction bytes from the sanitized artifact alone.
+
+The frozen `./scripts/phase6_static.sh` was also attempted after Prompt 2. Its Phase 5 and Phase 6 design, vector, and security subchecks passed, but its Phase 6 scope check exited FAIL because it forbids `ACTION_SEND` anywhere in main source (`Phase 7 sharing introduced early`). That prohibition was correct for the Phase 6 freeze and is expected to reject Phase 7's authorized Share Sheet. The Phase 6 script was left unchanged. The separate Phase 7 static/export checks above validate the current scope, and the frozen baseline hashes still match.
