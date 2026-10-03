@@ -1,43 +1,18 @@
-# Phase 8 screenshot and demo-readiness audit — implementation checkpoint
+# Phase 8 final screenshot and demo-readiness audit
 
-Date: 2026-10-02. This is a readiness audit, not the final competition screenshot set.
+Date: 2026-10-03 (Asia/Yangon). The six captured screenshots under `screenshots/phase8/` came from the exact repaired debug APK and real persisted Devnet/test sessions on `emulator-5554`. They were visually reviewed at 1080×2424; no screenshot state was fabricated.
 
-## Device audit captures performed
+| File | Observed state |
+|---|---|
+| `home-normal.png` | NORMAL, Devnet/no-real-funds, developer-tool identity, latest PASS session |
+| `fault-sign-reject-active.png` | Selected `FAULT_SIGN_REJECT`, active and intentional warning, expected `ERROR_NOT_SIGNED` |
+| `session-injected-error-not-signed.png` | Persisted failed sign-and-send, `INJECTED`, and independent fault ID |
+| `session-success.png` | Persisted PASS and successful sign-and-send timeline |
+| `session-success-export.png` | Same successful session with sanitized Markdown/JSON/Copy controls |
+| `signing-approval-devnet.png` | Real pending request, Devnet safety, transaction diagnostics, explicit REJECT/APPROVE |
 
-During the Phase 8 hardening review, temporary emulator captures were taken and visually inspected for:
+The first approval capture exposed Android status-bar overlap. `SigningApprovalScreen.kt` gained top system-bar padding; the final capture was taken after the repaired build passed full local and connected tests and visibly clears the title from the status bar. No protocol or approval authority changed.
 
-- Home in the normal/light presentation;
-- Home in dark theme at 1.3× font scale;
-- Settings in dark theme at 1.3× font scale;
-- Settings after switching to light theme;
-- Fault Lab at 1.3× font scale;
-- Fault Lab with an active fault warning.
+The injected screenshots explicitly label the condition intentional and do not present it as an observed production-wallet defect. The approval screenshot shows public Devnet metadata only, not secret key material or raw transaction bytes. The final active fault was restored to persisted NORMAL after screenshot capture. These are screenshot candidates, not production-wallet compatibility proof.
 
-Those temporary `/tmp` audit captures were used for layout review and were intentionally not committed as competition artifacts.
-
-## Readiness findings
-
-- Safety wording remains prominent.
-- Light/dark presentation is coherent.
-- Large-font navigation remains usable.
-- Active fault state remains visibly synthetic/intentional.
-- Session Detail already has a failure-first hierarchy and report controls from the Phase 8 implementation checkpoint.
-- Signing Approval keeps the Devnet/no-real-funds boundary and explicit decisions.
-
-## Final screenshot policy
-
-The final competition screenshot candidates should be captured only after the Phase 8 canonical live regression so they represent the same final verified build and real persisted Devnet/test evidence.
-
-Target final states remain:
-
-1. Home — NORMAL.
-2. Fault Lab — `FAULT_SIGN_REJECT` active.
-3. Session Detail — injected `ERROR_NOT_SIGNED` with `INJECTED` clearly visible.
-4. Successful Session Detail with sanitized report controls.
-5. Signing Approval with Devnet transaction diagnostics.
-
-No screenshot may make an injected failure look organically observed, expose private material, or imply unverified production-wallet compatibility.
-
-## Result
-
-**SCREENSHOT-READY / FINAL CANONICAL CAPTURE DEFERRED TO THE FINAL LIVE-REGRESSION PASS.**
+Result: **SIX FACTUAL SCREENSHOT CANDIDATES CAPTURED AND REVIEWED**.

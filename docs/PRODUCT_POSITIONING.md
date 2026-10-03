@@ -35,3 +35,13 @@ Production wallets remain necessary for final compatibility validation.
 MWA Lab is used before and alongside real-wallet testing.
 
 No compatibility claim may be published without current verification.
+
+## Phase 8 first impression
+
+The first Home viewport says Mobile Wallet Adapter protocol debugger and
+deterministic failure simulator, Solana Devnet, and no real funds. It shows
+whether an intentional fault is active and where to inspect recorded sessions.
+The final five-second audit passes this comprehension contract. The embedded
+Devnet identity is test infrastructure, and the injected failure screenshots
+are labeled as intentional. Production-wallet compatibility remains
+**NOT VERIFIED IN THIS RELEASE**.

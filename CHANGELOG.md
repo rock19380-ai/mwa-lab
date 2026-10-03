@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Phase 8 — World-class UX and positioning
+
+- Added a stable light/dark design system, first-run product explanation, typed
+  five-destination shell, read-only Lab Identity, and safe appearance Settings.
+- Made session outcomes, timeline, injected faults, and sanitized report actions
+  easier to scan while preserving their persisted authority and classifications.
+- Kept Devnet/no-real-funds warnings and explicit approval visible; corrected
+  the approval title's Android status-bar inset after final device review.
+- Added final local, connected, canonical Devnet NORMAL/injected, security,
+  screenshot, and prefreeze evidence without expanding protocol behavior.
+- Retained Room schema 3, walletlib 2.0.7, fixed Devnet RPC, and unexposed
+  Identity Reset. Production-wallet compatibility is NOT VERIFIED IN THIS RELEASE.
+
 ### Phase 7 — Sanitized Diagnostic Reports
 
 - Added canonical typed report v1 over persisted session, event, capability,

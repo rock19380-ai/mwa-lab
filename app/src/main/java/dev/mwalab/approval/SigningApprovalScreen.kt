@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -33,7 +34,8 @@ fun SigningApprovalScreen(
     simulationStates: Map<SimulationTargetRef, SimulationUiState> = emptyMap(),
     onSimulate: (SimulationTargetRef) -> Unit = {},
 ) {
-    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("MWA LAB TEST ENDPOINT", style = MaterialTheme.typography.headlineSmall)
         Text("SOLANA DEVNET", style = MaterialTheme.typography.labelLarge)
         LabSafetyBanner()

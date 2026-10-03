@@ -292,3 +292,21 @@ path and grants temporary read access to one `content://` report URI through
 Android Share Sheet. No broad external storage, `file://` sharing, cloud upload,
 or backend is used. Session Detail labels synthetic fault conditions explicitly;
 a fault marker never implies the terminal failure source.
+
+## Phase 8 UI and export continuation
+
+The Phase 8 shell and approval layout project existing structured state. The
+new Settings view cannot edit RPC/network authority; Mainnet remains unavailable.
+Lab Identity exposes a public Devnet address only, and Identity Reset remains
+unexposed. Explicit APPROVE/REJECT still owns normal signing decisions.
+Injected failures remain visibly intentional; `failureSource` and
+`injectedFaultId` remain independent. Markdown, JSON, and Copy Summary still
+come from the canonical bounded sanitized report. Actual final Devnet cache
+artifacts passed read-only Room parity, sentinel, and forbidden-field checks.
+
+The historical Phase 7 security scanner freezes the old approval directory and
+therefore rejects the intended Phase 8 `SigningApprovalScreen.kt` presentation
+diff. That scanner was not rewritten. The Phase 8 continuation gate checks the
+unchanged approval coordinator, signing/storage/fault/report authorities and
+current export security. Details are in
+[Phase 8 final security evidence](evidence/phase8/phase8-final-security.md).

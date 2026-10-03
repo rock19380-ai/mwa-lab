@@ -293,3 +293,17 @@ share the canonical model. Transaction and simulation diagnostics remain
 observational; unknown decoded semantics stay unknown. The exporter has no
 approval, signing, submission, fault, simulation, or RPC execution authority.
 Room stays at schema 3 and walletlib stays at 2.0.7.
+
+## Phase 8 presentation boundary
+
+The single-activity Compose shell uses typed destinations for Home, Sessions,
+Fault Lab, Lab Identity, Settings, and child Session Detail. Home and diagnostics
+project existing identity, fault-selection, and persisted session repositories;
+they do not gain protocol, signing, RPC, report, or storage authority. UI-only
+private preferences hold onboarding completion and appearance mode. Settings
+shows the fixed Devnet RPC and report policy read-only. Identity Reset remains
+unexposed. The approval screen's top system-bar padding is a layout correction;
+`ApprovalCoordinator` and walletlib callbacks retain decision authority.
+
+See [Phase 8 design](phase8-world-class-ux-positioning-design.md) and the
+[factual final verification](evidence/phase8/).

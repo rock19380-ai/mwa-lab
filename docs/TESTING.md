@@ -371,3 +371,22 @@ approval is recorded as manually observed; automated parity is reported
 separately. Exact results are under `docs/evidence/phase7/`. Historical Phase 6
 static scope checks still apply to Phase 6 checkouts; Phase 7 CI routes to its
 own gate because Phase 6 intentionally prohibited pre-Phase-7 sharing.
+
+## Phase 8 final verification
+
+The final candidate ran `./scripts/phase8_static.sh` and the offline Gradle
+`lint test assembleDebug :app:assembleDebugAndroidTest
+:demo-client:assembleDebugAndroidTest` gate. Parsed XML reports 287 app JVM,
+10 demo JVM, 136 app connected, and 1 demo connected tests, all with zero
+failures, errors, and skips. Connected suites ran sequentially on one Android
+16 emulator. The exact debug APK removed by each runner was reinstalled before
+its dependent next step; font scale was restored to 1.0.
+
+The established Phase 2 demo-client NORMAL and `FAULT_SIGN_REJECT` sign-and-send
+scenarios were exercised against the final UI with real Devnet test funds. The
+Phase 7 read-only device verifier compared both generated Markdown/JSON reports
+to Room after force-stop/relaunch. The final injected selection was restored to
+NORMAL. See [final local](evidence/phase8/phase8-final-local-verification.md),
+[device](evidence/phase8/phase8-final-device-verification.md), and
+[live](evidence/phase8/phase8-live-normal.md) evidence. Exact-head GitHub Actions
+success and an annotated tag are required before calling the phase frozen.

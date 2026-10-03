@@ -270,16 +270,21 @@ or claim independent production-wallet compatibility. See
 [Phase 7 evidence](docs/evidence/phase7/).
 
 
-## Phase 8 — UX and positioning checkpoint
+## Phase 8 — World-class UX and positioning
 
-The current Phase 8 branch presents MWA Lab as a Mobile Wallet Adapter protocol
-debugger and deterministic failure simulator. Its Home, Sessions, Fault Lab,
-Lab Identity, Settings, and signing approval surfaces visibly state the
-Solana Devnet / no-real-funds boundary. Session Detail keeps protocol outcomes
-separate from injected fault markers and child simulation evidence. Reports
-remain sanitized. Identity Reset is not exposed.
+Home now identifies MWA Lab as a Mobile Wallet Adapter protocol debugger and
+deterministic failure simulator in its first viewport. Typed navigation reaches
+Home, Sessions, Fault Lab, read-only Lab Identity, and safe Settings. Session
+Detail leads with protocol outcome and keeps an applied fault ID independent
+from failure source. The signing surface preserves explicit approval and the
+Devnet/no-real-funds boundary; a final device audit corrected its status-bar
+inset. Identity Reset remains unexposed.
 
-This is an open implementation checkpoint, not a Phase 8 freeze or an
-independent production-wallet compatibility claim. See the
-[Phase 8 design](docs/phase8-world-class-ux-positioning-design.md) and
+The Phase 8 freeze candidate passed the final local and connected suites plus
+canonical NORMAL and `FAULT_SIGN_REJECT` Devnet live scenarios. Markdown, JSON,
+and Copy Summary were exercised from persisted sessions; real screenshots are
+under [screenshots/phase8/](screenshots/phase8/). Production-wallet
+compatibility remains **NOT VERIFIED IN THIS RELEASE**. Exact-head CI and the
+annotated freeze tag are the final provenance authority; see
+[PHASE_8_REPORT.md](PHASE_8_REPORT.md) and
 [Phase 8 evidence](docs/evidence/phase8/).
