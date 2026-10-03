@@ -44,6 +44,13 @@ import dev.mwalab.ui.settings.UiPreferences
 import dev.mwalab.ui.theme.MWALabTheme
 
 class MainActivity : ComponentActivity() {
+    private var homeViewModel: HomeViewModel? = null
+
+    override fun onResume() {
+        super.onResume()
+        homeViewModel?.refreshWallet()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -60,7 +67,11 @@ class MainActivity : ComponentActivity() {
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val model = when (modelClass) {
-                    HomeViewModel::class.java -> HomeViewModel(MwaLabComposition.identityRepository(applicationContext), repository)
+                    HomeViewModel::class.java -> HomeViewModel(
+                        MwaLabComposition.identityRepository(applicationContext),
+                        repository,
+                        walletService = MwaLabComposition.testWalletService(applicationContext),
+                    )
                     SessionsViewModel::class.java -> SessionsViewModel(repository)
                     SessionDetailViewModel::class.java -> SessionDetailViewModel(
                         repository, capabilities, transactionRepository = transactions,
@@ -74,6 +85,7 @@ class MainActivity : ComponentActivity() {
         }
         val provider = ViewModelProvider(this, factory)
         val home = provider[HomeViewModel::class.java]
+        homeViewModel = home
         val sessions = provider[SessionsViewModel::class.java]
         val detail = provider[SessionDetailViewModel::class.java]
         @Suppress("DEPRECATION")
@@ -124,6 +136,15 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 LaunchedEffect(selectedSession) { selectedSession?.let(detail::selectSession) }
+                LaunchedEffect(onboardingSeen, destination) {
+                    if (onboardingSeen && (
+                            destination == AppDestination.HOME ||
+                                destination == AppDestination.LAB_IDENTITY
+                        )
+                    ) {
+                        home.refreshWallet()
+                    }
+                }
                 val openSession: (String) -> Unit = { id ->
                     selectedSession = id
                     detail.selectSession(id)
@@ -133,7 +154,7 @@ class MainActivity : ComponentActivity() {
                     destination = destination.backDestination()
                 }
                 if (!onboardingSeen) {
-                    OnboardingScreen(activeFault) {
+                    OnboardingScreen(activeFault, homeState) {
                         uiPreferences.onboardingSeen = true
                         onboardingSeen = true
                     }
@@ -149,7 +170,7 @@ class MainActivity : ComponentActivity() {
                                             destination == AppDestination.SESSION_DETAIL && item == AppDestination.SESSIONS,
                                         onClick = { destination = item },
                                         icon = { LabNavigationIcon(item) },
-                                        label = { Text(if (item == AppDestination.LAB_IDENTITY) "Identity" else item.label, maxLines = 1) },
+                                        label = { Text(item.label, maxLines = 1) },
                                         alwaysShowLabel = true,
                                     )
                                 }
@@ -158,14 +179,27 @@ class MainActivity : ComponentActivity() {
                     ) { padding ->
                         Box(Modifier.fillMaxSize().padding(padding)) {
                             when (destination) {
-                                AppDestination.HOME -> HomeScreen(homeState,
-                                    { destination = AppDestination.SESSIONS }, openSession, home::retry,
-                                    activeFault, { destination = AppDestination.FAULT_LAB },
+                                AppDestination.HOME -> HomeScreen(
+                                    homeState,
+                                    { destination = AppDestination.SESSIONS },
+                                    openSession,
+                                    home::retry,
+                                    activeFault,
+                                    { destination = AppDestination.FAULT_LAB },
                                     onIdentity = { destination = AppDestination.LAB_IDENTITY },
-                                    onCopyAddress = copyAddress)
+                                    onCopyAddress = copyAddress,
+                                    onRefreshWallet = home::refreshWallet,
+                                    onRequestAirdrop = home::requestDevnetSol,
+                                )
                                 AppDestination.SESSIONS -> SessionsScreen(sessionsState, openSession, sessions::retry)
                                 AppDestination.FAULT_LAB -> FaultLabScreen(activeFault, faultSelection::select)
-                                AppDestination.LAB_IDENTITY -> LabIdentityScreen(homeState.identity, copyAddress, home::retry)
+                                AppDestination.LAB_IDENTITY -> LabIdentityScreen(
+                                    identity = homeState.identity,
+                                    onCopy = copyAddress,
+                                    onRetry = home::retry,
+                                    wallet = homeState.wallet,
+                                    onRequestAirdrop = home::requestDevnetSol,
+                                )
                                 AppDestination.SETTINGS -> SettingsScreen(themeMode, { mode ->
                                     themeMode = mode
                                     uiPreferences.themeMode = mode

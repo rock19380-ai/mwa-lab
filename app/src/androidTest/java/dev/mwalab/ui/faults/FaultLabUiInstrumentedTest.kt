@@ -25,9 +25,11 @@ class FaultLabUiInstrumentedTest {
             if (compose.onAllNodesWithText("ENTER LAB").fetchSemanticsNodes().isNotEmpty()) {
                 compose.onNodeWithText("ENTER LAB").performClick()
             }
-            compose.onNodeWithText("Active fault").assertExists()
+            compose.onNodeWithTag("home-list").performScrollToNode(hasText("FAULT MODE"))
+            compose.onNodeWithText("FAULT MODE").assertExists()
             compose.onNodeWithText("NORMAL").assertExists()
-            compose.onNodeWithText("Fault Lab").performClick()
+            compose.onNodeWithText("No intentional fault selected.").assertExists()
+            compose.onNodeWithTag("nav-FAULT_LAB").performClick()
             compose.onNodeWithTag("fault-lab").performScrollToNode(hasTestTag("fault-FAULT_SIGN_REJECT"))
             compose.onNodeWithTag("fault-FAULT_SIGN_REJECT").performClick()
             compose.onNodeWithTag("fault-active-card").assertExists()
@@ -38,9 +40,12 @@ class FaultLabUiInstrumentedTest {
             compose.onNodeWithTag("fault-active-card").assertExists()
             compose.onAllNodesWithText("Reject signing").onFirst().assertExists()
             assertEquals(FaultId.SIGN_REJECT, selection.selected.value.id)
-            compose.onNodeWithText("Home").performClick()
+            compose.onNodeWithTag("nav-HOME").performClick()
+            compose.onNodeWithTag("home-list").performScrollToNode(
+                hasText("FAULT ACTIVE · INTENTIONAL TEST CONDITION"),
+            )
             compose.onNodeWithText("FAULT ACTIVE · INTENTIONAL TEST CONDITION").assertExists()
-            compose.onNodeWithText("Fault Lab").performClick()
+            compose.onNodeWithTag("nav-FAULT_LAB").performClick()
             compose.onNodeWithTag("return-to-normal").performClick()
             compose.onAllNodesWithTag("fault-active-card").assertCountEquals(0)
             assertEquals(FaultId.NORMAL, selection.selected.value.id)

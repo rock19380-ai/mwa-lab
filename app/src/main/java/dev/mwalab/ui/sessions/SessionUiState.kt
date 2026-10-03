@@ -4,6 +4,7 @@ import dev.mwalab.capabilities.CapabilitySnapshot
 import dev.mwalab.session.SessionSummary
 import dev.mwalab.transaction.TransactionSummary
 import dev.mwalab.simulation.SimulationResult
+import dev.mwalab.wallet.TestWalletUiState
 
 sealed interface SessionsUiState {
     data object Loading : SessionsUiState
@@ -54,6 +55,7 @@ sealed interface IdentityUiState {
 data class HomeUiState(
     val identity: IdentityUiState = IdentityUiState.Loading,
     val history: SessionsUiState = SessionsUiState.Loading,
+    val wallet: TestWalletUiState = TestWalletUiState(),
 ) {
     val lastSession: SessionSummary? get() = (history as? SessionsUiState.Ready)?.sessions?.firstOrNull()
 }

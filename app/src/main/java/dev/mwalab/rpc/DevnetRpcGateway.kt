@@ -28,7 +28,14 @@ enum class TransportFailureReason {
     TIMEOUT,
     IO,
     HTTP,
+    RATE_LIMITED,
 }
+
+data class LatestBlockhash(
+    val blockhash: ByteArray,
+    val lastValidBlockHeight: Long,
+    val contextSlot: Long,
+)
 
 data class DevnetSendOptions(
     val minContextSlot: Int?,
@@ -50,6 +57,15 @@ data class DevnetSendOptions(
 }
 
 interface DevnetRpcGateway {
+    suspend fun getBalance(publicKey: ByteArray): DevnetRpcResult<Long> = DevnetRpcResult.MalformedResponse
+
+    suspend fun requestAirdrop(
+        publicKey: ByteArray,
+        lamports: Long,
+    ): DevnetRpcResult<ByteArray> = DevnetRpcResult.MalformedResponse
+
+    suspend fun getLatestBlockhash(): DevnetRpcResult<LatestBlockhash> = DevnetRpcResult.MalformedResponse
+
     suspend fun simulateTransaction(
         transaction: ByteArray,
         options: DevnetSimulationOptions,
@@ -157,6 +173,68 @@ class SolanaDevnetRpcGateway internal constructor(
     private val transport: DevnetHttpTransport = FixedDevnetHttpTransport(),
 ) : DevnetRpcGateway {
     private val requestId = AtomicLong(0)
+
+    override suspend fun getBalance(publicKey: ByteArray): DevnetRpcResult<Long> {
+        if (publicKey.size != PUBLIC_KEY_BYTES) return DevnetRpcResult.MalformedResponse
+        val params = JSONArray()
+            .put(Base58.encodeToString(publicKey))
+            .put(JSONObject().put("commitment", "confirmed"))
+        return when (val response = rpc("getBalance", params)) {
+            is RpcEnvelope.Success -> {
+                val result = response.value as? JSONObject ?: return DevnetRpcResult.MalformedResponse
+                val lamports = nonNegativeLong(result.opt("value")) ?: return DevnetRpcResult.MalformedResponse
+                DevnetRpcResult.Success(lamports)
+            }
+            is RpcEnvelope.RpcError -> DevnetRpcResult.RpcError(response.code)
+            is RpcEnvelope.TransportFailure -> DevnetRpcResult.TransportFailure(response.reason)
+            RpcEnvelope.Malformed -> DevnetRpcResult.MalformedResponse
+        }
+    }
+
+    override suspend fun requestAirdrop(
+        publicKey: ByteArray,
+        lamports: Long,
+    ): DevnetRpcResult<ByteArray> {
+        if (publicKey.size != PUBLIC_KEY_BYTES || lamports <= 0L || lamports > MAX_AIRDROP_LAMPORTS) {
+            return DevnetRpcResult.MalformedResponse
+        }
+        val params = JSONArray()
+            .put(Base58.encodeToString(publicKey))
+            .put(lamports)
+            .put(JSONObject().put("commitment", "confirmed"))
+        return when (val response = rpc("requestAirdrop", params)) {
+            is RpcEnvelope.Success -> {
+                val encoded = response.value as? String ?: return DevnetRpcResult.MalformedResponse
+                val signature = decodeBase58(encoded) ?: return DevnetRpcResult.MalformedResponse
+                if (signature.size == SIGNATURE_BYTES) DevnetRpcResult.Success(signature)
+                else DevnetRpcResult.MalformedResponse
+            }
+            is RpcEnvelope.RpcError -> DevnetRpcResult.RpcError(response.code)
+            is RpcEnvelope.TransportFailure -> DevnetRpcResult.TransportFailure(response.reason)
+            RpcEnvelope.Malformed -> DevnetRpcResult.MalformedResponse
+        }
+    }
+
+    override suspend fun getLatestBlockhash(): DevnetRpcResult<LatestBlockhash> {
+        val params = JSONArray().put(JSONObject().put("commitment", "confirmed"))
+        return when (val response = rpc("getLatestBlockhash", params)) {
+            is RpcEnvelope.Success -> {
+                val result = response.value as? JSONObject ?: return DevnetRpcResult.MalformedResponse
+                val context = result.optJSONObject("context") ?: return DevnetRpcResult.MalformedResponse
+                val value = result.optJSONObject("value") ?: return DevnetRpcResult.MalformedResponse
+                val contextSlot = nonNegativeLong(context.opt("slot")) ?: return DevnetRpcResult.MalformedResponse
+                val lastValidBlockHeight = nonNegativeLong(value.opt("lastValidBlockHeight"))
+                    ?: return DevnetRpcResult.MalformedResponse
+                val encodedBlockhash = value.optString("blockhash", "")
+                val blockhash = decodeBase58(encodedBlockhash) ?: return DevnetRpcResult.MalformedResponse
+                if (blockhash.size != BLOCKHASH_BYTES) return DevnetRpcResult.MalformedResponse
+                DevnetRpcResult.Success(LatestBlockhash(blockhash, lastValidBlockHeight, contextSlot))
+            }
+            is RpcEnvelope.RpcError -> DevnetRpcResult.RpcError(response.code)
+            is RpcEnvelope.TransportFailure -> DevnetRpcResult.TransportFailure(response.reason)
+            RpcEnvelope.Malformed -> DevnetRpcResult.MalformedResponse
+        }
+    }
 
     override suspend fun simulateTransaction(
         transaction: ByteArray,
@@ -315,7 +393,13 @@ class SolanaDevnetRpcGateway internal constructor(
 
             is DevnetHttpTransportResult.Response -> {
                 if (transportResult.statusCode !in 200..299) {
-                    return RpcEnvelope.TransportFailure(TransportFailureReason.HTTP)
+                    return RpcEnvelope.TransportFailure(
+                        if (transportResult.statusCode == HTTP_TOO_MANY_REQUESTS) {
+                            TransportFailureReason.RATE_LIMITED
+                        } else {
+                            TransportFailureReason.HTTP
+                        },
+                    )
                 }
                 if (transportResult.body.size > MAX_RPC_RESPONSE_BYTES) {
                     return RpcEnvelope.Malformed
@@ -354,6 +438,13 @@ class SolanaDevnetRpcGateway internal constructor(
         else -> null
     }
 
+    private fun nonNegativeLong(value: Any?): Long? = when (value) {
+        is Int -> value.toLong().takeIf { it >= 0L }
+        is Long -> value.takeIf { it >= 0L }
+        is BigInteger -> runCatching { value.longValueExact() }.getOrNull()?.takeIf { it >= 0L }
+        else -> null
+    }
+
     private fun decodeBase58(value: String): ByteArray? {
         if (value.isEmpty() || value.length > MAX_BASE58_SIGNATURE_CHARS) return null
         var number = BigInteger.ZERO
@@ -386,7 +477,11 @@ class SolanaDevnetRpcGateway internal constructor(
         const val DEVNET_RPC_URL = "https://api.devnet.solana.com"
         private const val MAX_RPC_RESPONSE_BYTES = 64 * 1024
         private const val MAX_TRANSACTION_BYTES = 1232
+        private const val PUBLIC_KEY_BYTES = 32
+        private const val BLOCKHASH_BYTES = 32
         private const val SIGNATURE_BYTES = 64
+        private const val MAX_AIRDROP_LAMPORTS = 2_000_000_000L
+        private const val HTTP_TOO_MANY_REQUESTS = 429
         private const val MAX_BASE58_SIGNATURE_CHARS = 128
         private const val CONFIRMATION_POLL_INTERVAL_MS = 500L
         private const val BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"

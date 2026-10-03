@@ -90,8 +90,8 @@ class PersistentTransactionInspectorActivityInstrumentedTest {
         }
     }
     private fun assertLabIdentity() {
-        compose.onAllNodesWithText("MWA Lab").onFirst().assertIsDisplayed()
-        compose.onNodeWithText("DEVNET ONLY").assertIsDisplayed()
+        compose.onAllNodesWithText("MWA LAB").onFirst().assertIsDisplayed()
+        compose.onNodeWithTag("home-safety-banner").assertIsDisplayed()
         compose.onNodeWithText("NO REAL FUNDS").assertIsDisplayed()
     }
     private fun scroll(text: String) {

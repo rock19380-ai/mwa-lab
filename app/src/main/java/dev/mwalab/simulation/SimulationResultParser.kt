@@ -35,7 +35,8 @@ object SimulationResultParser {
                 reason = when (rpc.reason) {
                     TransportFailureReason.TIMEOUT -> SimulationAvailabilityReason.TIMEOUT
                     TransportFailureReason.IO -> SimulationAvailabilityReason.IO
-                    TransportFailureReason.HTTP -> SimulationAvailabilityReason.HTTP
+                    TransportFailureReason.HTTP,
+                    TransportFailureReason.RATE_LIMITED -> SimulationAvailabilityReason.HTTP
                 })
             DevnetRpcResult.MalformedResponse -> base.result(SimulationOutcome.UNAVAILABLE,
                 reason = SimulationAvailabilityReason.MALFORMED_RESPONSE)

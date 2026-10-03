@@ -288,3 +288,23 @@ compatibility remains **NOT VERIFIED IN THIS RELEASE**. Exact-head CI and the
 annotated freeze tag are the final provenance authority; see
 [PHASE_8_REPORT.md](PHASE_8_REPORT.md) and
 [Phase 8 evidence](docs/evidence/phase8/).
+
+## Phase 9 — First-run connection and Test Wallet UX (in progress)
+
+Manual first launch now explains that MWA Lab is a Devnet-only protocol
+debugger with a disposable test identity. An incoming same-device Local MWA
+association still bypasses onboarding and reaches the wallet endpoint directly.
+Normal supported authorization requires an explicit human Approve or Reject
+decision; deterministic injected authorization rejection remains separate and
+does not impersonate a user decision.
+
+Home leads with same-device connection guidance and a visible Test Wallet.
+The Test Wallet reads its public address and exact lamport balance through the
+fixed Solana Devnet RPC boundary, supports explicit refresh, renders an offline
+public-address QR for Receive Test SOL, and offers a conservative 0.5 Devnet SOL
+airdrop request with submitted, confirmation, rate-limit, unavailable, and
+unknown states. These wallet utilities do not create MWA protocol events.
+
+Remote MWA controls, Send Test SOL, and a Remote QR scanner are not shipped at
+this checkpoint. Production-wallet compatibility remains **NOT VERIFIED**. See
+[Phase 9 evidence](docs/evidence/phase9/) for the executed gates and current scope.

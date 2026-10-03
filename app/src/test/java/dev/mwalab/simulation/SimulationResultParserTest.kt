@@ -46,6 +46,7 @@ class SimulationResultParserTest {
             DevnetRpcResult.TransportFailure(TransportFailureReason.TIMEOUT) to SimulationAvailabilityReason.TIMEOUT,
             DevnetRpcResult.TransportFailure(TransportFailureReason.IO) to SimulationAvailabilityReason.IO,
             DevnetRpcResult.TransportFailure(TransportFailureReason.HTTP) to SimulationAvailabilityReason.HTTP,
+            DevnetRpcResult.TransportFailure(TransportFailureReason.RATE_LIMITED) to SimulationAvailabilityReason.HTTP,
             DevnetRpcResult.MalformedResponse to SimulationAvailabilityReason.MALFORMED_RESPONSE,
         )
         for ((rpc, reason) in cases) {

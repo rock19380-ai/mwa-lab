@@ -21,7 +21,7 @@ class Phase8NavigationInstrumentedTest {
             compose.onNodeWithTag("nav-$route").assertContentDescriptionEquals(
                 when (route) {
                     "FAULT_LAB" -> "Fault Lab"
-                    "LAB_IDENTITY" -> "Lab Identity"
+                    "LAB_IDENTITY" -> "Test Wallet"
                     else -> route.lowercase().replaceFirstChar { it.uppercase() }
                 })
         }

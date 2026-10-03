@@ -155,6 +155,103 @@ class SolanaDevnetRpcGatewayInstrumentedTest {
         )
     }
 
+    @Test
+    fun getBalanceParsesNonNegativeLamportsAndUsesFixedMethod() = runBlocking {
+        val publicKey = ByteArray(32) { (it + 1).toByte() }
+        val body = """
+            {"jsonrpc":"2.0","id":1,"result":{"context":{"slot":123},"value":1234567890}}
+        """.trimIndent().encodeToByteArray()
+        val transport = QueueTransport(DevnetHttpTransportResult.Response(200, body))
+        val gateway = SolanaDevnetRpcGateway(transport)
+
+        assertEquals(DevnetRpcResult.Success(1_234_567_890L), gateway.getBalance(publicKey))
+        val request = JSONObject(String(transport.requestBodies.single(), StandardCharsets.UTF_8))
+        assertEquals("getBalance", request.getString("method"))
+        assertEquals(Base58.encodeToString(publicKey), request.getJSONArray("params").getString(0))
+    }
+
+    @Test
+    fun getBalanceRejectsFractionalAndOutOfRangeLamportValues() = runBlocking {
+        val publicKey = ByteArray(32) { 5 }
+        val invalidBodies = listOf(
+            """{"jsonrpc":"2.0","id":1,"result":{"context":{"slot":123},"value":1.5}}""",
+            """{"jsonrpc":"2.0","id":1,"result":{"context":{"slot":123},"value":9223372036854775808}}""",
+        )
+
+        invalidBodies.forEach { body ->
+            val gateway = SolanaDevnetRpcGateway(
+                QueueTransport(
+                    DevnetHttpTransportResult.Response(200, body.encodeToByteArray()),
+                ),
+            )
+
+            assertEquals(DevnetRpcResult.MalformedResponse, gateway.getBalance(publicKey))
+        }
+    }
+
+    @Test
+    fun requestAirdropReturnsSignatureButDoesNotInventConfirmation() = runBlocking {
+        val publicKey = ByteArray(32) { 3 }
+        val signature = ByteArray(64) { (it + 2).toByte() }
+        val transport = QueueTransport(
+            DevnetHttpTransportResult.Response(200, jsonResult(Base58.encodeToString(signature))),
+        )
+        val gateway = SolanaDevnetRpcGateway(transport)
+
+        val result = gateway.requestAirdrop(publicKey, 500_000_000L)
+
+        assertTrue(result is DevnetRpcResult.Success)
+        result as DevnetRpcResult.Success
+        assertTrue(result.value.contentEquals(signature))
+        val request = JSONObject(String(transport.requestBodies.single(), StandardCharsets.UTF_8))
+        assertEquals("requestAirdrop", request.getString("method"))
+        assertEquals(500_000_000L, request.getJSONArray("params").getLong(1))
+    }
+
+    @Test
+    fun http429IsDistinctRateLimitTransportFailure() = runBlocking {
+        val gateway = SolanaDevnetRpcGateway(
+            QueueTransport(DevnetHttpTransportResult.Response(429, ByteArray(0))),
+        )
+
+        assertEquals(
+            DevnetRpcResult.TransportFailure(TransportFailureReason.RATE_LIMITED),
+            gateway.requestAirdrop(ByteArray(32) { 4 }, 500_000_000L),
+        )
+    }
+
+    @Test
+    fun latestBlockhashParsesBoundedBlockhashHeightAndContextSlot() = runBlocking {
+        val blockhash = ByteArray(32) { (it + 9).toByte() }
+        val body = JSONObject()
+            .put("jsonrpc", "2.0")
+            .put("id", 1)
+            .put(
+                "result",
+                JSONObject()
+                    .put("context", JSONObject().put("slot", 777L))
+                    .put(
+                        "value",
+                        JSONObject()
+                            .put("blockhash", Base58.encodeToString(blockhash))
+                            .put("lastValidBlockHeight", 999L),
+                    ),
+            )
+            .toString()
+            .encodeToByteArray()
+        val gateway = SolanaDevnetRpcGateway(
+            QueueTransport(DevnetHttpTransportResult.Response(200, body)),
+        )
+
+        val result = gateway.getLatestBlockhash()
+
+        assertTrue(result is DevnetRpcResult.Success)
+        result as DevnetRpcResult.Success
+        assertTrue(result.value.blockhash.contentEquals(blockhash))
+        assertEquals(999L, result.value.lastValidBlockHeight)
+        assertEquals(777L, result.value.contextSlot)
+    }
+
     private fun defaultOptions() = DevnetSendOptions(
         minContextSlot = null,
         commitment = null,

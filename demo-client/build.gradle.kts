@@ -55,3 +55,10 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.runner)
 }
+
+// The cross-package acceptance test requires the wallet APK to be installed.
+// Android test cleanup can remove it after :app:connectedDebugAndroidTest, so
+// keep this gate self-contained and deterministic.
+tasks.matching { it.name == "connectedDebugAndroidTest" }.configureEach {
+    dependsOn(":app:installDebug")
+}

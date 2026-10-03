@@ -35,12 +35,20 @@ class Phase8UiInstrumentedTest {
             HomeScreen(HomeUiState(IdentityUiState.Ready("8u3XMxFwZ7NmpSKk619MsrmZkMTskzrrcq5LwFA1TEqb"),
                 SessionsUiState.Empty), {}, {}, {}, FaultCatalog.get(FaultId.NORMAL))
         } }
-        compose.onNodeWithText("MWA Lab").assertExists()
+        compose.onNodeWithText("MWA LAB").assertExists()
         compose.onNodeWithText("Mobile Wallet Adapter protocol debugger", substring = true).assertExists()
-        compose.onNodeWithText("DEVNET ONLY").assertIsDisplayed()
+        compose.onAllNodesWithText("DEVNET ONLY").assertCountEquals(2)
+        compose.onNodeWithTag("home-safety-banner").assertIsDisplayed()
+        compose.onNodeWithTag("home-connection-devnet-badge").assertExists()
         compose.onNodeWithText("NO REAL FUNDS").assertIsDisplayed()
-        compose.onNodeWithText("NORMAL").assertIsDisplayed()
-        compose.onAllNodesWithText("READY FOR DAPP CONNECTION").assertCountEquals(0)
+        compose.onNodeWithText("READY FOR DAPP CONNECTIONS").assertExists()
+        compose.onNodeWithText("HOW TO CONNECT").assertExists()
+        compose.onNodeWithTag("home-list").performScrollToNode(hasText("TEST WALLET"))
+        compose.onNodeWithText("TEST WALLET").assertExists()
+        compose.onNodeWithTag("home-list").performScrollToNode(hasText("FAULT MODE"))
+        compose.onNodeWithText("FAULT MODE").assertExists()
+        compose.onNodeWithText("NORMAL").assertExists()
+        compose.onNodeWithText("No intentional fault selected.").assertExists()
     }
 
     @Test fun failedSessionShowsMethodResultSourceAndIndependentFaultBeforeDetails() {
@@ -76,11 +84,12 @@ class Phase8UiInstrumentedTest {
 
     @Test fun identityOffersOnlyPublicAddress() {
         var copied: String? = null
+        val address = "8u3XMxFwZ7NmpSKk619MsrmZkMTskzrrcq5LwFA1TEqb"
         compose.setContent { MWALabTheme {
-            LabIdentityScreen(IdentityUiState.Ready("public-devnet-address"), { copied = it }, {})
+            LabIdentityScreen(IdentityUiState.Ready(address), { copied = it }, {})
         } }
         compose.onNodeWithText("Copy Address").performClick()
-        compose.runOnIdle { assertEquals("public-devnet-address", copied) }
+        compose.runOnIdle { assertEquals(address, copied) }
         compose.onAllNodesWithText("RESET IDENTITY").assertCountEquals(0)
     }
 
