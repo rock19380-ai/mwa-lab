@@ -64,7 +64,8 @@ class DiagnosticReportSnapshotAssembler(
             policy.event(event, selectedTx, selectedSim)
         }
         return DiagnosticReport(0L, session = ReportSession(policy.identity(session.id),
-            policy.label(session.dappIdentityName), session.startedAtEpochMillis,
+            policy.label(session.dappIdentityName), session.associationMode,
+            session.identityVerificationState, session.startedAtEpochMillis,
             session.completedAtEpochMillis, session.durationMillis, summary.status,
             session.closeReason?.name,
             if (session.completedAtEpochMillis == null) ReportCompleteness.PARTIAL else ReportCompleteness.COMPLETE),

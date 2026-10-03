@@ -1,5 +1,7 @@
 package dev.mwalab.session
 
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.recorder.EventClock
 import dev.mwalab.protocol.recorder.ProtocolRecorder
 import dev.mwalab.protocol.recorder.SystemEventClock
@@ -21,10 +23,20 @@ class SessionLifecycleCoordinator(
     private data class CloseMetadata(val reason: SessionCloseReason, val atEpochMillis: Long)
     private val firstCloseBySession = ConcurrentHashMap<SessionId, CloseMetadata>()
 
-    suspend fun createSession(sessionId: SessionId): PersistenceResult {
+    suspend fun createSession(
+        sessionId: SessionId,
+        associationMode: AssociationMode = AssociationMode.LOCAL,
+        identityVerificationState: DappVerificationState = if (associationMode == AssociationMode.LOCAL) {
+            DappVerificationState.NOT_AVAILABLE
+        } else {
+            DappVerificationState.REMOTE_UNVERIFIED
+        },
+    ): PersistenceResult {
         val session = MwaSession(
             id = sessionId,
             startedAtEpochMillis = clock.nowEpochMillis().coerceAtLeast(0L),
+            associationMode = associationMode,
+            identityVerificationState = identityVerificationState,
         )
         return persist {
             sessionRepository.createSession(session)
@@ -40,6 +52,16 @@ class SessionLifecycleCoordinator(
         return persist {
             sessionRepository.updateDappIdentity(sessionId, safeName)
         }
+    }
+
+    suspend fun updateIdentityVerificationState(
+        sessionId: SessionId,
+        identityVerificationState: DappVerificationState,
+    ): PersistenceResult = persist {
+        sessionRepository.updateIdentityVerificationState(
+            sessionId,
+            identityVerificationState,
+        )
     }
 
     suspend fun finishSession(

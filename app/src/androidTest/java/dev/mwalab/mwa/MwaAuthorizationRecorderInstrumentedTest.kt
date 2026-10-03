@@ -9,6 +9,8 @@ import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationScenari
 import com.solana.mobilewalletadapter.clientlib.scenario.Scenario
 import com.solana.mobilewalletadapter.common.ProtocolContract
 import dev.mwalab.app.MwaLabComposition
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.mwa.evidence.MwaSessionEvent
 import dev.mwalab.mwa.evidence.MwaSessionEvidenceStore
 import dev.mwalab.protocol.ProtocolEvidenceStore
@@ -121,6 +123,8 @@ class MwaAuthorizationRecorderInstrumentedTest {
         }
 
         assertEquals(identityName, recorded.session.dappIdentityName)
+        assertEquals(AssociationMode.LOCAL, recorded.session.associationMode)
+        assertEquals(DappVerificationState.UNVERIFIED, recorded.session.identityVerificationState)
         assertEquals(
             listOf(
                 ProtocolMethod.AUTHORIZE,

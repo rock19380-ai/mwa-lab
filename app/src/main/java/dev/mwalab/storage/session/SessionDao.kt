@@ -36,6 +36,18 @@ interface SessionDao {
     )
     suspend fun updateDappIdentity(sessionId: String, dappIdentityName: String?): Int
 
+    @Query(
+        """
+        UPDATE sessions
+        SET identity_verification_state = :identityVerificationState
+        WHERE session_id = :sessionId
+        """,
+    )
+    suspend fun updateIdentityVerificationState(
+        sessionId: String,
+        identityVerificationState: String,
+    ): Int
+
     @Transaction
     @Query("SELECT * FROM sessions ORDER BY started_at_ms DESC")
     fun observeAllWithEvents(): Flow<List<SessionWithEventsRecord>>

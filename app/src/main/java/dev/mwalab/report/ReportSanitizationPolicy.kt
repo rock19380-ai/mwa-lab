@@ -180,6 +180,9 @@ class ReportSanitizationPolicy {
 
     private fun looksSensitive(value: String): Boolean = listOf("secret", "private_key", "private-key",
         "seed", "mnemonic", "auth_token", "auth-token", "association_token", "association-token",
+        "association_uri", "association-uri", "remote_uri", "remote-uri",
+        "association_public_key", "association-public-key", "reflector_id", "reflector-id",
+        "reflector_token", "reflector-token", "reflector_secret", "reflector-secret",
         "credential", "ciphertext", "raw-auth", "raw-message", "raw-transaction")
         .any { value.contains(it, ignoreCase = true) }
 

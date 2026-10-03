@@ -1,5 +1,7 @@
 package dev.mwalab.report
 
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.capabilities.*
 import dev.mwalab.protocol.*
 import dev.mwalab.session.*
@@ -68,14 +70,41 @@ class DiagnosticReportTest {
         val parsed = JSONObject(JsonDiagnosticReportRenderer().render(report))
         assertEquals(DiagnosticReport.FORMAT, parsed.getString("format"))
         assertEquals(1, parsed.getInt("version"))
-        assertEquals("COMPLETE", parsed.getJSONObject("session").getString("completeness"))
+        val sessionJson = parsed.getJSONObject("session")
+        assertEquals("COMPLETE", sessionJson.getString("completeness"))
+        assertEquals("LOCAL", sessionJson.getString("association_mode"))
+        assertEquals("NOT_AVAILABLE", sessionJson.getString("identity_verification_state"))
         assertEquals("SUCCESS", parsed.getJSONArray("events").getJSONObject(0).getString("outcome"))
         val markdown = MarkdownDiagnosticReportRenderer().render(report)
         assertTrue(markdown.contains("Outcome: SUCCESS"))
+        assertTrue(markdown.contains("Association mode: LOCAL"))
+        assertTrue(markdown.contains("Identity status: NOT\\_AVAILABLE"))
         assertTrue(markdown.contains("## Reproduction Context"))
         assertTrue(markdown.contains("1970-01-01T00:00:00.500Z"))
         assertTrue(markdown.contains("byte-for-byte reproduction is not available"))
     }
+    @Test fun remoteTransportMetadataStaysUnverifiedAcrossReportProjections() {
+        val source = source(listOf(event())).also { existing ->
+            existing.summary = SessionSummary(
+                existing.summary.session.copy(
+                    associationMode = AssociationMode.REMOTE,
+                    identityVerificationState = DappVerificationState.REMOTE_UNVERIFIED,
+                ),
+                existing.summary.events,
+            )
+        }
+        val report = build(source)
+        val json = JSONObject(JsonDiagnosticReportRenderer().render(report)).getJSONObject("session")
+        assertEquals("REMOTE", json.getString("association_mode"))
+        assertEquals("REMOTE_UNVERIFIED", json.getString("identity_verification_state"))
+        val markdown = MarkdownDiagnosticReportRenderer().render(report)
+        assertTrue(markdown.contains("Association mode: REMOTE"))
+        assertTrue(markdown.contains("Identity status: REMOTE"))
+        val summary = DiagnosticReportSummaryRenderer().render(report)
+        assertTrue(summary.contains("Association: REMOTE"))
+        assertTrue(summary.contains("Identity: REMOTE_UNVERIFIED"))
+    }
+
     @Test fun failureTruthPreservesFiveIndependentCases() {
         val cases = listOf(
             event(outcome = ProtocolOutcome.FAILURE, source = ProtocolFailureSource.INJECTED,

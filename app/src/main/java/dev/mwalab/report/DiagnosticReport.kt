@@ -1,5 +1,7 @@
 package dev.mwalab.report
 
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
 import dev.mwalab.protocol.ProtocolOutcome
@@ -35,6 +37,8 @@ enum class ReportCompleteness { COMPLETE, PARTIAL }
 data class ReportSession(
     val sessionId: String,
     val dappDisplayName: String?,
+    val associationMode: AssociationMode,
+    val identityVerificationState: DappVerificationState,
     val startedAtEpochMillis: Long,
     val completedAtEpochMillis: Long?,
     val durationMillis: Long?,

@@ -344,12 +344,20 @@ class MwaSessionHost(
                 "requested_address_count" to (request.addresses?.size ?: 0).toString(),
                 "sign_in_requested" to (request.signInPayload != null).toString(),
             )
+            val identityVerificationState = if (
+                request.identityName.isNullOrBlank() && request.identityUri == null
+            ) {
+                DappVerificationState.NOT_AVAILABLE
+            } else {
+                DappVerificationState.UNVERIFIED
+            }
             val protocolHandle = beginPersistentProtocol(
                 sessionId = persistentSessionId,
                 method = ProtocolMethod.AUTHORIZE,
                 requestSummary = requestSummary,
             )
             updatePersistentDappIdentity(persistentSessionId, request.identityName)
+            updatePersistentIdentityVerificationState(persistentSessionId, identityVerificationState)
 
             record(MwaSessionEvent.AUTHORIZE_REQUEST)
 
@@ -443,11 +451,7 @@ class MwaSessionHost(
                             dappDisplayName = sanitizeAuthorizationDisplayName(request.identityName),
                             claimedUriDisplay = sanitizeClaimedIdentityUri(request.identityUri),
                             callerPackage = null,
-                            verificationState = if (request.identityName.isNullOrBlank() && request.identityUri == null) {
-                                DappVerificationState.NOT_AVAILABLE
-                            } else {
-                                DappVerificationState.UNVERIFIED
-                            },
+                            verificationState = identityVerificationState,
                             chain = request.chain ?: ProtocolContract.CHAIN_SOLANA_DEVNET,
                             requestedFeatures = request.features
                                 ?.mapNotNull(::sanitizeRequestedFeature)
@@ -2334,6 +2338,21 @@ class MwaSessionHost(
         }
         if (result is SessionLifecycleCoordinator.PersistenceResult.PersistenceFailed) {
             record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "dapp_identity")
+        }
+    }
+
+    private fun updatePersistentIdentityVerificationState(
+        sessionId: String,
+        identityVerificationState: DappVerificationState,
+    ) {
+        val result = runBlocking(Dispatchers.IO) {
+            sessionLifecycleCoordinator.updateIdentityVerificationState(
+                sessionId,
+                identityVerificationState,
+            )
+        }
+        if (result is SessionLifecycleCoordinator.PersistenceResult.PersistenceFailed) {
+            record(MwaSessionEvent.DIAGNOSTIC_PERSISTENCE_FAILED, "identity_verification")
         }
     }
 

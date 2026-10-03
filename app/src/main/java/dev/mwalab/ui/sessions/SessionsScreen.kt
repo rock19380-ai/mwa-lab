@@ -49,6 +49,7 @@ fun SessionCard(summary: SessionSummary, onSession: (String) -> Unit) {
             Text(summary.session.dappIdentityName ?: "Unknown dApp", style = MaterialTheme.typography.titleLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StatusBadge(summary.status.name, alert = summary.status == SessionStatus.FAIL)
+                StatusBadge(summary.session.associationMode.name)
                 if (sessionHasInjectedCondition(summary)) StatusBadge("INJECTED", alert = true)
             }
             Text("Started ${timestampText(summary.session.startedAtEpochMillis)}",

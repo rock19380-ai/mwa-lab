@@ -1,5 +1,6 @@
 package dev.mwalab.session
 
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.ProtocolEvent
 import kotlinx.coroutines.flow.Flow
 
@@ -13,6 +14,11 @@ interface SessionRepository {
     )
 
     suspend fun updateDappIdentity(sessionId: SessionId, dappIdentityName: String?)
+
+    suspend fun updateIdentityVerificationState(
+        sessionId: SessionId,
+        identityVerificationState: DappVerificationState,
+    ) = Unit
 
     suspend fun recordProtocolEvent(event: ProtocolEvent)
 

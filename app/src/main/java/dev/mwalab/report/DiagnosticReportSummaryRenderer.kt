@@ -16,6 +16,8 @@ class DiagnosticReportSummaryRenderer {
             appendLine()
             appendLine(report.session.dappDisplayName ?: "Unknown dApp")
             appendLine("Solana Devnet")
+            appendLine("Association: ${report.session.associationMode.name}")
+            appendLine("Identity: ${report.session.identityVerificationState.name}")
             appendLine("Session: ${report.session.status.name}")
             appendLine("Completeness: ${report.session.completeness.name}")
             appendLine("Events: ${report.events.size}${if (report.truncated) " (report truncated)" else ""}")

@@ -1,5 +1,8 @@
 package dev.mwalab.session
 
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
+
 /**
  * Diagnostic session metadata, separate from walletlib authorization state.
  * [dappIdentityName] is an optional, already sanitized display label, not proof
@@ -11,6 +14,8 @@ data class MwaSession(
     val completedAtEpochMillis: Long? = null,
     val dappIdentityName: String? = null,
     val closeReason: SessionCloseReason? = null,
+    val associationMode: AssociationMode = AssociationMode.LOCAL,
+    val identityVerificationState: DappVerificationState = DappVerificationState.NOT_AVAILABLE,
 ) {
     init {
         require(id.isNotBlank() && id != "unknown") { "A session needs an assigned identity" }
@@ -27,6 +32,17 @@ data class MwaSession(
                 dappIdentityName.length <= MAX_DAPP_DISPLAY_NAME_LENGTH &&
                 dappIdentityName.none { it.isISOControl() }
             )) { "dApp display label must be bounded and normalized" }
+        require(
+            associationMode != AssociationMode.LOCAL ||
+                identityVerificationState != DappVerificationState.REMOTE_UNVERIFIED,
+        ) { "Local sessions cannot claim remote verification state" }
+        require(
+            associationMode != AssociationMode.REMOTE ||
+                identityVerificationState in setOf(
+                    DappVerificationState.NOT_AVAILABLE,
+                    DappVerificationState.REMOTE_UNVERIFIED,
+                ),
+        ) { "Remote sessions cannot claim unproven identity verification" }
     }
 
     // Fixed domain invariant, not a configurable network setting.

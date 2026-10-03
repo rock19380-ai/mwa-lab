@@ -1,5 +1,7 @@
 package dev.mwalab.session
 
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
@@ -34,7 +36,41 @@ class SessionLifecycleCoordinatorTest {
         assertEquals("session-a", repository.created.single().id)
         assertEquals(1234L, repository.created.single().startedAtEpochMillis)
         assertEquals("solana:devnet", repository.created.single().cluster)
+        assertEquals(AssociationMode.LOCAL, repository.created.single().associationMode)
+        assertEquals(DappVerificationState.NOT_AVAILABLE, repository.created.single().identityVerificationState)
         assertNull(repository.created.single().completedAtEpochMillis)
+    }
+
+    @Test
+    fun remoteSessionAndVerificationStateUseTheSameLifecycleBoundary() = runBlocking {
+        val repository = FakeSessionRepository()
+        val coordinator = SessionLifecycleCoordinator(
+            sessionRepository = repository,
+            protocolRecorder = FakeProtocolRecorder(),
+            clock = FixedClock(55L),
+        )
+
+        assertEquals(
+            SessionLifecycleCoordinator.PersistenceResult.Persisted,
+            coordinator.createSession("remote", AssociationMode.REMOTE),
+        )
+        assertEquals(AssociationMode.REMOTE, repository.created.single().associationMode)
+        assertEquals(
+            DappVerificationState.REMOTE_UNVERIFIED,
+            repository.created.single().identityVerificationState,
+        )
+
+        assertEquals(
+            SessionLifecycleCoordinator.PersistenceResult.Persisted,
+            coordinator.updateIdentityVerificationState(
+                "remote",
+                DappVerificationState.REMOTE_UNVERIFIED,
+            ),
+        )
+        assertEquals(
+            "remote" to DappVerificationState.REMOTE_UNVERIFIED,
+            repository.verificationStates.single(),
+        )
     }
 
     @Test
@@ -152,6 +188,7 @@ class SessionLifecycleCoordinatorTest {
         val created = mutableListOf<MwaSession>()
         val finished = mutableListOf<Triple<SessionId, Long, SessionCloseReason>>()
         val identities = mutableListOf<Pair<SessionId, String?>>()
+        val verificationStates = mutableListOf<Pair<SessionId, DappVerificationState>>()
 
         override suspend fun createSession(session: MwaSession) {
             if (failWrites) throw IllegalStateException("synthetic persistence failure")
@@ -171,6 +208,14 @@ class SessionLifecycleCoordinatorTest {
         override suspend fun updateDappIdentity(sessionId: SessionId, dappIdentityName: String?) {
             if (failWrites) throw IllegalStateException("synthetic persistence failure")
             identities += sessionId to dappIdentityName
+        }
+
+        override suspend fun updateIdentityVerificationState(
+            sessionId: SessionId,
+            identityVerificationState: DappVerificationState,
+        ) {
+            if (failWrites) throw IllegalStateException("synthetic persistence failure")
+            verificationStates += sessionId to identityVerificationState
         }
 
         override suspend fun recordProtocolEvent(event: ProtocolEvent) = Unit

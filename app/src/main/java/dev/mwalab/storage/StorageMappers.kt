@@ -1,5 +1,7 @@
 package dev.mwalab.storage
 
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.ProtocolEvidence
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
@@ -19,6 +21,8 @@ internal fun MwaSession.toEntity(): SessionEntity = SessionEntity(
     dappIdentityName = dappIdentityName,
     cluster = cluster,
     closeReason = closeReason?.name,
+    associationMode = associationMode.name,
+    identityVerificationState = identityVerificationState.name,
 )
 
 internal fun SessionEntity.toDomain(): MwaSession {
@@ -29,6 +33,8 @@ internal fun SessionEntity.toDomain(): MwaSession {
         completedAtEpochMillis = completedAtEpochMillis,
         dappIdentityName = dappIdentityName,
         closeReason = closeReason?.let(SessionCloseReason::valueOf),
+        associationMode = AssociationMode.valueOf(associationMode),
+        identityVerificationState = DappVerificationState.valueOf(identityVerificationState),
     )
 }
 

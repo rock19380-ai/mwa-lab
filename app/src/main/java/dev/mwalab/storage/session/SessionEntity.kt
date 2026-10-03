@@ -19,4 +19,8 @@ data class SessionEntity(
     val cluster: String,
     @ColumnInfo(name = "close_reason")
     val closeReason: String?,
+    @ColumnInfo(name = "association_mode", defaultValue = "'LOCAL'")
+    val associationMode: String,
+    @ColumnInfo(name = "identity_verification_state", defaultValue = "'NOT_AVAILABLE'")
+    val identityVerificationState: String,
 )

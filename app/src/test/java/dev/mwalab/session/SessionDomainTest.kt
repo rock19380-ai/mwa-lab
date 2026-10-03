@@ -1,5 +1,7 @@
 package dev.mwalab.session
 
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
@@ -36,6 +38,27 @@ class SessionDomainTest {
         for (name in listOf("", " ", "  Demo", "Demo\nClient", "x".repeat(129))) {
             assertThrows(IllegalArgumentException::class.java) { active.copy(dappIdentityName = name) }
         }
+    }
+
+    @Test
+    fun transportAndVerificationStateCannotImplyFalseEvidence() {
+        assertEquals(AssociationMode.LOCAL, active.associationMode)
+        assertEquals(DappVerificationState.NOT_AVAILABLE, active.identityVerificationState)
+        assertThrows(IllegalArgumentException::class.java) {
+            active.copy(identityVerificationState = DappVerificationState.REMOTE_UNVERIFIED)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            active.copy(
+                associationMode = AssociationMode.REMOTE,
+                identityVerificationState = DappVerificationState.VERIFIED,
+            )
+        }
+        val remote = active.copy(
+            associationMode = AssociationMode.REMOTE,
+            identityVerificationState = DappVerificationState.REMOTE_UNVERIFIED,
+        )
+        assertEquals(AssociationMode.REMOTE, remote.associationMode)
+        assertEquals(DappVerificationState.REMOTE_UNVERIFIED, remote.identityVerificationState)
     }
 
     @Test

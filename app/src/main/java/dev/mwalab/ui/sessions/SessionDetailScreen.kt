@@ -55,6 +55,8 @@ fun SessionDetailScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(summary.session.dappIdentityName ?: "Unknown dApp", style = MaterialTheme.typography.headlineSmall)
                         Text("SOLANA DEVNET · ${summary.session.cluster}")
+                        Text("Connection: ${summary.session.associationMode.name}")
+                        Text("Identity status: ${summary.session.identityVerificationState.name}")
                     }
                 }
                 item { SessionHero(summary) }

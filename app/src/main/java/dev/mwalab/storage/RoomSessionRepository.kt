@@ -1,6 +1,7 @@
 package dev.mwalab.storage
 
 import dev.mwalab.faults.FaultEvidenceInvariant
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.ProtocolEvent
 import dev.mwalab.session.MwaSession
 import dev.mwalab.session.SessionCloseReason
@@ -38,6 +39,13 @@ class RoomSessionRepository(
             "dApp display label contains control characters"
         }
         sessionDao.updateDappIdentity(sessionId, normalized)
+    }
+
+    override suspend fun updateIdentityVerificationState(
+        sessionId: SessionId,
+        identityVerificationState: DappVerificationState,
+    ) {
+        sessionDao.updateIdentityVerificationState(sessionId, identityVerificationState.name)
     }
 
     override suspend fun recordProtocolEvent(event: ProtocolEvent) {

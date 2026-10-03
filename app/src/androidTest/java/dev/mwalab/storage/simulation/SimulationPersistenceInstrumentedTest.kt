@@ -155,7 +155,12 @@ class SimulationPersistenceInstrumentedTest {
         contextSlot = 55, unitsConsumed = 100, logs = BoundedLogs(listOf("Program success"), false))
 
     private fun seed(db: androidx.sqlite.db.SupportSQLiteDatabase, session: String, event: String, fingerprint: String) {
-        db.execSQL("INSERT INTO sessions VALUES (?, 1, NULL, NULL, 'solana:devnet', NULL)", arrayOf(session))
+        db.execSQL(
+            "INSERT INTO sessions(session_id, started_at_ms, completed_at_ms, " +
+                "dapp_identity_name, cluster, close_reason) " +
+                "VALUES (?, 1, NULL, NULL, 'solana:devnet', NULL)",
+            arrayOf(session),
+        )
         val summary = """{"payload_count":"1","payload_0_sha256":"$fingerprint","payload_0_length":"100"}"""
         db.execSQL("INSERT INTO protocol_events VALUES (?, ?, 1, 'SIGN_TRANSACTIONS', 2, 3, 'SUCCESS', NULL, 'NONE', NULL, ?, '{}', NULL)",
             arrayOf(event, session, summary))
@@ -167,7 +172,11 @@ class SimulationPersistenceInstrumentedTest {
     private suspend fun assertBad(block: suspend () -> Unit) { assertTrue(runCatching { block() }.isFailure) }
     private fun name() = ("phase5-simulation-" + UUID.randomUUID() + ".db").also(names::add)
     private fun open(name: String) = Room.databaseBuilder(context, MwaLabDatabase::class.java, name)
-        .addMigrations(MwaLabDatabase.MIGRATION_1_2, MwaLabDatabase.MIGRATION_2_3).build()
+        .addMigrations(
+            MwaLabDatabase.MIGRATION_1_2,
+            MwaLabDatabase.MIGRATION_2_3,
+            MwaLabDatabase.MIGRATION_3_4,
+        ).build()
 
     private companion object { const val HASH = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
 }

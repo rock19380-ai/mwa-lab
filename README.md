@@ -305,6 +305,12 @@ public-address QR for Receive Test SOL, and offers a conservative 0.5 Devnet SOL
 airdrop request with submitted, confirmation, rate-limit, unavailable, and
 unknown states. These wallet utilities do not create MWA protocol events.
 
+Phase 9 transport-aware diagnostics use Room schema 4. Sessions persist only
+coarse `LOCAL` / `REMOTE` association mode and bounded identity-verification
+state; historical Phase 8 sessions migrate to `LOCAL` + `NOT_AVAILABLE`. Raw
+association URIs, reflector identifiers/tokens, and transport key material are
+not persisted as session metadata or diagnostic report fields.
+
 Remote MWA controls, Send Test SOL, and a Remote QR scanner are not shipped at
 this checkpoint. Production-wallet compatibility remains **NOT VERIFIED**. See
 [Phase 9 evidence](docs/evidence/phase9/) for the executed gates and current scope.

@@ -208,7 +208,11 @@ class CapabilitySnapshotPersistenceInstrumentedTest {
     private fun capabilities(db: MwaLabDatabase) = RoomCapabilitySnapshotRepository(db.capabilitySnapshotDao())
     private fun newName() = ("phase4-capabilities-" + UUID.randomUUID() + ".db").also(databaseNames::add)
     private fun open(name: String) = Room.databaseBuilder(context, MwaLabDatabase::class.java, name)
-        .addMigrations(MwaLabDatabase.MIGRATION_1_2, MwaLabDatabase.MIGRATION_2_3).build()
+        .addMigrations(
+            MwaLabDatabase.MIGRATION_1_2,
+            MwaLabDatabase.MIGRATION_2_3,
+            MwaLabDatabase.MIGRATION_3_4,
+        ).build()
 
     private suspend fun withDatabase(
         name: String = newName(),

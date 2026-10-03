@@ -25,7 +25,7 @@ import dev.mwalab.storage.transaction.TransactionDiagnosticEntity
         TransactionDiagnosticEntity::class,
         SimulationResultEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class MwaLabDatabase : RoomDatabase() {
@@ -139,11 +139,24 @@ abstract class MwaLabDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_3_4: Migration = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE sessions ADD COLUMN association_mode " +
+                        "TEXT NOT NULL DEFAULT 'LOCAL'",
+                )
+                db.execSQL(
+                    "ALTER TABLE sessions ADD COLUMN identity_verification_state " +
+                        "TEXT NOT NULL DEFAULT 'NOT_AVAILABLE'",
+                )
+            }
+        }
+
         fun create(context: Context): MwaLabDatabase =
             Room.databaseBuilder(
                 context.applicationContext,
                 MwaLabDatabase::class.java,
                 DATABASE_NAME,
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
     }
 }

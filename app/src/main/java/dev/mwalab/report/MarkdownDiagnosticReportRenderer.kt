@@ -29,6 +29,8 @@ class MarkdownDiagnosticReportRenderer {
             appendLine("## Session")
             line("Session ID", report.session.sessionId)
             line("dApp label", report.session.dappDisplayName)
+            line("Association mode", report.session.associationMode.name)
+            line("Identity status", report.session.identityVerificationState.name)
             line("Started at (epoch ms)", report.session.startedAtEpochMillis)
             line("Started at (UTC)", utc(report.session.startedAtEpochMillis))
             line("Completed at (epoch ms)", report.session.completedAtEpochMillis)

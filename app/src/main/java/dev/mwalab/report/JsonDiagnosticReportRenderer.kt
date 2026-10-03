@@ -17,6 +17,8 @@ class JsonDiagnosticReportRenderer {
             "session" to linkedMapOf(
                 "session_id" to report.session.sessionId,
                 "dapp_display_name" to report.session.dappDisplayName,
+                "association_mode" to report.session.associationMode.name,
+                "identity_verification_state" to report.session.identityVerificationState.name,
                 "started_at" to report.session.startedAtEpochMillis,
                 "completed_at" to report.session.completedAtEpochMillis,
                 "duration_ms" to report.session.durationMillis,

@@ -1,0 +1,577 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "d1b777f3007c429d89ad1b7bf0a0d5d6",
+    "entities": [
+      {
+        "tableName": "sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` TEXT NOT NULL, `started_at_ms` INTEGER NOT NULL, `completed_at_ms` INTEGER, `dapp_identity_name` TEXT, `cluster` TEXT NOT NULL, `close_reason` TEXT, `association_mode` TEXT NOT NULL DEFAULT 'LOCAL', `identity_verification_state` TEXT NOT NULL DEFAULT 'NOT_AVAILABLE', PRIMARY KEY(`session_id`))",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtEpochMillis",
+            "columnName": "started_at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAtEpochMillis",
+            "columnName": "completed_at_ms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dappIdentityName",
+            "columnName": "dapp_identity_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cluster",
+            "columnName": "cluster",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "closeReason",
+            "columnName": "close_reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "associationMode",
+            "columnName": "association_mode",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'LOCAL'"
+          },
+          {
+            "fieldPath": "identityVerificationState",
+            "columnName": "identity_verification_state",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'NOT_AVAILABLE'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id"
+          ]
+        }
+      },
+      {
+        "tableName": "protocol_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`event_id` TEXT NOT NULL, `session_id` TEXT NOT NULL, `sequence` INTEGER NOT NULL, `method` TEXT NOT NULL, `started_at_ms` INTEGER NOT NULL, `completed_at_ms` INTEGER NOT NULL, `outcome` TEXT NOT NULL, `protocol_error_code` INTEGER, `failure_source` TEXT NOT NULL, `injected_fault_id` TEXT, `request_summary_json` TEXT NOT NULL, `response_summary_json` TEXT NOT NULL, `capability_context_json` TEXT, PRIMARY KEY(`event_id`), FOREIGN KEY(`session_id`) REFERENCES `sessions`(`session_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sequence",
+            "columnName": "sequence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "method",
+            "columnName": "method",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtEpochMillis",
+            "columnName": "started_at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAtEpochMillis",
+            "columnName": "completed_at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "outcome",
+            "columnName": "outcome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protocolErrorCode",
+            "columnName": "protocol_error_code",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "failureSource",
+            "columnName": "failure_source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "injectedFaultId",
+            "columnName": "injected_fault_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestSummaryJson",
+            "columnName": "request_summary_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "responseSummaryJson",
+            "columnName": "response_summary_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "capabilityContextJson",
+            "columnName": "capability_context_json",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "event_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_protocol_events_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_protocol_events_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          },
+          {
+            "name": "index_protocol_events_session_id_sequence",
+            "unique": true,
+            "columnNames": [
+              "session_id",
+              "sequence"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_protocol_events_session_id_sequence` ON `${TABLE_NAME}` (`session_id`, `sequence`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "session_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "capability_snapshots",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` TEXT NOT NULL, `captured_at_ms` INTEGER NOT NULL, `source` TEXT NOT NULL, `max_transactions` INTEGER NOT NULL, `max_messages` INTEGER NOT NULL, `supported_versions_json` TEXT NOT NULL, `optional_features_json` TEXT NOT NULL, PRIMARY KEY(`session_id`), FOREIGN KEY(`session_id`) REFERENCES `sessions`(`session_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "capturedAtEpochMillis",
+            "columnName": "captured_at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxTransactionsPerSigningRequest",
+            "columnName": "max_transactions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxMessagesPerSigningRequest",
+            "columnName": "max_messages",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportedVersionsJson",
+            "columnName": "supported_versions_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "optionalFeaturesJson",
+            "columnName": "optional_features_json",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "session_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "transaction_diagnostics",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transaction_id` TEXT NOT NULL, `session_id` TEXT NOT NULL, `event_id` TEXT NOT NULL, `payload_index` INTEGER NOT NULL, `fingerprint_sha256` TEXT NOT NULL, `wire_length` INTEGER NOT NULL, `version` TEXT NOT NULL, `inspection_status` TEXT NOT NULL, `summary_json` TEXT NOT NULL, PRIMARY KEY(`transaction_id`), FOREIGN KEY(`session_id`) REFERENCES `sessions`(`session_id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`event_id`) REFERENCES `protocol_events`(`event_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "diagnosticId",
+            "columnName": "transaction_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payloadIndex",
+            "columnName": "payload_index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fingerprintSha256",
+            "columnName": "fingerprint_sha256",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wireLength",
+            "columnName": "wire_length",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "version",
+            "columnName": "version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inspectionStatus",
+            "columnName": "inspection_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "summaryJson",
+            "columnName": "summary_json",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "transaction_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_transaction_diagnostics_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transaction_diagnostics_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          },
+          {
+            "name": "index_transaction_diagnostics_event_id",
+            "unique": false,
+            "columnNames": [
+              "event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transaction_diagnostics_event_id` ON `${TABLE_NAME}` (`event_id`)"
+          },
+          {
+            "name": "index_transaction_diagnostics_event_id_payload_index",
+            "unique": true,
+            "columnNames": [
+              "event_id",
+              "payload_index"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_transaction_diagnostics_event_id_payload_index` ON `${TABLE_NAME}` (`event_id`, `payload_index`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "session_id"
+            ]
+          },
+          {
+            "table": "protocol_events",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "event_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "simulation_results",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`simulation_id` TEXT NOT NULL, `session_id` TEXT NOT NULL, `event_id` TEXT NOT NULL, `request_id` TEXT NOT NULL, `payload_index` INTEGER NOT NULL, `attempt_number` INTEGER NOT NULL, `fingerprint_sha256` TEXT NOT NULL, `started_at_ms` INTEGER NOT NULL, `completed_at_ms` INTEGER NOT NULL, `duration_ms` INTEGER NOT NULL, `outcome` TEXT NOT NULL, `failure_source` TEXT NOT NULL, `commitment` TEXT NOT NULL, `context_slot` INTEGER, `error_kind` TEXT, `instruction_index` INTEGER, `instruction_error_kind` TEXT, `custom_program_error_code` INTEGER, `rpc_error_code` INTEGER, `availability_reason` TEXT, `units_consumed` INTEGER, `logs_json` TEXT NOT NULL, `logs_truncated` INTEGER NOT NULL, PRIMARY KEY(`simulation_id`), FOREIGN KEY(`session_id`) REFERENCES `sessions`(`session_id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`event_id`) REFERENCES `protocol_events`(`event_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "simulationId",
+            "columnName": "simulation_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestId",
+            "columnName": "request_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payloadIndex",
+            "columnName": "payload_index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attemptNumber",
+            "columnName": "attempt_number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fingerprintSha256",
+            "columnName": "fingerprint_sha256",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtMillis",
+            "columnName": "started_at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAtMillis",
+            "columnName": "completed_at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationMillis",
+            "columnName": "duration_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "outcome",
+            "columnName": "outcome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "failureSource",
+            "columnName": "failure_source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commitment",
+            "columnName": "commitment",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextSlot",
+            "columnName": "context_slot",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "errorKind",
+            "columnName": "error_kind",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "instructionIndex",
+            "columnName": "instruction_index",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "instructionErrorKind",
+            "columnName": "instruction_error_kind",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "customProgramErrorCode",
+            "columnName": "custom_program_error_code",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rpcErrorCode",
+            "columnName": "rpc_error_code",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "availabilityReason",
+            "columnName": "availability_reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "unitsConsumed",
+            "columnName": "units_consumed",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "logsJson",
+            "columnName": "logs_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "logsTruncated",
+            "columnName": "logs_truncated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "simulation_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_simulation_results_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_simulation_results_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          },
+          {
+            "name": "index_simulation_results_event_id",
+            "unique": false,
+            "columnNames": [
+              "event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_simulation_results_event_id` ON `${TABLE_NAME}` (`event_id`)"
+          },
+          {
+            "name": "index_simulation_results_event_id_payload_index_attempt_number",
+            "unique": true,
+            "columnNames": [
+              "event_id",
+              "payload_index",
+              "attempt_number"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_simulation_results_event_id_payload_index_attempt_number` ON `${TABLE_NAME}` (`event_id`, `payload_index`, `attempt_number`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "session_id"
+            ]
+          },
+          {
+            "table": "protocol_events",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "event_id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd1b777f3007c429d89ad1b7bf0a0d5d6')"
+    ]
+  }
+}

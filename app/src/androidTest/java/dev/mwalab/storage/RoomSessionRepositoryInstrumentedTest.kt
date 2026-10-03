@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.protocol.ProtocolEvidence
 import dev.mwalab.protocol.ProtocolFailureSource
 import dev.mwalab.protocol.ProtocolMethod
@@ -45,12 +47,15 @@ class RoomSessionRepositoryInstrumentedTest {
         repository.createSession(MwaSession("session-a", 100))
         repository.recordProtocolEvent(event("session-a", 2, ProtocolMethod.SIGN_MESSAGES))
         repository.recordProtocolEvent(event("session-a", 1, ProtocolMethod.AUTHORIZE))
+        repository.updateIdentityVerificationState("session-a", DappVerificationState.UNVERIFIED)
         repository.finishSession("session-a", 500, SessionCloseReason.SCENARIO_COMPLETE)
 
         val summary = repository.getSession("session-a")
         assertNotNull(summary)
         checkNotNull(summary)
         assertEquals(SessionCloseReason.SCENARIO_COMPLETE, summary.session.closeReason)
+        assertEquals(AssociationMode.LOCAL, summary.session.associationMode)
+        assertEquals(DappVerificationState.UNVERIFIED, summary.session.identityVerificationState)
         assertEquals(listOf(1L, 2L), summary.events.map { it.sequence })
         assertEquals(400L, summary.durationMillis)
         database.close()

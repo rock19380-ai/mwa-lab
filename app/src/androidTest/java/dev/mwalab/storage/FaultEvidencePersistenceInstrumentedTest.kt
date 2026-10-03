@@ -50,7 +50,7 @@ class FaultEvidencePersistenceInstrumentedTest {
                 .getSession("phase6-session")!!.events.single()
             assertEquals(ProtocolFailureSource.INJECTED, persisted.failureSource)
             assertEquals(FaultId.SIGN_REJECT.stableId, persisted.injectedFaultId)
-            assertEquals(3, reopened.openHelper.readableDatabase.version)
+            assertEquals(4, reopened.openHelper.readableDatabase.version)
         } finally {
             reopened.close()
             context.deleteDatabase(name)
