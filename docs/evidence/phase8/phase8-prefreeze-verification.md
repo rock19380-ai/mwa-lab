@@ -24,3 +24,9 @@ Date: 2026-10-03 (Asia/Yangon). Pre-closeout HEAD: `8c14ded3219fb03e169f6cd9c93e
 | Evidence/date | Final evidence describes executed checks, actual current XML counts, real Devnet sessions and screenshots, and the local 2026-10-03 date. No CI run ID or future freeze result is invented. Phase 9 has not started. |
 
 The closeout commit must include `PHASE_8_FILES.txt` and the exact final evidence. Then only a GitHub Actions run whose `headSha` equals that closeout commit and whose conclusion is success may authorize the dated annotated Phase 8 freeze tag.
+
+## Post-closeout exact-head CI incident
+
+The first closeout SHA `b70c4c0e21eee5566bc903e8e8ca893915bdc3ab` was pushed and its exact-head Android CI run [37092491540](https://github.com/rock19380-ai/mwa-lab/actions/runs/37092491540) completed with **failure**. Lint, unit tests, both debug APK builds, and both AndroidTest APK builds passed. The unconditional historical Phase 1 step failed because it searched `MainActivity.kt` for `MWA LAB TEST ENDPOINT`; Phase 8 had intentionally moved safety text to the current shared banner and signing screen. This run does not authorize a freeze.
+
+The Phase 8 repair gates the historical Phase 1 workflow step to checkouts without `scripts/phase8_static.sh`; the Phase 8 step still runs on Phase 8 checkout. `scripts/phase8_static.py` now asserts that routing. Historical Phase 1/7 scripts and all application sources are unchanged by this repair. Full offline local build/lint/JVM verification, Phase 8 static continuation, shell syntax, and diff hygiene passed after the change. The new exact-head CI run must complete successfully before any tag.

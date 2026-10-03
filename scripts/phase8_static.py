@@ -288,6 +288,9 @@ def ci_routing() -> None:
     workflow = read(".github/workflows/android.yml")
     require("      - phase8-world-class-ux-positioning" in workflow,
             "Phase 8 branch is absent from Android CI")
+    phase1_step = workflow.split("- name: Phase 1 deterministic static gate", 1)[1].split("- name:", 1)[0]
+    require("hashFiles('scripts/phase8_static.sh') == ''" in phase1_step,
+            "Obsolete Phase 1 UI assertion still runs on Phase 8 checkout")
     require("hashFiles('scripts/phase7_static.sh') != '' && "
             "hashFiles('scripts/phase8_static.sh') == ''" in workflow,
             "Historical Phase 7 checkout no longer routes to its own gate")

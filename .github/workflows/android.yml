@@ -65,6 +65,9 @@ jobs:
         run: test -f demo-client/build/outputs/apk/debug/demo-client-debug.apk
 
       - name: Phase 1 deterministic static gate
+        # The Phase 8 presentation moved the safety labels out of MainActivity.
+        # Its current-source gate verifies the shared banner and signing screen.
+        if: ${{ hashFiles('scripts/phase8_static.sh') == '' }}
         run: ./scripts/phase1_static.sh
 
       - name: Phase 2 historical scope gate

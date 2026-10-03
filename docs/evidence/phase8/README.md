@@ -21,6 +21,6 @@ This directory records Phase 8 UX, positioning, final local/device/live/security
 - `phase8-live-fault-sign-reject.md` — injected rejection, independent persisted fields, exports, and NORMAL restoration.
 - `phase8-final-security.md` — current security continuation, historical scanner interpretation, and actual export scan.
 - `phase8-screenshot-demo-readiness.md` — six final-build screenshots under `screenshots/phase8/`.
-- `phase8-prefreeze-verification.md` — final hostile audit before closeout commit.
+- `phase8-prefreeze-verification.md` — final hostile audit and first exact-head CI incident/repair.
 
-The screenshots show only real Devnet/test state and explicitly label injected evidence. Production-wallet compatibility is not inferred from MWA Lab's own endpoint. No Phase 8 freeze tag or exact-head CI result is claimed inside the freeze-candidate source commit.
+The screenshots show only real Devnet/test state and explicitly label injected evidence. Production-wallet compatibility is not inferred from MWA Lab's own endpoint. No successful exact-head CI or Phase 8 freeze tag is claimed inside the freeze-candidate source commit.

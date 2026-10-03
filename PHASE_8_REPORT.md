@@ -43,6 +43,8 @@ Production-wallet compatibility: **NOT VERIFIED IN THIS RELEASE**. MWA Lab's own
 
 ## Freeze provenance boundary
 
+The first closeout commit `b70c4c0e21eee5566bc903e8e8ca893915bdc3ab` reached CI, but run `37092491540` failed at an obsolete Phase 1 source-location assertion after lint, unit tests, and APK builds passed. A narrow Phase 8 CI routing repair now excludes that historical assertion on Phase 8 checkout while retaining the Phase 8 continuation gate; no application code or historical script changed. See the prefreeze evidence for the exact failure. The repair commit requires its own successful exact-head CI before freezing.
+
 The exact final closeout SHA, GitHub Actions run ID/URL, and successful conclusion cannot be embedded in this same source commit without changing its HEAD. The annotated Phase 8 freeze tag must record them only after that exact HEAD passes CI. No Phase 8 tag or Phase 9 work is claimed by this report.
 
 Detailed receipts: [Phase 8 evidence](docs/evidence/phase8/).
