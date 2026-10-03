@@ -218,9 +218,14 @@ class MwaCapabilityCaptureInstrumentedTest {
         }
     }
 
-    private fun authorize(client: MobileWalletAdapterClient, label: String) = client.authorize(
-        Uri.parse("https://phase4-capabilities.invalid"), Uri.parse("icon.png"), label,
-        ProtocolContract.CHAIN_SOLANA_DEVNET, null, null, null, null).get(10, TimeUnit.SECONDS)
+    private fun authorize(client: MobileWalletAdapterClient, label: String): com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient.AuthorizationResult {
+        val future = client.authorize(
+            Uri.parse("https://phase4-capabilities.invalid"), Uri.parse("icon.png"), label,
+            ProtocolContract.CHAIN_SOLANA_DEVNET, null, null, null, null,
+        )
+        AuthorizationApprovalTestDriver.approveNext()
+        return future.get(10, TimeUnit.SECONDS)
+    }
 
     private inner class Fixture : java.io.Closeable {
         val name = "phase4-capabilities-" + UUID.randomUUID() + ".db"

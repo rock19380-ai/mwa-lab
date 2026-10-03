@@ -1,5 +1,8 @@
 package dev.mwalab.democlient
 
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +50,7 @@ class DemoClientActivity : ComponentActivity() {
                 var state by remember(phase2Scenario, phase4Scenario, phase5Scenario, phase6Scenario) {
                     mutableStateOf<DemoUiState>(DemoUiState.Running)
                 }
+                var debuggerLaunchMessage by remember { mutableStateOf<String?>(null) }
 
                 LaunchedEffect(phase2Scenario, phase4Scenario, phase5Scenario, phase6Scenario) {
                     state = withContext(Dispatchers.IO) {
@@ -98,13 +103,14 @@ class DemoClientActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        text = "MWA Lab Demo Client",
+                        text = "MWA LAB DEMO dAPP",
                         style = MaterialTheme.typography.headlineSmall,
                     )
                     Text(
-                        text = "FOR TESTING ONLY",
+                        text = "TEST HARNESS — NOT THE DEBUGGER",
                         style = MaterialTheme.typography.titleMedium,
                     )
+                    Text("This test dApp drives deterministic Mobile Wallet Adapter acceptance flows.")
 
                     if (phase6Scenario != null) {
                         Text("Phase 6 fault acceptance: ${phase6Scenario.name}")
@@ -153,6 +159,16 @@ class DemoClientActivity : ComponentActivity() {
                                     ", optional=" +
                                     current.result.optionalFeatures.joinToString(),
                             )
+                            Text("This test dApp completed its MWA sequence.")
+                            Text("Open MWA Lab to inspect the wallet-side protocol trace.")
+                            Button(onClick = {
+                                debuggerLaunchMessage = launchDebugger()
+                            }) {
+                                Text("OPEN MWA LAB")
+                            }
+                            debuggerLaunchMessage?.let { message ->
+                                Text(message)
+                            }
                         }
                         is DemoUiState.Phase6Complete -> {
                             val result = current.result
@@ -195,11 +211,27 @@ class DemoClientActivity : ComponentActivity() {
         }
     }
 
+    private fun launchDebugger(): String? = try {
+        val component = ComponentName(PRIMARY_PACKAGE, PRIMARY_ACTIVITY)
+        startActivity(
+            Intent(Intent.ACTION_MAIN)
+                .setComponent(component)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP),
+        )
+        null
+    } catch (_: ActivityNotFoundException) {
+        "MWA Lab debugger is not installed on this device."
+    } catch (_: SecurityException) {
+        "MWA Lab debugger could not be opened from this test harness."
+    }
+
     companion object {
         const val EXTRA_PHASE2_SCENARIO = "mwa_phase2_scenario"
         const val EXTRA_PHASE4_SCENARIO = "mwa_phase4_scenario"
         const val EXTRA_PHASE5_SCENARIO = "mwa_phase5_scenario"
         const val EXTRA_PHASE6_SCENARIO = "mwa_phase6_scenario"
+        internal const val PRIMARY_PACKAGE = "dev.mwalab"
+        internal const val PRIMARY_ACTIVITY = "dev.mwalab.MainActivity"
     }
 }
 

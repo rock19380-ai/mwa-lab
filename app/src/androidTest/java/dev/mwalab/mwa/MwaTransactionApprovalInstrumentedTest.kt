@@ -399,7 +399,9 @@ class MwaTransactionApprovalInstrumentedTest {
             f.assertInjectedEvent(ProtocolMethod.REAUTHORIZE, FaultId.AUTH_REJECT,
                 ProtocolContract.ERROR_AUTHORIZATION_FAILED, "injected_auth_reject")
             f.selectFault(FaultId.NORMAL)
-            assertNotNull(f.authorizeAgain().get(10, TimeUnit.SECONDS))
+            val normalAuthorization = f.authorizeAgain()
+            AuthorizationApprovalTestDriver.approveNext()
+            assertNotNull(normalAuthorization.get(10, TimeUnit.SECONDS))
             assertEquals(0, f.signCount)
             assertTrue(f.submitted.isEmpty())
         }
@@ -612,9 +614,18 @@ class MwaTransactionApprovalInstrumentedTest {
             f.awaitFaultMark(FaultId.DELAY_5S)
             f.selectFault(FaultId.NORMAL)
             val replacement = f.replaceAssociation()
-            val newAuth = replacement.authorize(Uri.parse("https://phase6-replacement.invalid"), Uri.parse("icon.png"),
-                "Phase 6 replacement", ProtocolContract.CHAIN_SOLANA_DEVNET,
-                null, null, null, null).get(10, TimeUnit.SECONDS)
+            val replacementAuthorization = replacement.authorize(
+                Uri.parse("https://phase6-replacement.invalid"),
+                Uri.parse("icon.png"),
+                "Phase 6 replacement",
+                ProtocolContract.CHAIN_SOLANA_DEVNET,
+                null,
+                null,
+                null,
+                null,
+            )
+            AuthorizationApprovalTestDriver.approveNext()
+            val newAuth = replacementAuthorization.get(10, TimeUnit.SECONDS)
             assertTrue(newAuth.authToken.isNotEmpty())
             runCatching { old.get(10, TimeUnit.SECONDS) }
             val oldEvent = f.awaitFaultEvent(ProtocolMethod.SIGN_MESSAGES, FaultId.DELAY_5S)
@@ -743,9 +754,11 @@ class MwaTransactionApprovalInstrumentedTest {
             authorize()
         }
         fun authorize() {
-            val authorization = client.authorize(Uri.parse("https://phase48-test.invalid"), Uri.parse("icon.png"),
+            val future = client.authorize(Uri.parse("https://phase48-test.invalid"), Uri.parse("icon.png"),
                 "Phase 4.8 approval fixture", ProtocolContract.CHAIN_SOLANA_DEVNET,
-                null, null, null, null).get(10, TimeUnit.SECONDS)
+                null, null, null, null)
+            AuthorizationApprovalTestDriver.approveNext()
+            val authorization = future.get(10, TimeUnit.SECONDS)
             publicKey = authorization.accounts.single().publicKey
             authTokens += authorization.authToken
         }

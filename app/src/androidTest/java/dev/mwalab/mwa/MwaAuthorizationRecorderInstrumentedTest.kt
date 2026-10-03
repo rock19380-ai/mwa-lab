@@ -82,7 +82,7 @@ class MwaAuthorizationRecorderInstrumentedTest {
         assertNotNull("Mainnet authorization must fail closed", mainnetFailure)
         awaitEvent(MwaSessionEvent.AUTHORIZE_CHAIN_REJECTED)
 
-        val authorization = client.authorize(
+        val authorizationFuture = client.authorize(
             identityUri,
             iconUri,
             identityName,
@@ -91,7 +91,9 @@ class MwaAuthorizationRecorderInstrumentedTest {
             null,
             null,
             null,
-        ).get(10, TimeUnit.SECONDS)
+        )
+        AuthorizationApprovalTestDriver.approveNext()
+        val authorization = authorizationFuture.get(10, TimeUnit.SECONDS)
         assertTrue(authorization.authToken.isNotEmpty())
         awaitEvent(MwaSessionEvent.AUTHORIZE_SUCCEEDED)
 

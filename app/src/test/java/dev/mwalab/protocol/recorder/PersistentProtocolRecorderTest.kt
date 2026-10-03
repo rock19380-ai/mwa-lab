@@ -206,6 +206,31 @@ class PersistentProtocolRecorderTest {
     }
 
     @Test
+    fun explicitHumanConsentSummaryIsPersistableWithoutOpeningArbitraryMetadata() = runBlocking {
+        val repository = FakeSessionRepository()
+        val recorder = PersistentProtocolRecorder(repository, FakeClock(100))
+        val handle = recorder.begin(
+            "session-a",
+            ProtocolMethod.AUTHORIZE,
+            mapOf("chain" to "solana:devnet"),
+        )
+
+        recorder.complete(
+            handle,
+            outcome = ProtocolOutcome.SUCCESS,
+            responseSummary = mapOf(
+                "result" to "authorized",
+                "human_consent" to "approved",
+            ),
+        )
+
+        val event = repository.events.single()
+        assertEquals("authorized", event.responseSummary["result"])
+        assertEquals("approved", event.responseSummary["human_consent"])
+        assertFalse(event.responseSummary.containsKey("auth_token"))
+    }
+
+    @Test
     fun secretBearingSummaryKeysAreRejectedBeforePersistence() {
         runBlocking {
             val failure = runCatching {

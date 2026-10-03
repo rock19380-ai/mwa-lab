@@ -6,6 +6,7 @@ import dev.mwalab.faults.FaultSelectionRepository
 import dev.mwalab.faults.PersistentFaultSelectionRepository
 import dev.mwalab.faults.PrivatePreferencesFaultSelectionStore
 import dev.mwalab.approval.ApprovalCoordinator
+import dev.mwalab.approval.AuthorizationApprovalCoordinator
 import dev.mwalab.transaction.TransactionInspection
 import dev.mwalab.transaction.TransactionInspector
 import dev.mwalab.transaction.TransactionDiagnosticRepository
@@ -36,6 +37,9 @@ object MwaLabComposition {
 
     @Volatile
     private var approvalCoordinatorInstance: ApprovalCoordinator? = null
+
+    @Volatile
+    private var authorizationApprovalCoordinatorInstance: AuthorizationApprovalCoordinator? = null
 
     @Volatile
     private var devnetRpcGatewayInstance: DevnetRpcGateway? = null
@@ -88,6 +92,13 @@ object MwaLabComposition {
         approvalCoordinatorInstance ?: synchronized(this) {
             approvalCoordinatorInstance ?: ApprovalCoordinator().also {
                 approvalCoordinatorInstance = it
+            }
+        }
+
+    fun authorizationApprovalCoordinator(): AuthorizationApprovalCoordinator =
+        authorizationApprovalCoordinatorInstance ?: synchronized(this) {
+            authorizationApprovalCoordinatorInstance ?: AuthorizationApprovalCoordinator().also {
+                authorizationApprovalCoordinatorInstance = it
             }
         }
 

@@ -64,7 +64,7 @@ class MwaSigningRecorderInstrumentedTest {
         val identityUri = Uri.parse("https://phase3-signing-recorder.invalid")
         val iconUri = Uri.parse("icon.png")
 
-        val authorization = client.authorize(
+        val authorizationFuture = client.authorize(
             identityUri,
             iconUri,
             identityName,
@@ -73,7 +73,9 @@ class MwaSigningRecorderInstrumentedTest {
             null,
             null,
             null,
-        ).get(10, TimeUnit.SECONDS)
+        )
+        AuthorizationApprovalTestDriver.approveNext()
+        val authorization = authorizationFuture.get(10, TimeUnit.SECONDS)
         assertTrue(authorization.authToken.isNotEmpty())
         awaitEvent(MwaSessionEvent.AUTHORIZE_SUCCEEDED)
 

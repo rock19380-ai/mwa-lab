@@ -132,7 +132,7 @@ class MwaLocalAssociationInstrumentedTest {
             rejectionCountBeforeMissingChain + 1,
         )
 
-        val authorization = client.authorize(
+        val userRejectedFuture = client.authorize(
             identityUri,
             iconUri,
             identityName,
@@ -141,7 +141,26 @@ class MwaLocalAssociationInstrumentedTest {
             null,
             null,
             null,
-        ).get(10, TimeUnit.SECONDS)
+        )
+        AuthorizationApprovalTestDriver.rejectNext()
+        assertNotNull(
+            "Explicit user rejection must fail authorization",
+            runCatching { userRejectedFuture.get(10, TimeUnit.SECONDS) }.exceptionOrNull(),
+        )
+        awaitEvent(MwaSessionEvent.AUTHORIZE_APPROVAL_REJECTED)
+
+        val authorizationFuture = client.authorize(
+            identityUri,
+            iconUri,
+            identityName,
+            ProtocolContract.CHAIN_SOLANA_DEVNET,
+            null,
+            null,
+            null,
+            null,
+        )
+        AuthorizationApprovalTestDriver.approveNext()
+        val authorization = authorizationFuture.get(10, TimeUnit.SECONDS)
 
         assertTrue(authorization.authToken.isNotEmpty())
         assertEquals(1, authorization.accounts.size)

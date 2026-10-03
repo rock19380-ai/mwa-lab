@@ -221,6 +221,7 @@ class PersistentProtocolRecorder(
             "address_count",
             "authorization_reference",
             "authorization_state",
+            "human_consent",
             "chain",
             "commitment",
             "commitment_verified",

@@ -26,10 +26,15 @@ import dev.mwalab.faults.FaultSelectionRepository
 import dev.mwalab.approval.ApprovalCoordinator
 import dev.mwalab.approval.ApprovalDecision
 import dev.mwalab.approval.ApprovalRequest
+import dev.mwalab.approval.AuthorizationApprovalCoordinator
+import dev.mwalab.approval.AuthorizationApprovalRequest
+import dev.mwalab.approval.AuthorizationDecision
 import dev.mwalab.capabilities.CapabilitySnapshotRepository
 import dev.mwalab.capabilities.snapshotForSession
 import dev.mwalab.identity.IdentityRepository
 import dev.mwalab.mwa.association.AssociationOpenResult
+import dev.mwalab.mwa.association.AssociationMode
+import dev.mwalab.mwa.association.DappVerificationState
 import dev.mwalab.mwa.authorization.LabAuthorizationDecision
 import dev.mwalab.mwa.authorization.LabAuthorizationPolicy
 import dev.mwalab.mwa.capabilities.MwaCapabilityProfile
@@ -87,6 +92,8 @@ class MwaSessionHost(
         MwaLabComposition.signingService(context.applicationContext),
     private val approvalCoordinator: ApprovalCoordinator =
         MwaLabComposition.approvalCoordinator(),
+    private val authorizationApprovalCoordinator: AuthorizationApprovalCoordinator =
+        MwaLabComposition.authorizationApprovalCoordinator(),
     private val rpcGateway: DevnetRpcGateway = MwaLabComposition.devnetRpcGateway(),
     private val evidenceSink: MwaSessionEvidenceSink = MwaSessionEvidenceStore,
     private val protocolEvidenceSink: ProtocolEvidenceSink = ProtocolEvidenceStore,
@@ -249,6 +256,7 @@ class MwaSessionHost(
         simulationDiagnosticSettlement.invalidateSession(activeSessionId)
         activeAuthorizationGeneration.set(NO_AUTHORIZATION_GENERATION)
         approvalCoordinator.cancelPending()
+        authorizationApprovalCoordinator.cancelPending()
         val current = synchronized(lock) {
             scenario.also { scenario = null }
         }
@@ -428,38 +436,100 @@ class MwaSessionHost(
 
                 when (decision) {
                     is LabAuthorizationDecision.Granted -> {
-                        markAuthorizationActive(generation)
-                        request.completeWithAuthorize(
-                            arrayOf(decision.account),
-                            null,
-                            decision.authorizationScope,
-                            null,
+                        val approvalRequest = AuthorizationApprovalRequest(
+                            sessionId = persistentSessionId,
+                            generation = generation,
+                            associationMode = AssociationMode.LOCAL,
+                            dappDisplayName = sanitizeAuthorizationDisplayName(request.identityName),
+                            claimedUriDisplay = sanitizeClaimedIdentityUri(request.identityUri),
+                            callerPackage = null,
+                            verificationState = if (request.identityName.isNullOrBlank() && request.identityUri == null) {
+                                DappVerificationState.NOT_AVAILABLE
+                            } else {
+                                DappVerificationState.UNVERIFIED
+                            },
+                            chain = request.chain ?: ProtocolContract.CHAIN_SOLANA_DEVNET,
+                            requestedFeatures = request.features
+                                ?.mapNotNull(::sanitizeRequestedFeature)
+                                ?.take(MAX_AUTHORIZATION_FEATURES)
+                                .orEmpty(),
+                            requestedAddressCount = request.addresses?.size ?: 0,
                         )
-                        record(MwaSessionEvent.AUTHORIZE_SUCCEEDED)
-                        completePersistentProtocol(
-                            handle = protocolHandle,
-                            outcome = ProtocolOutcome.SUCCESS,
-                            responseSummary = mapOf(
+                        record(MwaSessionEvent.AUTHORIZE_APPROVAL_WAITING)
+                        val approval = authorizationApprovalCoordinator.requestApproval(approvalRequest)
+
+                        if (!isActiveSession(persistentSessionId, generation)) {
+                            runCatching { request.completeWithDecline() }
+                            return@launch
+                        }
+
+                        if (approval is AuthorizationDecision.Approved) {
+                            markAuthorizationActive(generation)
+                            request.completeWithAuthorize(
+                                arrayOf(decision.account),
+                                null,
+                                decision.authorizationScope,
+                                null,
+                            )
+                            record(MwaSessionEvent.AUTHORIZE_SUCCEEDED)
+                            val response = mapOf(
                                 "result" to "authorized",
                                 "chain" to (request.chain ?: "<missing>"),
                                 "public_account" to
                                     (decision.account.displayAddress ?: "<public-key-only>"),
                                 "authorization_state" to "walletlib_managed",
-                            ),
-                        )
-                        recordProtocol(
-                            method = ProtocolMethod.AUTHORIZE,
-                            startedAt = startedAt,
-                            outcome = ProtocolOutcome.SUCCESS,
-                            requestSummary = requestSummary,
-                            responseSummary = mapOf(
-                                "result" to "authorized",
-                                "chain" to (request.chain ?: "<missing>"),
-                                "public_account" to
-                                    (decision.account.displayAddress ?: "<public-key-only>"),
-                                "authorization_state" to "walletlib_managed",
-                            ),
-                        )
+                                "human_consent" to "approved",
+                            )
+                            completePersistentProtocol(
+                                handle = protocolHandle,
+                                outcome = ProtocolOutcome.SUCCESS,
+                                responseSummary = response,
+                            )
+                            recordProtocol(
+                                method = ProtocolMethod.AUTHORIZE,
+                                startedAt = startedAt,
+                                outcome = ProtocolOutcome.SUCCESS,
+                                requestSummary = requestSummary,
+                                responseSummary = response,
+                            )
+                        } else {
+                            val result = when (approval) {
+                                AuthorizationDecision.Rejected -> "user_rejected"
+                                AuthorizationDecision.Cancelled -> "approval_cancelled"
+                                AuthorizationDecision.Expired -> "approval_expired"
+                                AuthorizationDecision.Busy -> "approval_busy"
+                                AuthorizationDecision.Approved -> error("Handled above")
+                            }
+                            val source = if (approval is AuthorizationDecision.Rejected) {
+                                ProtocolFailureSource.OBSERVED_PROTOCOL
+                            } else {
+                                ProtocolFailureSource.UNKNOWN
+                            }
+                            runCatching { request.completeWithDecline() }
+                            record(MwaSessionEvent.AUTHORIZE_APPROVAL_REJECTED, result)
+                            completePersistentProtocol(
+                                handle = protocolHandle,
+                                outcome = ProtocolOutcome.FAILURE,
+                                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                                failureSource = source,
+                                responseSummary = mapOf(
+                                    "result" to result,
+                                    "human_consent" to if (approval is AuthorizationDecision.Rejected) "rejected" else "not_completed",
+                                ),
+                            )
+                            recordProtocol(
+                                method = ProtocolMethod.AUTHORIZE,
+                                startedAt = startedAt,
+                                outcome = ProtocolOutcome.FAILURE,
+                                protocolErrorCode = ProtocolContract.ERROR_AUTHORIZATION_FAILED,
+                                failureSource = source,
+                                requestSummary = requestSummary,
+                                responseSummary = mapOf(
+                                    "result" to result,
+                                    "human_consent" to if (approval is AuthorizationDecision.Rejected) "rejected" else "not_completed",
+                                ),
+                            )
+                        }
                     }
 
                     LabAuthorizationDecision.UnsupportedChain -> {
@@ -2275,6 +2345,32 @@ class MwaSessionHost(
         }
     }
 
+    private fun sanitizeAuthorizationDisplayName(value: String?): String? {
+        val normalized = value?.trim()?.takeIf(String::isNotBlank) ?: return null
+        if (normalized.any { it.isISOControl() }) return null
+        return normalized.take(MAX_AUTHORIZATION_TEXT)
+    }
+
+    private fun sanitizeClaimedIdentityUri(uri: Uri?): String? {
+        if (uri == null) return null
+        val scheme = uri.scheme?.lowercase()?.takeIf { it == "https" || it == "http" } ?: return null
+        val host = uri.host?.trim()?.takeIf(String::isNotBlank) ?: return null
+        val path = uri.encodedPath.orEmpty().take(MAX_AUTHORIZATION_URI_PATH)
+        val display = "$scheme://$host$path"
+        return display.take(MAX_AUTHORIZATION_TEXT)
+    }
+
+    private fun sanitizeRequestedFeature(value: String): String? {
+        val normalized = value.trim().takeIf(String::isNotBlank) ?: return null
+        if (normalized.any { it.isISOControl() }) return null
+        return normalized.take(MAX_AUTHORIZATION_TEXT)
+    }
+
+    private fun isActiveSession(sessionId: String, generation: Long): Boolean =
+        isCurrentGeneration(generation) && synchronized(lock) {
+            activePersistentSessionId == sessionId
+        }
+
     private fun markAuthorizationActive(generation: Long) {
         if (isCurrentGeneration(generation)) {
             activeAuthorizationGeneration.set(generation)
@@ -2364,5 +2460,8 @@ class MwaSessionHost(
         private const val AUTH_ISSUER_NAME = "mwa-lab-phase1"
         private const val MAX_MESSAGE_BYTES = 64 * 1024
         private const val MAX_PERSISTED_PAYLOAD_METADATA = 10
+        private const val MAX_AUTHORIZATION_TEXT = 256
+        private const val MAX_AUTHORIZATION_URI_PATH = 160
+        private const val MAX_AUTHORIZATION_FEATURES = 32
     }
 }

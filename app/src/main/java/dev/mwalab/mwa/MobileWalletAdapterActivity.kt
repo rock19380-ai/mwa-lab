@@ -7,18 +7,20 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.mwalab.app.MwaLabComposition
-import dev.mwalab.approval.SigningApprovalScreen
+import dev.mwalab.approval.WalletEndpointScreen
 import dev.mwalab.mwa.association.AssociationOpenResult
 import dev.mwalab.ui.theme.MWALabTheme
 
 class MobileWalletAdapterActivity : ComponentActivity() {
     private val approvalCoordinator by lazy { MwaLabComposition.approvalCoordinator() }
+    private val authorizationApprovalCoordinator by lazy { MwaLabComposition.authorizationApprovalCoordinator() }
     private val simulationCoordinator by lazy { MwaLabComposition.simulationCoordinator(applicationContext) }
 
     private val sessionHost by lazy {
         MwaSessionHost(
             context = applicationContext,
             approvalCoordinator = approvalCoordinator,
+            authorizationApprovalCoordinator = authorizationApprovalCoordinator,
             onSessionFinished = {
                 if (!isFinishing && !isDestroyed) finish()
             },
@@ -31,11 +33,15 @@ class MobileWalletAdapterActivity : ComponentActivity() {
         setContent {
             MWALabTheme {
                 val approvalState by approvalCoordinator.state.collectAsState()
+                val authorizationState by authorizationApprovalCoordinator.state.collectAsState()
                 val simulationStates by simulationCoordinator.state.collectAsState()
-                SigningApprovalScreen(
-                    state = approvalState,
-                    onApprove = { approvalCoordinator.approve(it) },
-                    onReject = { approvalCoordinator.reject(it) },
+                WalletEndpointScreen(
+                    authorizationState = authorizationState,
+                    signingState = approvalState,
+                    onAuthorizationApprove = { authorizationApprovalCoordinator.approve(it) },
+                    onAuthorizationReject = { authorizationApprovalCoordinator.reject(it) },
+                    onSigningApprove = { approvalCoordinator.approve(it) },
+                    onSigningReject = { approvalCoordinator.reject(it) },
                     simulationStates = simulationStates,
                     onSimulate = { simulationCoordinator.simulate(it) },
                 )

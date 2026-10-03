@@ -78,7 +78,7 @@ class MwaSessionLifecycleInstrumentedTest {
         assertEquals("solana:devnet", active.session.cluster)
 
         val identityName = "MWA Lab Phase 3 lifecycle client"
-        val authorization = client.authorize(
+        val authorizationFuture = client.authorize(
             Uri.parse("https://phase3-lifecycle.invalid"),
             Uri.parse("icon.png"),
             identityName,
@@ -87,7 +87,9 @@ class MwaSessionLifecycleInstrumentedTest {
             null,
             null,
             null,
-        ).get(10, TimeUnit.SECONDS)
+        )
+        AuthorizationApprovalTestDriver.approveNext()
+        val authorization = authorizationFuture.get(10, TimeUnit.SECONDS)
         assertTrue(authorization.authToken.isNotEmpty())
 
         val identified = awaitSession(repository, active.session.id) {

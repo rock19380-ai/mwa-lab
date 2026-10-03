@@ -181,10 +181,15 @@ class MwaHostileRecorderInstrumentedTest {
         }
     }
 
-    private fun authorize(client: MobileWalletAdapterClient, label: String) = client.authorize(
-        android.net.Uri.parse("https://secret-identity-query.invalid/?secret=NEVER_PERSIST_URI"),
-        android.net.Uri.parse("SECRET_ICON_URI.png"), label, ProtocolContract.CHAIN_SOLANA_DEVNET,
-        null, null, null, null).get(10, TimeUnit.SECONDS)
+    private fun authorize(client: MobileWalletAdapterClient, label: String): com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient.AuthorizationResult {
+        val future = client.authorize(
+            android.net.Uri.parse("https://secret-identity-query.invalid/?secret=NEVER_PERSIST_URI"),
+            android.net.Uri.parse("SECRET_ICON_URI.png"), label, ProtocolContract.CHAIN_SOLANA_DEVNET,
+            null, null, null, null,
+        )
+        AuthorizationApprovalTestDriver.approveNext()
+        return future.get(10, TimeUnit.SECONDS)
+    }
 
     private inner class Fixture(label: String) : java.io.Closeable {
         val name = "phase3-$label-${UUID.randomUUID()}.db"
