@@ -13,6 +13,7 @@ on:
       - phase7-sanitized-diagnostic-reports
       - phase8-world-class-ux-positioning
       - phase9-first-run-connection-ux
+      - phase10-release-candidate-compatibility-evidence
   pull_request:
 
 permissions:
@@ -42,10 +43,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle executable
-        run: chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh ./scripts/phase9_static.sh
+        run: |
+          chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh ./scripts/phase9_static.sh
+          if [ -f ./scripts/phase10_static.sh ]; then chmod +x ./scripts/phase10_static.sh; fi
 
       - name: Validate shell gate syntax
-        run: bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh ./scripts/phase9_static.sh
+        run: |
+          bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh ./scripts/phase9_static.sh
+          if [ -f ./scripts/phase10_static.sh ]; then bash -n ./scripts/phase10_static.sh; fi
 
       - name: Lint
         run: ./gradlew lint
@@ -56,11 +61,19 @@ jobs:
       - name: Assemble debug APKs
         run: ./gradlew assembleDebug
 
+      - name: Assemble unsigned release buildability APK
+        if: ${{ hashFiles('scripts/phase10_static.sh') != '' }}
+        run: ./gradlew assembleRelease
+
       - name: Assemble AndroidTest APKs
         run: ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 
       - name: Verify primary debug APK exists
         run: test -f app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Verify unsigned release buildability APK exists
+        if: ${{ hashFiles('scripts/phase10_static.sh') != '' }}
+        run: test -f app/build/outputs/apk/release/app-release-unsigned.apk
 
       - name: Verify demo-client debug APK exists
         run: test -f demo-client/build/outputs/apk/debug/demo-client-debug.apk
@@ -100,5 +113,9 @@ jobs:
         run: ./scripts/phase8_static.sh
 
       - name: Phase 9 first-run, Test Wallet, and transport safety gate
-        if: ${{ hashFiles('scripts/phase9_static.sh') != '' }}
+        if: ${{ hashFiles('scripts/phase9_static.sh') != '' && hashFiles('scripts/phase10_static.sh') == '' }}
         run: ./scripts/phase9_static.sh
+
+      - name: Phase 10 release identity and safety gate
+        if: ${{ hashFiles('scripts/phase10_static.sh') != '' }}
+        run: ./scripts/phase10_static.sh

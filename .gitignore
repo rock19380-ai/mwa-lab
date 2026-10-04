@@ -18,3 +18,7 @@ local.properties
 
 # Python phase-gate bytecode
 __pycache__/
+*.jks
+*.keystore
+keystore.properties
+release-signing.properties

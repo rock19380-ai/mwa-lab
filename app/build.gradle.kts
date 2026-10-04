@@ -1,7 +1,29 @@
+import java.io.File
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+}
+
+val releaseSigningVariables = listOf(
+    "MWALAB_RELEASE_STORE_FILE",
+    "MWALAB_RELEASE_STORE_PASSWORD",
+    "MWALAB_RELEASE_KEY_ALIAS",
+    "MWALAB_RELEASE_KEY_PASSWORD",
+).associateWith { providers.environmentVariable(it).orNull }
+val releaseSigningRequested = releaseSigningVariables.values.any { it != null }
+if (releaseSigningRequested) {
+    val missing = releaseSigningVariables.filterValues { it.isNullOrBlank() }.keys
+    if (missing.isNotEmpty()) {
+        throw GradleException("Incomplete release signing environment: missing ${missing.joinToString()}")
+    }
+    val storeFile = File(releaseSigningVariables.getValue("MWALAB_RELEASE_STORE_FILE")!!)
+    if (!storeFile.isAbsolute || !storeFile.isFile ||
+        storeFile.canonicalFile.toPath().startsWith(rootProject.projectDir.canonicalFile.toPath())
+    ) {
+        throw GradleException("Release keystore must be an existing absolute file outside the repository")
+    }
 }
 
 android {
@@ -15,15 +37,26 @@ android {
         minSdk = 23
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1.0-clockin"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Live Devnet acceptance is run only by an explicit adb instrumentation command.
         testInstrumentationRunnerArguments["notClass"] = "dev.mwalab.wallet.Phase9LiveSendInstrumentedTest"
     }
 
+    signingConfigs {
+        if (releaseSigningRequested) {
+            create("operatorRelease") {
+                storeFile = file(releaseSigningVariables.getValue("MWALAB_RELEASE_STORE_FILE")!!)
+                storePassword = releaseSigningVariables.getValue("MWALAB_RELEASE_STORE_PASSWORD")!!
+                keyAlias = releaseSigningVariables.getValue("MWALAB_RELEASE_KEY_ALIAS")!!
+                keyPassword = releaseSigningVariables.getValue("MWALAB_RELEASE_KEY_PASSWORD")!!
+            }
+        }
+    }
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("operatorRelease")
             optimization {
                 enable = false
             }

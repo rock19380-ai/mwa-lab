@@ -2,6 +2,26 @@
 
 No release candidate exists yet.
 
+## Phase 10 release-buildability checkpoint
+
+Release identity is `dev.mwalab`, versionCode `1`, versionName
+`0.1.0-clockin`. The `rc1` suffix belongs to the externally copied, verified
+signed APK filename, not the in-app version. CI builds an **unsigned** release
+APK to verify buildability; it is not a competition RC. With no operator
+credentials, signed RC1: pending operator signing secret.
+
+Remote MWA: `BLOCKED_HIDDEN` (not released); Remote QR scanner: `OMITTED`;
+production-wallet compatibility: `NOT_VERIFIED`. No Phase 10 live Devnet
+acceptance or final release freeze is asserted by this checkpoint.
+
+For an operator-signed build, keep the stable keystore outside this repository
+and provide `MWALAB_RELEASE_STORE_FILE` (absolute path),
+`MWALAB_RELEASE_STORE_PASSWORD`, `MWALAB_RELEASE_KEY_ALIAS`, and
+`MWALAB_RELEASE_KEY_PASSWORD` as environment variables. A partial configuration
+fails rather than producing a misleading signed artifact. Never check in the
+keystore or signing credentials; verify the resulting APK with `apksigner`
+and `aapt` before distributing it. The signed artifact is not produced by CI.
+
 Release gates will eventually require:
 
 - signed release APK;
