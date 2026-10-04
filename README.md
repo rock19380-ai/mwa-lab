@@ -21,6 +21,23 @@ MWA Lab is a developer-facing MWA endpoint built to make that protocol boundary
 visible and reproducible. It is not a production wallet and is not a replacement
 for Phantom, Solflare, Seed Vault Wallet, or another production wallet.
 
+## Start in 30 seconds
+
+1. Install MWA Lab and an MWA-enabled Android dApp on the same device.
+2. Open the dApp and tap **Connect Wallet**.
+3. Choose **MWA Lab** if Android asks.
+4. Review and approve the Devnet test connection.
+5. Run the dApp action, then open MWA Lab to inspect its protocol trace.
+
+The dApp starts the Local MWA association; there is no server to start or
+ordinary website URL to paste. The separate MWA Lab Demo Client is a test dApp,
+not a production wallet.
+
+**Receive Test SOL QR** contains only the disposable public Devnet address for
+funding. A **Remote MWA QR** would connect a dApp to the protocol. Remote MWA
+and its scanner are not released in this Phase 9 checkpoint, so the QR types
+must not be interchanged.
+
 ## Phase 2 verified boundary
 
 Phase 2 extends the frozen Phase 1 association/authorization foundation and is
@@ -161,14 +178,13 @@ protocol boundary.
 ./gradlew test
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
-./scripts/phase1_static.sh
-./scripts/phase7_static.sh
-./scripts/phase8_static.sh
+./scripts/phase9_static.sh
 ```
 
-GitHub Actions runs deterministic non-device gates and routes each checkout
-by its Phase 7 or Phase 8 script marker. Historical phase gates retain their
-frozen scope; connected-device and live Devnet evidence are recorded separately.
+GitHub Actions runs deterministic non-device gates and routes the Phase 9
+checkout through the current-source Phase 9 static gate. The frozen Phase 8
+static gate is run from a detached worktree at its Phase 8 tag. Connected-device
+and live Devnet evidence are recorded separately.
 
 ## Modules
 
@@ -322,3 +338,13 @@ protocol timeline.
 Remote MWA release controls and a Remote QR scanner are not shipped at this
 checkpoint. Production-wallet compatibility remains **NOT VERIFIED**. See
 [Phase 9 evidence](docs/evidence/phase9/) for the executed gates and current scope.
+
+
+The pre-freeze live run is **BLOCKED_EXTERNAL_FUNDING**: the current Test Wallet
+held 0 Devnet lamports, the in-app airdrop returned RPC `-32603`, and two
+bounded official Devnet RPC requests returned `429`. Deterministic Send gates
+and a real injected Local `FAULT_SIGN_REJECT` run passed, with the expected
+`ERROR_NOT_SIGNED / INJECTED / FAULT_SIGN_REJECT` Room evidence. The direct
+Test Wallet live Send and canonical NORMAL live sign-and-send are still
+blocked; no Phase 9 freeze tag is claimed. The public Test Wallet address and
+minimum Devnet top-up are in [PHASE_9_REPORT.md](PHASE_9_REPORT.md).

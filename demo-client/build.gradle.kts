@@ -17,6 +17,8 @@ android {
         versionName = "1.0-phase1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Live Devnet acceptance is run only by an explicit adb instrumentation command.
+        testInstrumentationRunnerArguments["notClass"] = "dev.mwalab.democlient.DemoClientPhase9LiveInstrumentedTest"
     }
 
     buildTypes {

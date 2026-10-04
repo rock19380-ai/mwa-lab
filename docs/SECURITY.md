@@ -310,3 +310,32 @@ diff. That scanner was not rewritten. The Phase 8 continuation gate checks the
 unchanged approval coordinator, signing/storage/fault/report authorities and
 current export security. Details are in
 [Phase 8 final security evidence](evidence/phase8/phase8-final-security.md).
+
+
+## Phase 9 authorization, Test Wallet, and transport boundary
+
+Normal supported Local authorization now requires an explicit human decision
+through a separate request-bound coordinator. Injected authorization/signing
+faults retain deterministic protocol outcomes and `INJECTED` provenance without
+requiring a tap for the faulted operation. The current injected Local
+`FAULT_SIGN_REJECT` run returned `ERROR_NOT_SIGNED (-3)` and persisted
+`INJECTED / FAULT_SIGN_REJECT`; the preference was restored to `NORMAL`.
+
+Test Wallet utilities use the existing protected disposable signer and fixed
+Devnet RPC. The Receive QR contains the public address only. A direct Send
+uses a reviewed legacy System Program transfer, preflight, and confirmed
+commitment; ambiguous submission is not reported as success or automatically
+retried by the app. These direct actions do not create MWA protocol events.
+
+Room schema 4 adds only coarse `association_mode` and
+`identity_verification_state` transport fields to sessions. Raw Remote
+association URI, reflector ID/token, association public key, and transport key
+material are absent from diagnostic session columns and report fields. The
+diagnostic sanitizer rejects Remote-shaped secret keys. No Remote release
+control, camera permission, or scanner dependency ships. Local claimed identity
+remains unverified without independent verification evidence; production-wallet
+compatibility is not inferred from the internal Demo Client.
+
+The Phase 9 live Send and NORMAL funded submission remain externally blocked by
+Devnet funding. This is a release-evidence limit, not a claimed product PASS.
+See [Phase 9 audit](evidence/phase9/09-adversarial-audit/live-and-security.md).

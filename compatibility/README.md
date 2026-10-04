@@ -15,3 +15,10 @@ Every observation should record:
 - scenario;
 - observed result;
 - evidence reference.
+
+
+Allowed path results: `PASS`, `FAIL`, `PARTIAL`, `NOT TESTED`, `BLOCKED`.
+The Phase 9 internal Demo Client does not establish production-wallet
+compatibility. Current production-wallet status is `NOT_VERIFIED`; Remote MWA
+is `BLOCKED / NOT RELEASED`, and the Remote scanner is `OMITTED / NOT
+APPLICABLE`. No production-wallet observation was added in Phase 9.
