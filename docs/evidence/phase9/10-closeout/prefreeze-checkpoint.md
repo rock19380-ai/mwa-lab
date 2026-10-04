@@ -2,6 +2,8 @@
 
 Date: 2026-10-04. Branch: `phase9-first-run-connection-ux`.
 
+Historical checkpoint: this funding block was resolved by the later [live acceptance closeout](live-acceptance-closeout.md). The statements below describe the earlier pre-freeze state only.
+
 The work resumed from committed Batch 4 HEAD
 `4047dbece34715f3ab88f0be8dc401f7c0df429e` with intentional uncommitted
 Batch 5 live tests, current-source static gate, and CI routing. The Batch 5

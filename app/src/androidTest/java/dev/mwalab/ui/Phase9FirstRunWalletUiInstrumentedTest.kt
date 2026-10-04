@@ -59,7 +59,8 @@ class Phase9FirstRunWalletUiInstrumentedTest {
         compose.onNodeWithText(address).assertExists()
         compose.onNodeWithText("1.5 SOL · Devnet").assertExists()
         compose.onNodeWithText("TEST ON THIS PHONE").assertExists()
-        compose.onNodeWithText("ENTER LAB").assertHasClickAction()
+        compose.onNodeWithTag("onboarding-list").performScrollToNode(hasTestTag("enter-lab"))
+        compose.onNodeWithTag("enter-lab").assertHasClickAction()
     }
 
     @Test fun homeHasRequiredConnectionGuidanceAndHowToConnectTroubleshooting() {

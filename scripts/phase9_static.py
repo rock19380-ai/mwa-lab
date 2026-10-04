@@ -159,6 +159,10 @@ for build_file, live_class in (
     )
 
 app_live = read("app/src/androidTest/java/dev/mwalab/wallet/Phase9LiveSendInstrumentedTest.kt")
+require("requestAirdrop" not in app_live and "confirmAirdrop" not in app_live,
+        "opt-in live send test may call an airdrop")
+require('getString("mwa_phase9_recipient")' in app_live,
+        "live send test does not require an explicit recipient")
 require(
     "assumeTrue(" in app_live
     and 'getString("mwa_phase9_live") == "1"' in app_live

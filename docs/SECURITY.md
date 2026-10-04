@@ -336,6 +336,9 @@ control, camera permission, or scanner dependency ships. Local claimed identity
 remains unverified without independent verification evidence; production-wallet
 compatibility is not inferred from the internal Demo Client.
 
-The Phase 9 live Send and NORMAL funded submission remain externally blocked by
-Devnet funding. This is a release-evidence limit, not a claimed product PASS.
-See [Phase 9 audit](evidence/phase9/09-adversarial-audit/live-and-security.md).
+After user manual Devnet funding, the Phase 9 direct 1-lamport Send and
+canonical NORMAL Local memo sign-and-send both confirmed on Devnet. The injected
+Local signing rejection remained `ERROR_NOT_SIGNED (-3) / INJECTED /`
+`FAULT_SIGN_REJECT` without a signing tap or submission. The final fault was
+restored to `NORMAL`. The live harness now fails closed below its funding
+threshold without calling an airdrop. See [Phase 9 audit](evidence/phase9/09-adversarial-audit/live-and-security.md).

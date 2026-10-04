@@ -2,9 +2,7 @@ package dev.mwalab.wallet
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.funkatronics.encoders.Base58
 import dev.mwalab.app.MwaLabComposition
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -28,20 +26,19 @@ class Phase9LiveSendInstrumentedTest {
         val walletService = MwaLabComposition.testWalletService(context)
         val sendService = MwaLabComposition.testWalletSendService(context)
 
-        val funded = ensureFunding(walletService)
+        val funded = requireManualFunding(walletService)
         val identity = identityRepository.getOrCreate()
         assertEquals(identity.displayAddress, funded.address)
 
         val beforeSessions = sessionRepository.observeSessions().first().size
 
-        val recipientBytes = ByteArray(32) { index ->
-            ((index * 17 + 29) and 0xff).toByte()
-        }.also {
-            if (it.contentEquals(identity.publicKeyBytes())) {
-                it[31] = (it[31].toInt() xor 1).toByte()
-            }
-        }
-        val recipient = Base58.encodeToString(recipientBytes)
+        val recipient = InstrumentationRegistry.getArguments()
+            .getString("mwa_phase9_recipient")
+            ?: error("Live Devnet recipient must be explicitly selected")
+        assertTrue(
+            "Live Devnet recipient must be a canonical Solana address distinct from the wallet",
+            SolanaPublicKeyParser.parse(recipient) != null && recipient != identity.displayAddress,
+        )
 
         val prepared = sendService.prepare(recipient, "0.000000001")
         assertTrue(
@@ -62,7 +59,7 @@ class Phase9LiveSendInstrumentedTest {
         )
     }
 
-    private suspend fun ensureFunding(
+    private suspend fun requireManualFunding(
         walletService: TestWalletService,
     ): WalletBalanceLoadResult.Available {
         val initial = walletService.loadBalance()
@@ -78,42 +75,10 @@ class Phase9LiveSendInstrumentedTest {
             is WalletBalanceLoadResult.Unavailable -> initial.address ?: "<identity unavailable>"
         }
 
-        when (val requested = walletService.requestAirdrop(DEFAULT_AIRDROP_LAMPORTS)) {
-            is WalletAirdropRequestResult.Submitted -> {
-                walletService.confirmAirdrop(requested.signature)
-            }
-            WalletAirdropRequestResult.RateLimited ->
-                error(
-                    "LIVE_DEVNET_FUNDING_REQUIRED address=$address " +
-                        "reason=airdrop_rate_limited",
-                )
-            is WalletAirdropRequestResult.RpcUnavailable ->
-                error(
-                    "LIVE_DEVNET_FUNDING_REQUIRED address=$address " +
-                        "reason=rpc_unavailable_${requested.reason}",
-                )
-            is WalletAirdropRequestResult.Failed ->
-                error(
-                    "LIVE_DEVNET_FUNDING_REQUIRED address=$address " +
-                        "reason=airdrop_failed rpc_code=${requested.rpcCode}",
-                )
-        }
-
-        repeat(6) {
-            val refreshed = walletService.loadBalance()
-            if (
-                refreshed is WalletBalanceLoadResult.Available &&
-                refreshed.lamports >= MIN_LIVE_BALANCE_LAMPORTS
-            ) {
-                return refreshed
-            }
-            delay(1_000)
-        }
-
-        val final = walletService.loadBalance()
         error(
             "LIVE_DEVNET_FUNDING_REQUIRED address=$address " +
-                "reason=balance_not_funded_after_airdrop final=$final",
+                "reason=manual_balance_below_threshold_or_unavailable " +
+                "minimum_lamports=$MIN_LIVE_BALANCE_LAMPORTS",
         )
     }
 

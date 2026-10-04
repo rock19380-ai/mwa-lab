@@ -13,8 +13,12 @@ class Phase8NavigationInstrumentedTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
     @Test fun allFiveTypedDestinationsAreReachableAndNavigationLabelsAreAccessible() {
-        if (compose.onAllNodesWithText("ENTER LAB").fetchSemanticsNodes().isNotEmpty()) {
-            compose.onNodeWithText("ENTER LAB").performClick()
+        if (compose.onAllNodesWithTag("onboarding-list").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithTag("onboarding-list").performScrollToNode(hasTestTag("enter-lab"))
+            compose.onNodeWithTag("enter-lab").assertHasClickAction().performClick()
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("nav-SESSIONS").fetchSemanticsNodes().isNotEmpty()
         }
         listOf("SESSIONS", "FAULT_LAB", "LAB_IDENTITY", "SETTINGS", "HOME").forEach { route ->
             compose.onNodeWithTag("nav-$route").assertHasClickAction().performClick()

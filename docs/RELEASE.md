@@ -14,18 +14,18 @@ Release gates will eventually require:
 - matching Git commit/tag/APK/checksum.
 
 
-## Phase 9 pre-freeze state (2026-10-04)
+## Phase 9 live acceptance (2026-10-04)
 
-Phase 9 is `BLOCKED_EXTERNAL_FUNDING`, not a release candidate. The installed
-disposable Test Wallet address is
-`B2AFEixuhw9g4rYVk7Wv4qv2XoNz44n5Geb6JaiWWvJG` and its confirmed Devnet
-balance was 0 lamports. The interrupted live run had used a prior disposable
-address before the connected-suite uninstall/reinstall. The opt-in live Send and canonical NORMAL Local
-sign-and-send could not submit. The injected Local rejection passed and its
-Room evidence was checked. Remote MWA remains `BLOCKED_HIDDEN`; its scanner is
-`OMITTED`; production-wallet compatibility is `NOT_VERIFIED`.
+The installed protected disposable Test Wallet was manually funded on Devnet
+and verified before live submission. The 1-lamport direct Test Wallet Send and
+canonical NORMAL Local MWA memo sign-and-send both confirmed on Devnet. The
+injected Local `FAULT_SIGN_REJECT` path returned `ERROR_NOT_SIGNED (-3)`
+without signing approval or submission, and the final fault is `NORMAL`.
+Current-run Room schema 4 evidence is in the [Phase 9 audit](evidence/phase9/09-adversarial-audit/live-and-security.md).
+No airdrop or faucet was called in this continuation.
 
-Fund that public address with at least 100,000 Devnet lamports, then rerun the
-two opt-in live submission gates and verify confirmation plus Room evidence.
-Do not create a Phase 9 freeze tag until the mandatory live gates and
-exact-head CI succeed. See [Phase 9 report](../PHASE_9_REPORT.md).
+Remote MWA remains `BLOCKED_HIDDEN`; its scanner is `OMITTED`; Identity Reset
+is `UNEXPOSED_OPTIONAL_P1`; production-wallet compatibility is
+`NOT_VERIFIED`. Phase 9 live acceptance does not itself make a production
+release candidate. A Phase 9 freeze requires a clean exact-head CI success and
+annotated tag provenance.

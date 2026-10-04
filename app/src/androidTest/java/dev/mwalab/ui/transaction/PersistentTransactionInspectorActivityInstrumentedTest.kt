@@ -46,8 +46,12 @@ class PersistentTransactionInspectorActivityInstrumentedTest {
             MwaLabComposition.transactionDiagnosticRepository(context).recordForEvent(id, eventId, listOf(summary))
         }
 
-        if (compose.onAllNodesWithText("ENTER LAB").fetchSemanticsNodes().isNotEmpty()) {
-            compose.onNodeWithText("ENTER LAB").performClick()
+        if (compose.onAllNodesWithTag("onboarding-list").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithTag("onboarding-list").performScrollToNode(hasTestTag("enter-lab"))
+            compose.onNodeWithTag("enter-lab").assertHasClickAction().performClick()
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("home-list").fetchSemanticsNodes().isNotEmpty()
         }
         assertLabIdentity()
         compose.onNodeWithTag("nav-SESSIONS").performClick()
@@ -91,7 +95,9 @@ class PersistentTransactionInspectorActivityInstrumentedTest {
     }
     private fun assertLabIdentity() {
         compose.onAllNodesWithText("MWA LAB").onFirst().assertIsDisplayed()
+        compose.onNodeWithTag("home-list").performScrollToNode(hasTestTag("home-safety-banner"))
         compose.onNodeWithTag("home-safety-banner").assertIsDisplayed()
+        compose.onNodeWithTag("home-list").performScrollToNode(hasText("NO REAL FUNDS"))
         compose.onNodeWithText("NO REAL FUNDS").assertIsDisplayed()
     }
     private fun scroll(text: String) {

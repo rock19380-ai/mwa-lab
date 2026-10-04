@@ -72,6 +72,7 @@ class SessionsUiInstrumentedTest {
         val summary = SessionSummary(MwaSession("unknown-error", 100, 200,
             closeReason = SessionCloseReason.SCENARIO_COMPLETE), listOf(event))
         compose.setContent { MWALabTheme { SessionDetailScreen(SessionDetailUiState.Ready(summary), {}, {}) } }
+        compose.onNodeWithTag("protocol-timeline").performScrollToNode(hasTestTag("capability-snapshot"))
         compose.onNodeWithText("Capability snapshot was not recorded for this session.").assertExists()
         compose.onNodeWithText("walletlib 2.0.7 handles get_capabilities internally.", substring = true).assertExists()
         compose.onAllNodesWithText("#2 GET_CAPABILITIES").assertCountEquals(0)

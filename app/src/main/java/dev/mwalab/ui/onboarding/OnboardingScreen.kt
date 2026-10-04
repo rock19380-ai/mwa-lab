@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.mwalab.faults.FaultId
 import dev.mwalab.faults.FaultProfile
@@ -30,7 +31,7 @@ fun OnboardingScreen(
 ) {
     val address = home.wallet.address ?: (home.identity as? IdentityUiState.Ready)?.publicAddress
     LazyColumn(
-        Modifier.fillMaxSize().systemBarsPadding(),
+        Modifier.fillMaxSize().systemBarsPadding().testTag("onboarding-list"),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -70,7 +71,7 @@ fun OnboardingScreen(
             }
         }
         item {
-            Button(onClick = onEnter, modifier = Modifier.fillMaxWidth()) { Text("ENTER LAB") }
+            Button(onClick = onEnter, modifier = Modifier.fillMaxWidth().testTag("enter-lab")) { Text("ENTER LAB") }
         }
     }
 }

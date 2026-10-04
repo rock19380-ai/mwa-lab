@@ -106,19 +106,23 @@ class DemoClientPhase9LiveInstrumentedTest {
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds)
 
+        var lastPackage: String? = null
         while (System.nanoTime() < deadline) {
             val root = automation.rootInActiveWindow
+            lastPackage = root?.packageName?.toString()
             if (
                 root != null &&
-                root.packageName?.toString() == WALLET_PACKAGE &&
-                root.findAccessibilityNodeInfosByText(text).isNotEmpty()
+                lastPackage == WALLET_PACKAGE &&
+                findNode(root) { node ->
+                    node.text?.toString() == text || node.contentDescription?.toString() == text
+                } != null
             ) {
                 return
             }
             Thread.sleep(50)
         }
 
-        throw AssertionError("Timed out waiting for MWA Lab text: $text")
+        throw AssertionError("Timed out waiting for MWA Lab text: $text; active_package=$lastPackage")
     }
 
     private fun clickWalletButton(text: String, timeoutSeconds: Long) {
@@ -128,9 +132,10 @@ class DemoClientPhase9LiveInstrumentedTest {
         while (System.nanoTime() < deadline) {
             val root = automation.rootInActiveWindow
             if (root != null && root.packageName?.toString() == WALLET_PACKAGE) {
-                for (node in root.findAccessibilityNodeInfosByText(text)) {
-                    if (clickNodeOrClickableAncestor(node)) return
+                val button = findNode(root) { node ->
+                    node.text?.toString() == text || node.contentDescription?.toString() == text
                 }
+                if (clickNodeOrClickableAncestor(button)) return
             }
             Thread.sleep(50)
         }

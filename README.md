@@ -340,11 +340,14 @@ checkpoint. Production-wallet compatibility remains **NOT VERIFIED**. See
 [Phase 9 evidence](docs/evidence/phase9/) for the executed gates and current scope.
 
 
-The pre-freeze live run is **BLOCKED_EXTERNAL_FUNDING**: the current Test Wallet
-held 0 Devnet lamports, the in-app airdrop returned RPC `-32603`, and two
-bounded official Devnet RPC requests returned `429`. Deterministic Send gates
-and a real injected Local `FAULT_SIGN_REJECT` run passed, with the expected
-`ERROR_NOT_SIGNED / INJECTED / FAULT_SIGN_REJECT` Room evidence. The direct
-Test Wallet live Send and canonical NORMAL live sign-and-send are still
-blocked; no Phase 9 freeze tag is claimed. The public Test Wallet address and
-minimum Devnet top-up are in [PHASE_9_REPORT.md](PHASE_9_REPORT.md).
+Phase 9 live acceptance passed after user manual Devnet funding of the installed
+disposable Test Wallet. An explicitly opted-in 1-lamport direct Send confirmed
+on Devnet without creating an MWA protocol session. The Demo Client's real
+cross-package Local NORMAL memo sign-and-send required separate authorization
+and signing approval taps, returned a verified signature, and confirmed on
+Devnet. The independent injected `FAULT_SIGN_REJECT` path returned
+`ERROR_NOT_SIGNED (-3)` without a signing tap or submission. Current-run Room
+schema 4 evidence and the final persisted `NORMAL` fault are recorded in the
+[Phase 9 report](PHASE_9_REPORT.md). No airdrop or faucet was used in the funded
+continuation. Remote, scanner, Identity Reset, and production-wallet cuts above
+remain in effect.

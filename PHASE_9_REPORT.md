@@ -1,68 +1,49 @@
-# MWA Lab — Phase 9 pre-freeze report
+# MWA Lab — Phase 9 live acceptance report
 
-Status: **BLOCKED_EXTERNAL_FUNDING / PRE-FREEZE** (2026-10-04).
+Status: **LIVE_ACCEPTED** (2026-10-04). The annotated freeze tag and exact-head CI run are the authority for frozen provenance.
 
-Frozen predecessor: Phase 8 tag
-`phase8-world-class-ux-positioning-2026-10-03`, commit
-`7cb9c0da5839ee14f4ef5f45391449b5060e7ebc`. Phase 9 Batch 4 committed
-checkpoint: `4047dbece34715f3ab88f0be8dc401f7c0df429e`.
-walletlib/clientlib remain `2.0.7`; Room schema is `4` with a forward-only
-3-to-4 migration.
+Frozen predecessor: Phase 8 tag `phase8-world-class-ux-positioning-2026-10-03` at `7cb9c0da5839ee14f4ef5f45391449b5060e7ebc`. Phase 9 Batch 4 remains `4047dbece34715f3ab88f0be8dc401f7c0df429e`. Room schema is 4 with a forward-only 3-to-4 migration; walletlib/clientlib remain 2.0.7.
 
-## Implemented and deterministically verified
+## Accepted paths
 
-- Demo Client is labeled as a test dApp; manual first run and Home explain
-  same-device Local MWA and the disposable Devnet Test Wallet.
-- Supported normal authorization requires explicit human Approve/Reject;
-  injected authorization faults remain deterministic. Normal signing still
-  requires explicit approval.
-- Test Wallet shows public address/balance, public-address-only Receive QR,
-  Devnet airdrop status, and a reviewed native SOL Send path using the protected
-  signer and fixed Devnet RPC. Direct wallet actions stay outside MWA history.
-- Room schema 4 persists coarse `association_mode` and
-  `identity_verification_state`; reports retain sanitized coarse metadata.
-- Batch 5 main/unit/android-test Kotlin compilation, targeted JVM tests,
-  lint/test/debug APK/AndroidTest APK assembly, and Gradle connected tasks
-  passed before live funding stopped the run. A later XML review found that
-  Android counted the opt-in guards as failures; ordinary test discovery was
-  repaired without changing the live assertions. Final separate connected
-  receipts are app 149/0 and Demo Client 1/0 (tests/failures).
-- The current-source Phase 9 static gate passed. The injected live Local MWA
-  `FAULT_SIGN_REJECT` path passed independently, including persisted
-  `ERROR_NOT_SIGNED (-3) / INJECTED / FAULT_SIGN_REJECT` Room evidence.
+The installed protected disposable Test Wallet was verified as `B2AFEixuhw9g4rYVk7Wv4qv2XoNz44n5Geb6JaiWWvJG` before any live submission. User-provided Devnet funding gave a confirmed balance of **800,000,000 lamports** at slot `507231647`. No airdrop or faucet was called in this continuation. The live test harness now fails closed on insufficient manual funding and requires an explicit canonical recipient.
 
-## Release decisions and limits
-
-| Item | Status |
+| Gate | Result |
 |---|---|
-| Send Test SOL deterministic safety gates | PASS |
-| Send Test SOL live confirmation | BLOCKED_EXTERNAL_FUNDING |
-| Canonical NORMAL Local sign-and-send | BLOCKED_EXTERNAL_FUNDING |
-| Injected Local `FAULT_SIGN_REJECT` | PASS |
+| Send Test SOL deterministic safety tests | PASS |
+| Direct Test Wallet 1-lamport System Program transfer | PASS, finalized at slot `507232918` |
+| Direct Send MWA session count unchanged | PASS |
+| Canonical NORMAL Local MWA memo sign-and-send | PASS, finalized at slot `507234746` |
+| Explicit Local authorization and NORMAL signing approval | PASS |
+| Injected Local `FAULT_SIGN_REJECT`, without signing approval | PASS, `ERROR_NOT_SIGNED (-3)` |
+| Final persisted fault | NORMAL |
 | Remote MWA | BLOCKED_HIDDEN |
 | Remote QR scanner | OMITTED |
 | Identity Reset | UNEXPOSED_OPTIONAL_P1 |
 | Production-wallet compatibility | NOT_VERIFIED |
 
-The interrupted live run used
-`FnYk3SiU9aUqg5wdPuDPDxWn9GX4fPL9NS7Ru2aPNUZs` at 0 lamports. Its in-app
-airdrop returned RPC `-32603`; two later bounded official Devnet RPC attempts
-returned `429`. No live transaction was submitted. Final connected testing
-uninstalled/reinstalled the disposable wallet app, rotating its local identity.
-The **currently installed** Test Wallet address is
-`B2AFEixuhw9g4rYVk7Wv4qv2XoNz44n5Geb6JaiWWvJG`; confirmed Devnet
-`getBalance` at slot `507225904` returned **0 lamports**. A manual top-up of
-at least **100,000 Devnet lamports (0.0001 Devnet SOL)** to this current public
-address is required to resume the opt-in live gates. Recheck the address before
-funding and do not uninstall the app between funding and live acceptance.
-Use Devnet only.
+The direct send used preflight, a fresh blockhash, the protected Lab signer, and confirmed commitment. The canonical Demo Client path used a real cross-package Local association. The wallet required separate CONNECT DAPP and SIGNING APPROVAL taps; the Demo Client verified the returned signature and Devnet confirmation. The injected run required authorization approval, no signing tap, and no submission. Room schema 4 records the NORMAL session as `LOCAL / UNVERIFIED / SIGN_AND_SEND_TRANSACTIONS SUCCESS / NONE` and the injected session as `LOCAL / UNVERIFIED / FAILURE / -3 / INJECTED / FAULT_SIGN_REJECT`.
 
-No Remote end-to-end reflector/counterparty evidence exists; API class presence
-does not make Remote shippable. No Remote button, camera permission, or scanner
-dependency is included. The internal Demo Client is not a production wallet.
+The first direct attempt was rejected by Devnet preflight with `-32002` against a generated recipient with no existing account. Its balance remained unchanged, so no transfer was accepted. The harness was repaired to require an explicit canonical recipient; the successful 1-lamport recipient was the already funded public Devnet account that sent the manual top-up. Early NORMAL UI automation attempts timed out while the real signing approval screen was visible and left cancelled, unsubmitted Room events. Walking the accessibility node tree repaired the opt-in test harness; the final run passed. These failed attempts are retained as evidence rather than counted as passes.
 
-Phase 9 is not fully live accepted. Exact-head CI and an annotated Phase 9
-freeze tag remain pending; the tag must not be created until both live
-submission gates and all remaining mandatory gates truly pass.
+Remote API class presence is not Remote end-to-end evidence. No Remote release button, CAMERA permission, or scanner dependency ships. The Receive Test SOL QR is a public address, not an MWA connection QR. The internal Demo Client is not a production wallet.
 
-Detailed receipts: [Phase 9 evidence](docs/evidence/phase9/).
+Detailed transaction, Room, and audit receipts: [Phase 9 live and security evidence](docs/evidence/phase9/09-adversarial-audit/live-and-security.md) and [live closeout](docs/evidence/phase9/10-closeout/live-acceptance-closeout.md).
+
+## Final ordinary fresh-AVD regression
+
+A fresh disposable API-36 AVD exposed five viewport-sensitive Compose test
+assertions. Stable onboarding semantics tags and explicit LazyColumn scrolling
+repair only the testability/test-harness boundary; protocol, wallet, signing,
+authorization, transport, Room, and live acceptance behavior are unchanged.
+
+Final ordinary regression is green:
+
+- affected tests: **5 / 5 PASS**
+- app connected: **149 / 149 PASS**
+- Demo Client connected: **1 / 1 PASS**
+- failures/errors/skips: **0**
+- opt-in live classes excluded from ordinary discovery
+- no live transaction repeated
+- Phase 9 static: PASS
+- frozen Phase 8 static: PASS

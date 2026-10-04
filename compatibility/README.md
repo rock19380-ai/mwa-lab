@@ -22,3 +22,7 @@ The Phase 9 internal Demo Client does not establish production-wallet
 compatibility. Current production-wallet status is `NOT_VERIFIED`; Remote MWA
 is `BLOCKED / NOT RELEASED`, and the Remote scanner is `OMITTED / NOT
 APPLICABLE`. No production-wallet observation was added in Phase 9.
+
+The funded Phase 9 internal Demo Client Local acceptance passed, including
+NORMAL confirmed sign-and-send and injected rejection. This does not change
+the `NOT_VERIFIED` production-wallet status.

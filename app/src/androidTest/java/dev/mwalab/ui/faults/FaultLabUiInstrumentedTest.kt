@@ -22,8 +22,12 @@ class FaultLabUiInstrumentedTest {
         try {
             selection.select(FaultId.NORMAL)
             compose.waitForIdle()
-            if (compose.onAllNodesWithText("ENTER LAB").fetchSemanticsNodes().isNotEmpty()) {
-                compose.onNodeWithText("ENTER LAB").performClick()
+            if (compose.onAllNodesWithTag("onboarding-list").fetchSemanticsNodes().isNotEmpty()) {
+                compose.onNodeWithTag("onboarding-list").performScrollToNode(hasTestTag("enter-lab"))
+                compose.onNodeWithTag("enter-lab").assertHasClickAction().performClick()
+            }
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithTag("home-list").fetchSemanticsNodes().isNotEmpty()
             }
             compose.onNodeWithTag("home-list").performScrollToNode(hasText("FAULT MODE"))
             compose.onNodeWithText("FAULT MODE").assertExists()
