@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
                         MwaLabComposition.identityRepository(applicationContext),
                         repository,
                         walletService = MwaLabComposition.testWalletService(applicationContext),
+                        sendService = MwaLabComposition.testWalletSendService(applicationContext),
                     )
                     SessionsViewModel::class.java -> SessionsViewModel(repository)
                     SessionDetailViewModel::class.java -> SessionDetailViewModel(
@@ -190,6 +191,9 @@ class MainActivity : ComponentActivity() {
                                     onCopyAddress = copyAddress,
                                     onRefreshWallet = home::refreshWallet,
                                     onRequestAirdrop = home::requestDevnetSol,
+                                    onPrepareSend = home::prepareSend,
+                                    onConfirmSend = home::confirmSend,
+                                    onCancelSend = home::cancelSend,
                                 )
                                 AppDestination.SESSIONS -> SessionsScreen(sessionsState, openSession, sessions::retry)
                                 AppDestination.FAULT_LAB -> FaultLabScreen(activeFault, faultSelection::select)

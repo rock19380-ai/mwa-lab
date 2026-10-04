@@ -31,6 +31,7 @@ import dev.mwalab.storage.MwaLabDatabase
 import dev.mwalab.storage.RoomCapabilitySnapshotRepository
 import dev.mwalab.storage.RoomSessionRepository
 import dev.mwalab.wallet.TestWalletService
+import dev.mwalab.wallet.TestWalletSendService
 
 object MwaLabComposition {
     @Volatile
@@ -47,6 +48,9 @@ object MwaLabComposition {
 
     @Volatile
     private var testWalletServiceInstance: TestWalletService? = null
+
+    @Volatile
+    private var testWalletSendServiceInstance: TestWalletSendService? = null
 
     @Volatile
     private var databaseInstance: MwaLabDatabase? = null
@@ -119,6 +123,15 @@ object MwaLabComposition {
                 identityRepository(context.applicationContext),
                 devnetRpcGateway(),
             ).also { testWalletServiceInstance = it }
+        }
+
+    fun testWalletSendService(context: Context): TestWalletSendService =
+        testWalletSendServiceInstance ?: synchronized(this) {
+            testWalletSendServiceInstance ?: TestWalletSendService(
+                identityRepository(context.applicationContext),
+                signingService(context.applicationContext),
+                devnetRpcGateway(),
+            ).also { testWalletSendServiceInstance = it }
         }
 
     private fun database(context: Context): MwaLabDatabase =

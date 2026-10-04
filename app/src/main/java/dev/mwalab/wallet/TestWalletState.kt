@@ -34,6 +34,7 @@ data class TestWalletUiState(
     val address: String? = null,
     val balance: WalletBalanceState = WalletBalanceState.Loading,
     val airdrop: WalletAirdropState = WalletAirdropState.Idle,
+    val send: WalletSendState = WalletSendState.Idle,
     val lastRefreshAtEpochMillis: Long? = null,
 )
 

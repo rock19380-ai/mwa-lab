@@ -11,6 +11,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,6 +30,9 @@ import dev.mwalab.ui.components.StateNotice
 import dev.mwalab.ui.components.StatusBadge
 import dev.mwalab.wallet.WalletAirdropState
 import dev.mwalab.wallet.WalletBalanceState
+import dev.mwalab.wallet.WalletSendState
+import dev.mwalab.wallet.WalletSendReview
+import dev.mwalab.wallet.walletSendFailureText
 import dev.mwalab.wallet.formatLamportsAsSol
 import dev.mwalab.wallet.walletUnavailableReasonText
 
@@ -44,12 +48,36 @@ fun HomeScreen(
     onCopyAddress: (String) -> Unit = {},
     onRefreshWallet: () -> Unit = {},
     onRequestAirdrop: () -> Unit = {},
+    onPrepareSend: (String, String) -> Unit = { _, _ -> },
+    onConfirmSend: () -> Unit = {},
+    onCancelSend: () -> Unit = {},
 ) {
     var showHowToConnect by remember { mutableStateOf(false) }
+    var showSendInput by remember { mutableStateOf(false) }
     val address = state.wallet.address ?: (state.identity as? IdentityUiState.Ready)?.publicAddress
 
     if (showHowToConnect) {
         HowToConnectDialog(onDismiss = { showHowToConnect = false })
+    }
+    if (showSendInput) {
+        SendTestSolInputDialog(
+            onDismiss = {
+                showSendInput = false
+                onCancelSend()
+            },
+            onReview = { recipient, amount ->
+                showSendInput = false
+                onPrepareSend(recipient, amount)
+            },
+        )
+    }
+    when (val send = state.wallet.send) {
+        is WalletSendState.Review -> SendTestSolReviewDialog(
+            review = send.transfer,
+            onDismiss = onCancelSend,
+            onConfirm = onConfirmSend,
+        )
+        else -> Unit
     }
 
     LazyColumn(
@@ -100,16 +128,26 @@ fun HomeScreen(
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
+                                onClick = {
+                                    onCancelSend()
+                                    showSendInput = true
+                                },
+                                enabled = state.wallet.send !is WalletSendState.Sending &&
+                                    state.wallet.send !is WalletSendState.Validating,
+                                modifier = Modifier.weight(1f).testTag("send-test-sol"),
+                            ) { Text("SEND TEST SOL") }
+                            Button(
                                 onClick = onIdentity,
                                 modifier = Modifier.weight(1f).testTag("receive-test-sol"),
                             ) { Text("RECEIVE TEST SOL") }
-                            Button(
-                                onClick = onRequestAirdrop,
-                                enabled = state.wallet.airdrop !is WalletAirdropState.Requesting &&
-                                    state.wallet.airdrop !is WalletAirdropState.Submitted,
-                                modifier = Modifier.weight(1f).testTag("request-devnet-sol"),
-                            ) { Text("REQUEST DEVNET SOL") }
                         }
+                        Button(
+                            onClick = onRequestAirdrop,
+                            enabled = state.wallet.airdrop !is WalletAirdropState.Requesting &&
+                                state.wallet.airdrop !is WalletAirdropState.Submitted,
+                            modifier = Modifier.fillMaxWidth().testTag("request-devnet-sol"),
+                        ) { Text("REQUEST 0.5 DEVNET SOL") }
+                        walletSendSummary(state.wallet.send)?.let { Text(it) }
                         walletAirdropSummary(state.wallet.airdrop)?.let { Text(it) }
                         TextButton(onClick = onIdentity) { Text("OPEN TEST WALLET") }
                     }
@@ -166,6 +204,74 @@ fun HomeScreen(
 }
 
 @Composable
+private fun SendTestSolInputDialog(
+    onDismiss: () -> Unit,
+    onReview: (String, String) -> Unit,
+) {
+    var recipient by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("SEND TEST SOL · DEVNET ONLY") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("Native SOL test transfer only. No mainnet assets.")
+                OutlinedTextField(
+                    value = recipient,
+                    onValueChange = { recipient = it },
+                    label = { Text("To · Solana address") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().testTag("send-recipient"),
+                )
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount · SOL") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().testTag("send-amount"),
+                )
+                Text("A 0.00001 SOL reserve is kept for network fees. RPC submission may still fail; success is never assumed.")
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("CANCEL") } },
+        confirmButton = {
+            Button(
+                onClick = { onReview(recipient, amount) },
+                enabled = recipient.isNotBlank() && amount.isNotBlank(),
+                modifier = Modifier.testTag("review-send-test-sol"),
+            ) { Text("REVIEW") }
+        },
+    )
+}
+
+@Composable
+private fun SendTestSolReviewDialog(
+    review: WalletSendReview,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("DEVNET TEST TRANSFER") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("From: ${shortAddress(review.fromAddress)}")
+                Text("To: ${shortAddress(review.toAddress)}")
+                Text("Amount: ${review.amountSol} SOL")
+                Text("Network: Solana Devnet")
+                Text("This uses test funds only.")
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("CANCEL") } },
+        confirmButton = {
+            Button(onClick = onConfirm, modifier = Modifier.testTag("confirm-send-test-sol")) {
+                Text("SEND TEST SOL")
+            }
+        },
+    )
+}
+
+@Composable
 private fun HowToConnectDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -193,6 +299,17 @@ internal fun walletBalanceText(balance: WalletBalanceState): String = when (bala
     WalletBalanceState.Loading -> "Balance: loading…"
     is WalletBalanceState.Available -> "${formatLamportsAsSol(balance.lamports)} SOL · Devnet"
     is WalletBalanceState.Unavailable -> "Balance unavailable · ${walletUnavailableReasonText(balance.reason)}"
+}
+
+internal fun walletSendSummary(state: WalletSendState): String? = when (state) {
+    WalletSendState.Idle -> null
+    WalletSendState.Validating -> "Validating Devnet transfer…"
+    is WalletSendState.Review -> "Transfer ready for review · ${state.transfer.amountSol} SOL."
+    is WalletSendState.Sending -> "Submitting ${state.transfer.amountSol} SOL to Solana Devnet…"
+    is WalletSendState.Confirmed -> "Transfer confirmed on Solana Devnet · balance refreshed."
+    is WalletSendState.SubmittedUnknown -> "Transfer was submitted, but confirmation is unknown. Refresh balance before retrying."
+    is WalletSendState.Failed -> walletSendFailureText(state.reason) +
+        (state.rpcCode?.let { " RPC $it." } ?: "")
 }
 
 internal fun walletAirdropSummary(state: WalletAirdropState): String? = when (state) {

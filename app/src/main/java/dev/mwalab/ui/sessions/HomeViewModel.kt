@@ -7,6 +7,11 @@ import dev.mwalab.session.SessionRepository
 import dev.mwalab.session.SessionSummary
 import dev.mwalab.wallet.DEFAULT_AIRDROP_LAMPORTS
 import dev.mwalab.wallet.TestWalletService
+import dev.mwalab.wallet.TestWalletSendService
+import dev.mwalab.wallet.WalletSendPreparationResult
+import dev.mwalab.wallet.WalletSendState
+import dev.mwalab.wallet.WalletSendSubmissionResult
+import dev.mwalab.wallet.PreparedTestSolTransfer
 import dev.mwalab.wallet.TestWalletUiState
 import dev.mwalab.wallet.WalletAirdropConfirmationResult
 import dev.mwalab.wallet.WalletAirdropRequestResult
@@ -28,6 +33,7 @@ class HomeViewModel(
     scope: CoroutineScope? = null,
     private val worker: CoroutineDispatcher = Dispatchers.IO,
     private val walletService: TestWalletService? = null,
+    private val sendService: TestWalletSendService? = null,
     private val clock: () -> Long = { System.currentTimeMillis() },
 ) : ViewModel() {
     private val stateScope = scope ?: viewModelScope
@@ -35,6 +41,8 @@ class HomeViewModel(
     private val walletState = MutableStateFlow(TestWalletUiState())
     private var balanceJob: Job? = null
     private var airdropJob: Job? = null
+    private var sendJob: Job? = null
+    private var preparedSend: PreparedTestSolTransfer? = null
 
     private val identity = reload.flatMapLatest {
         flow<IdentityUiState> {
@@ -117,4 +125,59 @@ class HomeViewModel(
             }
         }
     }
+    fun prepareSend(recipient: String, amountSol: String) {
+        val service = sendService ?: return
+        if (sendJob?.isActive == true) return
+        preparedSend = null
+        walletState.update { it.copy(send = WalletSendState.Validating) }
+        sendJob = stateScope.launch(worker) {
+            when (val result = service.prepare(recipient, amountSol)) {
+                is WalletSendPreparationResult.Ready -> {
+                    preparedSend = result.transfer
+                    walletState.update {
+                        it.copy(send = WalletSendState.Review(result.transfer.review()))
+                    }
+                }
+                is WalletSendPreparationResult.Failed -> walletState.update {
+                    it.copy(send = WalletSendState.Failed(result.reason, result.rpcCode))
+                }
+            }
+        }
+    }
+
+    fun confirmSend() {
+        val service = sendService ?: return
+        val transfer = preparedSend ?: return
+        if (sendJob?.isActive == true) return
+        val review = transfer.review()
+        walletState.update { it.copy(send = WalletSendState.Sending(review)) }
+        sendJob = stateScope.launch(worker) {
+            when (val result = service.submit(transfer)) {
+                WalletSendSubmissionResult.Confirmed -> {
+                    preparedSend = null
+                    walletState.update { it.copy(send = WalletSendState.Confirmed(review)) }
+                    refreshWallet()
+                }
+                WalletSendSubmissionResult.SubmittedUnknown -> {
+                    preparedSend = null
+                    walletState.update { it.copy(send = WalletSendState.SubmittedUnknown(review)) }
+                    refreshWallet()
+                }
+                is WalletSendSubmissionResult.Failed -> {
+                    preparedSend = null
+                    walletState.update {
+                        it.copy(send = WalletSendState.Failed(result.reason, result.rpcCode))
+                    }
+                }
+            }
+        }
+    }
+
+    fun cancelSend() {
+        val state = walletState.value.send
+        if (state is WalletSendState.Sending || state is WalletSendState.Validating) return
+        preparedSend = null
+        walletState.update { it.copy(send = WalletSendState.Idle) }
+    }
+
 }

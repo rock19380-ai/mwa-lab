@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.mwalab.faults.FaultCatalog
 import dev.mwalab.faults.FaultId
@@ -23,6 +24,8 @@ import dev.mwalab.ui.theme.MWALabTheme
 import dev.mwalab.wallet.TestWalletUiState
 import dev.mwalab.wallet.WalletAirdropState
 import dev.mwalab.wallet.WalletBalanceState
+import dev.mwalab.wallet.WalletSendReview
+import dev.mwalab.wallet.WalletSendState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -104,4 +107,61 @@ class Phase9FirstRunWalletUiInstrumentedTest {
         compose.onNodeWithTag("wallet-request-devnet-sol").performClick()
         compose.runOnIdle { assertEquals(1, requested) }
     }
+    @Test fun sendTestSolUsesExplicitInputSurface() {
+        var capturedRecipient: String? = null
+        var capturedAmount: String? = null
+        compose.setContent {
+            MWALabTheme {
+                HomeScreen(
+                    state = HomeUiState(IdentityUiState.Ready(address), SessionsUiState.Empty, wallet),
+                    onSessions = {},
+                    onSession = {},
+                    onRetry = {},
+                    activeFault = FaultCatalog.get(FaultId.NORMAL),
+                    onPrepareSend = { recipient, amount ->
+                        capturedRecipient = recipient
+                        capturedAmount = amount
+                    },
+                )
+            }
+        }
+
+        compose.onNodeWithTag("home-list").performScrollToNode(hasTestTag("send-test-sol"))
+        compose.onNodeWithTag("send-test-sol").performClick()
+        compose.onNodeWithTag("send-recipient").performTextInput(address)
+        compose.onNodeWithTag("send-amount").performTextInput("0.01")
+        compose.onNodeWithTag("review-send-test-sol").performClick()
+        compose.runOnIdle {
+            assertEquals(address, capturedRecipient)
+            assertEquals("0.01", capturedAmount)
+        }
+    }
+
+    @Test fun sendTestSolReviewSurfaceShowsDevnetTruth() {
+        compose.setContent {
+            MWALabTheme {
+                HomeScreen(
+                    state = HomeUiState(
+                        IdentityUiState.Ready(address),
+                        SessionsUiState.Empty,
+                        wallet.copy(
+                            send = WalletSendState.Review(
+                                WalletSendReview(address, address, 10_000_000L),
+                            ),
+                        ),
+                    ),
+                    onSessions = {},
+                    onSession = {},
+                    onRetry = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("DEVNET TEST TRANSFER").assertIsDisplayed()
+        compose.onNodeWithText("Amount: 0.01 SOL").assertIsDisplayed()
+        compose.onNodeWithText("Network: Solana Devnet").assertIsDisplayed()
+        compose.onNodeWithText("This uses test funds only.").assertIsDisplayed()
+        compose.onNodeWithTag("confirm-send-test-sol").assertHasClickAction()
+    }
+
 }

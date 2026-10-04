@@ -311,6 +311,14 @@ state; historical Phase 8 sessions migrate to `LOCAL` + `NOT_AVAILABLE`. Raw
 association URIs, reflector identifiers/tokens, and transport key material are
 not persisted as session metadata or diagnostic report fields.
 
-Remote MWA controls, Send Test SOL, and a Remote QR scanner are not shipped at
-this checkpoint. Production-wallet compatibility remains **NOT VERIFIED**. See
+The Test Wallet also includes **Send Test SOL** for native SOL on the fixed
+Solana Devnet endpoint. It accepts one canonical Solana recipient and one
+positive amount, keeps a conservative fee reserve, shows an explicit Devnet
+review, signs only with the existing protected disposable identity, and treats
+post-submission transport/confirmation ambiguity as **Submitted / confirmation
+unknown** rather than success. Direct Test Wallet sends remain outside the MWA
+protocol timeline.
+
+Remote MWA release controls and a Remote QR scanner are not shipped at this
+checkpoint. Production-wallet compatibility remains **NOT VERIFIED**. See
 [Phase 9 evidence](docs/evidence/phase9/) for the executed gates and current scope.
