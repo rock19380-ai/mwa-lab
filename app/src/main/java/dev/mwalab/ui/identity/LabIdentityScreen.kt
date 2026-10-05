@@ -60,7 +60,7 @@ fun LabIdentityScreen(
                                 Text("Copy Address")
                             }
                             OutlinedButton(onClick = onRetry, modifier = Modifier.weight(1f)) {
-                                Text("REFRESH BALANCE")
+                                Text("REFRESH")
                             }
                         }
                     }
