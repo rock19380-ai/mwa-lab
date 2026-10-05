@@ -1,0 +1,17 @@
+# Funded signed-RC1-r2 Test Wallet acceptance — 2026-10-05
+
+The prior `current-rc1-r2-funding-gate.md` recorded the *earlier* 0 SOL state. User funding subsequently brought the same installed signed-RC identity `FLAU1DewjS2jNpmf5eAWjC8h1BjQvzs8JNrDCBX2P8ja` to 0.3 SOL by read-only `solana balance ... --url https://api.devnet.solana.com`. No live airdrop/faucet/UI Request Devnet SOL action was invoked. After canonical Local MWA, the balance was 0.299995 SOL. The address was re-read from the installed Test Wallet immediately before direct send and still matched exactly.
+
+The only direct-send recipient was `B2AFEixuhw9g4rYVk7Wv4qv2XoNz44n5Geb6JaiWWvJG`: `docs/evidence/phase9/10-closeout/live-acceptance-closeout.md` identifies it as the user's old protected Test Wallet address, not an invented third-party address. A fresh read-only Devnet query showed its 0.799989999 SOL balance before this send. It remained on a separate preserved old AVD; that installation was not used as the current RC.
+
+## Non-submitting negatives
+
+The signed-RC **visible input/REVIEW** path rejected invalid recipient (`Invalid Solana recipient address.`), zero, negative `-1`, and ten-decimal `0.0000000001` amounts (`Enter a positive SOL amount with at most 9 decimal places.`), and 1 SOL against 0.299995 SOL balance (`Insufficient Devnet SOL after the test transfer and fee reserve.`). No negative case reached send confirmation or submitted anything. Screenshots 29–33. `TestSolTransferTest` also proves deterministic parser rejection, fee reserve, preflight enabled, confirmed commitment, and ambiguous confirmation/signature mismatch remaining `SubmittedUnknown`. Two new focused JVM cases prove identity change after review fails before blockhash/sign/submit and preparation RPC failure does not reach review/sign/submit; the specific test task passed. Product identity authority was not modified.
+
+## One positive native-SOL send
+
+The visible review showed From `FLAU1De…BX2P8ja`, To `B2AFEix…aiWWvJG`, `0.000000001 SOL`, and `Network: Solana Devnet` (screenshot 34). The visible SEND TEST SOL control was tapped **once**. The app showed `Transfer confirmed on Solana Devnet · balance refreshed.` and 0.299989999 SOL (screenshots 35–36). Read-only Devnet `getSignaturesForAddress` / `getSignatureStatuses` found new signature `2BcmjpwLZ1mBx7NUBWzSyG6PJKmE3dpLFAgdXEyyiCou2hznxP5KSRTUYbAG9N4dMXEdsgbfpTiVt15vJr4uRKNT`, slot 507594700, `err=null`, `confirmationStatus=finalized`. The 6001-lamport sender decrease (5000 fee + 1 transferred) and 1-lamport recipient increase to 0.79999 SOL match the System transfer. The fixed Devnet RPC and preflight/confirmed options are verified in source and `TestSolTransferTest`; no other live direct send was made.
+
+## Protocol-history isolation
+
+The protocol-session list before and after direct send had the same latest injected session (03:08:06.414 UTC) and same canonical normal session beneath it (screenshots 20 and 37). Read-only `sqlite3 -readonly` inspection *after* send: Room user_version 4; **9 sessions, 18 protocol events**; latest session start epoch 1791169686414 (03:08:06 UTC), before the direct send's blockTime 1791170955. No direct-send protocol session/event was fabricated. Direct Test Wallet send does not route through ProtocolRecorder per the Phase 10 static gate. After force-stop/reopen, the installed identity remained `FLAU1DewjS2jNpmf5eAWjC8h1BjQvzs8JNrDCBX2P8ja`, balance 0.299989999 SOL.

@@ -161,6 +161,61 @@ class TestSolTransferTest {
         )
     }
 
+    @Test
+    fun identityChangeAfterReviewFailsBeforeSigningOrRpcSubmission() = runTest {
+        val identity = object : IdentityRepository {
+            override suspend fun getOrCreate() = TestEndpointIdentity(from, fromAddress)
+            override suspend fun reset(): TestEndpointIdentity = error("reset must not be used")
+        }
+        val signer = object : LabSigningService {
+            override suspend fun publicIdentity() = TestEndpointIdentity(to, toAddress)
+            override suspend fun sign(message: ByteArray): ByteArray = error("must not sign")
+        }
+        val gateway = object : WalletUtilityTestRpcGateway() {
+            override suspend fun getBalance(publicKey: ByteArray) = DevnetRpcResult.Success(20_000_000L)
+            override suspend fun getLatestBlockhash(): DevnetRpcResult<LatestBlockhash> =
+                error("must not fetch blockhash")
+            override suspend fun sendTransaction(
+                signedTransaction: ByteArray,
+                options: DevnetSendOptions,
+            ): DevnetRpcResult<ByteArray> = error("must not submit")
+        }
+        val service = TestWalletSendService(identity, signer, gateway)
+        val prepared = service.prepare(toAddress, "0.01") as WalletSendPreparationResult.Ready
+
+        assertEquals(
+            WalletSendSubmissionResult.Failed(WalletSendFailureReason.IDENTITY),
+            service.submit(prepared.transfer),
+        )
+    }
+
+    @Test
+    fun preparationRpcFailureDoesNotReachReviewOrSigning() = runTest {
+        val identity = object : IdentityRepository {
+            override suspend fun getOrCreate() = TestEndpointIdentity(from, fromAddress)
+            override suspend fun reset(): TestEndpointIdentity = error("reset must not be used")
+        }
+        val signer = object : LabSigningService {
+            override suspend fun publicIdentity(): TestEndpointIdentity = error("must not sign")
+            override suspend fun sign(message: ByteArray): ByteArray = error("must not sign")
+        }
+        val gateway = object : WalletUtilityTestRpcGateway() {
+            override suspend fun getBalance(publicKey: ByteArray) =
+                DevnetRpcResult.TransportFailure(dev.mwalab.rpc.TransportFailureReason.TIMEOUT)
+            override suspend fun getLatestBlockhash(): DevnetRpcResult<LatestBlockhash> =
+                error("must not fetch blockhash")
+            override suspend fun sendTransaction(
+                signedTransaction: ByteArray,
+                options: DevnetSendOptions,
+            ): DevnetRpcResult<ByteArray> = error("must not submit")
+        }
+
+        assertEquals(
+            WalletSendPreparationResult.Failed(WalletSendFailureReason.RPC_UNAVAILABLE),
+            TestWalletSendService(identity, signer, gateway).prepare(toAddress, "0.01"),
+        )
+    }
+
     private fun ByteArray.containsSubsequence(needle: ByteArray): Boolean {
         if (needle.isEmpty()) return true
         if (needle.size > size) return false
