@@ -1,18 +1,32 @@
 # Compatibility
 
-Only directly observed compatibility evidence belongs here. Phase 9 path
-states are `PASS`, `FAIL`, `PARTIAL`, `NOT TESTED`, and `BLOCKED`. They
-describe a tested path, device, date, and evidence receipt, not a general wallet
-endorsement.
+Only directly observed compatibility evidence belongs here. Allowed states are
+`PASS`, `FAIL`, `PARTIAL`, `NOT TESTED`, and `BLOCKED`.
 
-Phase 8 status: **NOT VERIFIED IN THIS RELEASE**. Its Android emulator run used
-MWA Lab's own test endpoint; no production-wallet path was tested. See
-[Phase 8 compatibility smoke](evidence/phase8/phase8-production-wallet-smoke.md).
+## Phase 10 release matrix
 
-Phase 9 production-wallet compatibility: **NOT_VERIFIED**. The internal Demo
-Client is a deterministic test dApp, not a production wallet test. Its
-current-run Local NORMAL memo sign-and-send and injected signing rejection
-both passed over a real cross-package association. This is internal test
-endpoint evidence only. Remote MWA is `BLOCKED / NOT RELEASED`; its scanner is
-`OMITTED / NOT APPLICABLE`. See
-[Phase 9 audit](evidence/phase9/09-adversarial-audit/live-and-security.md).
+| Endpoint / wallet | Version / dependency | Device | Local MWA | Remote MWA | Evidence state | Notes |
+|---|---|---|---|---|---|---|
+| MWA Lab Demo Client → MWA Lab RC1-r2 | walletlib/clientlib 2.0.7; app 0.1.0-clockin | Android 16 / API 36 dedicated AVD | **PASS** | **BLOCKED / NOT RELEASED** | Verified 2026-10-05 | Internal deterministic test dApp; canonical NORMAL sign-and-send, sign-message, injected sign rejection, persistence, and reports verified |
+| Production wallets (Phantom / Solflare / Seed Vault Wallet / others) | — | — | **NOT TESTED** | **NOT TESTED** | **NOT_VERIFIED** | No release-specific production-wallet compatibility claim is made |
+
+The internal Demo Client is not a production wallet and cannot establish
+production-wallet compatibility by itself.
+
+## Connection-mode truth
+
+```text
+Same-device Local MWA     SHIPPED / VERIFIED
+Remote MWA                BLOCKED / NOT RELEASED
+Receive Test SOL QR       SHIPPED / ADDRESS ONLY
+Solana Pay QR             NOT AN MWA CONNECTION INPUT
+```
+
+Remote MWA is not hidden because the specification lacks a concept; it is hidden
+because this release lacks the required end-to-end acceptance evidence. No dead
+Remote button, camera permission, scanner dependency, or universal compatibility
+claim ships.
+
+Historical Phase 8/9 compatibility evidence remains under
+`docs/evidence/phase8/` and `docs/evidence/phase9/`; Phase 10 evidence is under
+`docs/evidence/phase10/`.

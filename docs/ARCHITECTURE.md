@@ -307,3 +307,45 @@ unexposed. The approval screen's top system-bar padding is a layout correction;
 
 See [Phase 8 design](phase8-world-class-ux-positioning-design.md) and the
 [factual final verification](evidence/phase8/).
+
+## Phase 9/10 connection, Test Wallet, and release boundary
+
+```text
+Android dApp / Demo Client
+        │
+        │ Local MWA
+        ▼
+MobileWalletAdapterActivity
+        │
+        ▼
+MwaSessionHost
+        ├── AuthorizationApprovalCoordinator
+        ├── ProtocolRecorder
+        ├── Capability context
+        ├── Transaction diagnostics
+        ├── Simulation diagnostics
+        ├── DeterministicFaultEngine
+        └── Approval / signing / fixed Devnet submission
+                 │
+                 ▼
+        persisted sanitized Room evidence
+                 ├── Sessions / Session Detail
+                 └── Markdown / JSON / Copy Summary
+
+Separate local utility branch:
+Test Wallet UI
+        ├── Receive public address / address QR
+        ├── optional Devnet funding request
+        └── Send Test SOL -> protected signer -> fixed Devnet RPC
+                 (NO ProtocolRecorder event)
+```
+
+Room schema 4 adds coarse association mode and identity-verification state only;
+raw association secrets are not diagnostic fields. Direct Test Wallet actions are
+not relabelled as dApp→wallet protocol traffic. Remote MWA is not released and no
+scanner/camera path exists in the RC.
+
+Phase 10 wraps this frozen architecture with external release signing, deterministic
+release/static gates, signed-APK verification, clean-checkout/CI provenance, and
+release evidence. It does not move protocol, approval, signing, RPC, fault,
+simulation, storage, or report authority into presentation/release code.

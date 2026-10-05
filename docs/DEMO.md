@@ -61,3 +61,31 @@ results, including one transient `RPC_NETWORK` attempt followed by a successful
 retry, are recorded in [Phase 8 evidence](evidence/phase8/). The six real
 screenshot candidates are in [screenshots/phase8](../screenshots/phase8/).
 Production-wallet compatibility is **NOT VERIFIED IN THIS RELEASE**.
+
+## Phase 10 RC1 competition flow
+
+Use the signed `0.1.0-clockin` RC and the internal Demo Client on the same Android
+device/emulator. Remote MWA is not part of this demo.
+
+1. Show Home: **MWA Protocol Debugger**, `DEVNET ONLY`, `NO REAL FUNDS`, Test
+   Wallet, and same-device connection guidance.
+2. Open the Demo Client and start the NORMAL Local MWA sign-and-send scenario.
+3. Show explicit authorization, transaction diagnostics, and separate signing
+   approval. Complete the action and show the persisted successful protocol
+   session.
+4. Open Fault Lab, select `FAULT_SIGN_REJECT`, and show `FAULT ACTIVE` /
+   intentional test condition.
+5. Repeat sign-and-send. Show client `ERROR_NOT_SIGNED (-3)` and persisted
+   `INJECTED / FAULT_SIGN_REJECT` with no transaction submission.
+6. Open Session Detail and demonstrate Share Markdown, Share JSON, and Copy
+   Summary.
+7. Return Fault Lab to `NORMAL`.
+8. Briefly show Test Wallet balance and **Receive Test SOL**; optionally show the
+   already-verified **Send Test SOL** review rather than spending additional
+   Devnet SOL for the recording.
+9. End on: **Make Mobile Wallet Adapter failures visible, reproducible, and
+   fixable.**
+
+Release evidence also proves one finalized direct 1-lamport Test Wallet Send did
+not create MWA protocol history. No production-wallet compatibility claim follows
+from the Demo Client.

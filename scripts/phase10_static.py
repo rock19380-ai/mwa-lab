@@ -111,14 +111,28 @@ require("ProtocolRecorder" not in send and "recordProtocolEvent" not in send,
         "direct Test Wallet Send routes through ProtocolRecorder")
 
 release = read("docs/RELEASE.md")
-require("Remote MWA: `BLOCKED_HIDDEN`" in release and
-        "production-wallet compatibility: `NOT_VERIFIED`" in release and
-        "Operator-signed RC1: signature and package verified; runtime acceptance pending." in release and
-        "Current candidate: `MWA-Lab-v0.1.0-clockin-rc1-r2.apk`" in release and
+require("Remote MWA:                      BLOCKED_HIDDEN / NOT RELEASED" in release and
+        "Production-wallet compatibility: NOT_VERIFIED" in release and
+        "Current signed RC1 revision 2 runtime acceptance: `PASS`." in release and
+        "MWA-Lab-v0.1.0-clockin-rc1-r2.apk" in release and
+        "canonical Local MWA `SIGN_AND_SEND_TRANSACTIONS`: `PASS`" in release and
+        "direct **Send Test SOL**: `PASS`" in release and
         "SUPERSEDED BY LATER PHASE 10 RC1 REVISION" in read("docs/evidence/phase10/02-build/signed-rc1.md") and
         re.search(r"APK SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1-r2.md")) and
         re.search(r"Signer certificate SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1-r2.md")),
-        "current release status overclaims remote or production-wallet compatibility")
+        "current release status is stale or overclaims remote/production-wallet compatibility")
+readme = read("README.md")
+require("Phase 9 — First-run connection and Test Wallet UX (in progress)" not in readme,
+        "README still marks Phase 9 in progress")
+require("## Phase 10 — Signed release candidate + compatibility evidence" in readme,
+        "README lacks current Phase 10 release-candidate summary")
+for required_path in ("docs/GETTING_STARTED.md", "PHASE_10_REPORT.md",
+                      "docs/evidence/phase10/10-closeout/rc1-checkpoint.md"):
+    require((ROOT / required_path).is_file(), f"missing Phase 10 closeout document: {required_path}")
+wallet_test = read("app/src/test/java/dev/mwalab/wallet/TestSolTransferTest.kt")
+for test_name in ("identityChangeAfterReviewFailsBeforeSigningOrRpcSubmission",
+                  "preparationRpcFailureDoesNotReachReviewOrSigning"):
+    require(test_name in wallet_test, f"missing fail-closed Test Wallet regression: {test_name}")
 workflow = read(".github/workflows/android.yml")
 for token in (
     "      - phase10-release-candidate-compatibility-evidence",

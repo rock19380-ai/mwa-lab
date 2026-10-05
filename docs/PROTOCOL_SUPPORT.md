@@ -214,3 +214,27 @@ Supported deterministic profiles reproduce the pinned walletlib 2.0.7 error fami
 | raw secrets/payloads/signatures | excluded from report model and outputs |
 | mainnet | unavailable |
 | production-wallet compatibility | requires independent verification |
+
+## Phase 9/10 current release support matrix
+
+| Capability | Current release state |
+|---|---|
+| Local MWA association | **VERIFIED / SHIPPED** |
+| Remote MWA association | **BLOCKED / NOT RELEASED** |
+| `authorize` / reauthorize / deauthorize | Supported within pinned walletlib boundary |
+| `sign_messages` | **VERIFIED**, explicit user approval in NORMAL mode |
+| `sign_transactions` | Legacy transactions only |
+| `sign_and_send_transactions` | **VERIFIED on Solana Devnet**, explicit approval in NORMAL mode |
+| `get_capabilities` | walletlib-configured; callback not observable through pinned walletlib |
+| v0 signing | Unsupported / fail closed |
+| deterministic fault injection | **VERIFIED**; injected provenance persisted separately |
+| sanitized Markdown/JSON/Copy Summary | **VERIFIED** |
+| direct Send Test SOL | **VERIFIED**, local utility only; no MWA protocol event |
+| Receive Test SOL QR | Shipped; public Devnet address only |
+| mainnet / testnet | Rejected / unavailable |
+| production-wallet compatibility | **NOT_VERIFIED** |
+
+Phase 10 signed-RC acceptance finalized one Local MWA memo sign-and-send and one
+1-lamport direct Test Wallet transfer on Devnet. `FAULT_SIGN_REJECT` returned
+`ERROR_NOT_SIGNED (-3)` / `INJECTED` without submission and the final persisted
+fault selection was restored to `NORMAL`.

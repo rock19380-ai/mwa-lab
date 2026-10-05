@@ -390,3 +390,44 @@ NORMAL. See [final local](evidence/phase8/phase8-final-local-verification.md),
 [device](evidence/phase8/phase8-final-device-verification.md), and
 [live](evidence/phase8/phase8-live-normal.md) evidence. Exact-head GitHub Actions
 success and an annotated tag are required before calling the phase frozen.
+
+## Phase 9 freeze and Phase 10 release-candidate verification
+
+Phase 9 froze the first-run/Test Wallet/transport boundary at Room schema 4 and
+walletlib/clientlib 2.0.7. Phase 10 then added release identity/signing and
+accepted the operator-signed RC1 revision 2 on a dedicated Android 16 / API 36
+AVD.
+
+Phase 10 separates evidence classes:
+
+```text
+JVM/lint/static/build            deterministic local/CI gates
+connected instrumentation        regression device; may reinstall app
+signed-RC acceptance             dedicated preserved acceptance AVD
+live Devnet evidence             explicit minimal transactions only
+production-wallet compatibility  separate; NOT TESTED in this release
+```
+
+Signed-RC runtime acceptance verified manual first-run; cold Local MWA approval
+and rejection; `SIGN_MESSAGE_APPROVE`; finalized NORMAL sign-and-send; injected
+`FAULT_SIGN_REJECT` sign-and-send; restart persistence; visible negative Test
+Wallet send cases; one finalized 1-lamport direct send; unchanged Room protocol
+history across that direct send; Markdown/JSON Share Sheet; Copy Summary; and
+actual generated report-byte sanitization. No live airdrop was invoked.
+
+The Demo Client initially hit an emulator background-network restriction that
+manifested as `UnknownHostException` before signing. A Demo Client-only device-idle
+allowlist removed that environment block without changing the HTTPS RPC endpoint,
+TLS, wallet code, or protocol authority. The prior one-off Demo Client ANR did not
+reproduce on the dedicated RC AVD.
+
+Final Phase 10 freeze still requires the final candidate commit to pass:
+
+```bash
+./scripts/phase10_static.sh
+./gradlew lint test assembleDebug assembleRelease \
+  :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
+```
+
+plus clean-checkout verification and GitHub Actions success for the exact final
+HEAD before the annotated Phase 10 tag is created.

@@ -342,3 +342,27 @@ Local signing rejection remained `ERROR_NOT_SIGNED (-3) / INJECTED /`
 `FAULT_SIGN_REJECT` without a signing tap or submission. The final fault was
 restored to `NORMAL`. The live harness now fails closed below its funding
 threshold without calling an airdrop. See [Phase 9 audit](evidence/phase9/09-adversarial-audit/live-and-security.md).
+
+## Phase 10 release-candidate security boundary
+
+Phase 10 adds release packaging/evidence, not protocol authority. The stable
+release keystore is external to Git and passwords are environment-only; partial
+signing configuration fails closed. The signed RC verifies with one expected
+certificate, while CI carries no private signing material.
+
+Current RC1-r2 keeps INTERNET, intentionally exported Local MWA association, and
+a non-exported diagnostic FileProvider with temporary read grants. CAMERA is
+absent, no Remote scanner/control ships, Remote MWA remains blocked/not released,
+and mainnet/testnet remain unavailable.
+
+The funded signed-RC run re-verified explicit authorization/signing approval in
+NORMAL mode, deterministic injected signing rejection, and direct Test Wallet
+Send isolation from `ProtocolRecorder`. Actual generated Markdown/JSON report
+bytes contained bounded hashes/lengths and structured public metadata, not raw
+private keys, seeds, authorization tokens, association secrets, raw payloads,
+raw signatures, or release-signing credentials.
+
+The direct Test Wallet send uses preflight and confirmed commitment, never
+auto-retries ambiguous post-submission state as success, and now has focused unit
+coverage proving identity changes after review fail before signing/submission and
+preparation RPC failure never reaches signing/submission.

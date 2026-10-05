@@ -35,7 +35,7 @@ not a production wallet.
 
 **Receive Test SOL QR** contains only the disposable public Devnet address for
 funding. A **Remote MWA QR** would connect a dApp to the protocol. Remote MWA
-and its scanner are not released in this Phase 9 checkpoint, so the QR types
+and its scanner are not released in the current Phase 10 RC, so the QR types
 must not be interchanged.
 
 ## Phase 2 verified boundary
@@ -178,13 +178,13 @@ protocol boundary.
 ./gradlew test
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
-./scripts/phase9_static.sh
+./scripts/phase10_static.sh
 ```
 
-GitHub Actions runs deterministic non-device gates and routes the Phase 9
-checkout through the current-source Phase 9 static gate. The frozen Phase 8
-static gate is run from a detached worktree at its Phase 8 tag. Connected-device
-and live Devnet evidence are recorded separately.
+GitHub Actions runs deterministic non-device gates and routes the current
+Phase 10 checkout through the Phase 10 release/safety gate. Historical phase
+gates remain preserved for their own checkouts. Connected-device and live Devnet
+evidence are recorded separately from CI buildability.
 
 ## Modules
 
@@ -305,7 +305,7 @@ annotated freeze tag are the final provenance authority; see
 [PHASE_8_REPORT.md](PHASE_8_REPORT.md) and
 [Phase 8 evidence](docs/evidence/phase8/).
 
-## Phase 9 — First-run connection and Test Wallet UX (in progress)
+## Phase 9 — First-run connection and Test Wallet UX (frozen)
 
 Manual first launch now explains that MWA Lab is a Devnet-only protocol
 debugger with a disposable test identity. An incoming same-device Local MWA
@@ -335,8 +335,8 @@ post-submission transport/confirmation ambiguity as **Submitted / confirmation
 unknown** rather than success. Direct Test Wallet sends remain outside the MWA
 protocol timeline.
 
-Remote MWA release controls and a Remote QR scanner are not shipped at this
-checkpoint. Production-wallet compatibility remains **NOT VERIFIED**. See
+Remote MWA release controls and a Remote QR scanner were not shipped in the
+frozen Phase 9 checkpoint. Production-wallet compatibility remained **NOT VERIFIED**. See
 [Phase 9 evidence](docs/evidence/phase9/) for the executed gates and current scope.
 
 
@@ -351,3 +351,41 @@ schema 4 evidence and the final persisted `NORMAL` fault are recorded in the
 [Phase 9 report](PHASE_9_REPORT.md). No airdrop or faucet was used in the funded
 continuation. Remote, scanner, Identity Reset, and production-wallet cuts above
 remain in effect.
+
+## Phase 10 — Signed release candidate + compatibility evidence
+
+Production-wallet compatibility remains **NOT VERIFIED**.
+
+Phase 10 does not add a new product feature. It converts the frozen product into
+an auditable release candidate. The current signed candidate is
+`MWA-Lab-v0.1.0-clockin-rc1-r2.apk` (`dev.mwalab`, versionCode `1`, versionName
+`0.1.0-clockin`) with APK SHA-256
+`0b17ccac5180d0bd6919f3f24c0c8a03efebebf9b42bd07f4909a2894e35bd21`.
+The release keystore remains outside Git.
+
+On a dedicated Android 16 / API 36 AVD, the signed candidate passed manual
+first-run, dApp-first cold Local MWA authorization, `SIGN_MESSAGE_APPROVE`, a
+finalized canonical Local `SIGN_AND_SEND_TRANSACTIONS`, deterministic
+`FAULT_SIGN_REJECT` sign-and-send (`ERROR_NOT_SIGNED (-3)` / `INJECTED`, no
+submission), restart persistence, Markdown/JSON/Copy Summary export, one safe
+1-lamport direct **Send Test SOL**, and proof that direct Test Wallet actions do
+not create MWA protocol history. Actual generated report bytes were inspected
+and retained only sanitized structured evidence. No live airdrop was invoked;
+the user manually funded the exact installed Devnet identity.
+
+Current release truth:
+
+```text
+Local MWA                       VERIFIED / SHIPPED
+Remote MWA                      BLOCKED / NOT RELEASED
+Remote QR scanner               OMITTED
+CAMERA permission               ABSENT
+mainnet / testnet                UNAVAILABLE
+production-wallet compatibility NOT_VERIFIED
+```
+
+See [Getting Started](docs/GETTING_STARTED.md), [Release](docs/RELEASE.md),
+[Compatibility](docs/COMPATIBILITY.md), [Phase 10 report](PHASE_10_REPORT.md),
+and [Phase 10 evidence](docs/evidence/phase10/). Final freeze authority is the
+exact-head GitHub Actions success plus the annotated Phase 10 tag; those are
+created only after the final candidate commit is immutable.

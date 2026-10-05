@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+### Phase 10 — Release Candidate + Compatibility Evidence
+
+- Locked release identity to `dev.mwalab` / versionCode `1` / versionName
+  `0.1.0-clockin` and added external-credential release signing with fail-closed
+  partial configuration and no repository-held keystore/password.
+- Added Phase 10 static/CI release gates while preserving walletlib/clientlib
+  2.0.7, Room schema 4, fixed Devnet authority, hidden Remote MWA, absent CAMERA,
+  and unavailable mainnet.
+- Built and verified signed `MWA-Lab-v0.1.0-clockin-rc1-r2.apk`; refreshed the
+  Test Wallet secondary action label to one-line `REFRESH` without changing
+  behavior or layout authority.
+- Passed signed-RC manual first-run, cold Local MWA, sign-message, finalized
+  NORMAL sign-and-send, injected `ERROR_NOT_SIGNED (-3)` sign-and-send, restart
+  persistence, report export/content audit, and direct 1-lamport Send Test SOL.
+- Proved direct Test Wallet Send remains outside MWA protocol history and added
+  fail-closed unit coverage for identity changes after review and preparation RPC
+  failure.
+- No live airdrop was invoked in Phase 10; the exact installed disposable Devnet
+  identity was manually funded. Remote MWA remains blocked/not released and
+  production-wallet compatibility remains NOT_VERIFIED.
+
+### Phase 9 — First-run connection and Test Wallet UX
+
+- Added explicit Local MWA authorization consent, first-run connection guidance,
+  disposable Test Wallet balance/Receive QR/funding UI, Room schema 4 transport
+  metadata, and native Devnet Send Test SOL.
+- Kept Receive QR address-only, direct wallet utilities outside MWA protocol
+  history, Remote MWA hidden, CAMERA absent, and mainnet unavailable.
+- Completed live Local NORMAL/injected acceptance and froze the exact-head Phase 9
+  checkpoint at `phase9-first-run-connection-ux-2026-10-04`.
+
 ### Phase 8 — World-class UX and positioning
 
 - Added a stable light/dark design system, first-run product explanation, typed
