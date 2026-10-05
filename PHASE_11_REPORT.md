@@ -1,41 +1,41 @@
-# Phase 11 — hard-code-freeze engineering candidate
+# Phase 11 — hard-code-freeze engineering and signed-RC2 runtime candidate
 
 ## Predecessor
 
-Annotated Phase 10 tag `phase10-release-candidate-compatibility-evidence-2026-10-05` resolves to `fa7a909f50ab0702327bd98f28461f60fe7ad082`. The signed RC1-r2 production source is `945295a3e0124af11a5d75a76c7444f09586339e`. See `docs/evidence/phase11/00-baseline/`.
+Annotated Phase 10 tag `phase10-release-candidate-compatibility-evidence-2026-10-05` resolves to `fa7a909f50ab0702327bd98f28461f60fe7ad082`; accepted signed RC production source `945295a3e0124af11a5d75a76c7444f09586339e`. Baseline evidence: `docs/evidence/phase11/00-baseline/`.
 
 ## Hard-freeze outcome
 
-Phase 11 static predecessor/safety/drift gate and CI wiring established. On October 5, 2026 the static chain, lint, unit tests, debug and unsigned release builds, both AndroidTest assemblies and focused wallet/report tests passed. Eight offline UI/fault/report instrumentation tests passed on a separate **debug-only** disposable API 36 emulator. The cross-app debug probe timed out twice while Android launcher/System UI ANRs were visible; it is environment-obstructed, not an RC2 result. See `docs/evidence/phase11/02-build/rc2-attempt-2026-10-05.md`. This is an engineering checkpoint, **not** a final freeze or final Phase 11 tag. `approved-repairs.tsv` has no accepted repairs.
+On October 5, 2026, Phase 9/10/11 static gates, lint, unit tests, debug and unsigned release builds, both AndroidTest assemblies and focused offline wallet/report tests passed in the engineering baseline batch. The static chain passed again after the signed-RC2 evidence update. Separate debug instrumentation is not represented as signed-RC2 runtime proof. No P0/P1 repair approved; Phase 11 is **not finally frozen or tagged**.
 
 ## Production-source status
 
-No protected production-source or build-config edits in this batch. Guard compares the working tree and candidate commit against the signed RC source and requires committed, accepted P0/P1 evidence for any future drift. The sole new executable is the fail-closed external signing helper, not production app code.
+Protected `app/src/main/**`, `demo-client/src/main/**`, `app/build.gradle.kts` and `gradle/libs.versions.toml` remain identical to the Phase 10 signed production-source baseline. This runtime batch changed documentation/evidence/screenshots only; no dependency upgrade, app change or RC2 rebuild. The evidence checkpoint HEAD must not be confused with the immutable artifact source commit.
 
 ## RC2 artifact
 
-**BLOCKED: operator signing variables unavailable to this process.** The external Phase 10 keystore exists but no password or alias was recovered or guessed. The `scripts/phase11_sign_rc2.sh` preflight refuses to build/copy without all four inputs and checks signer continuity before creating a date-of-execution external RC2 directory. The local unsigned release APK has the expected package/version/permissions/Local MWA activity and non-exported FileProvider; it fails signature verification as expected. Its checksum is **not** an RC2 checksum. See `docs/evidence/phase11/03-artifact-verification/unsigned-preflight-2026-10-05.md`.
+Existing operator-signed release was **not rebuilt/re-signed**: `/home/abbaas/Downloads/MWA_LAB_RC2_2026-10-05/MWA-Lab-v0.1.0-clockin-rc2.apk`; source `4b97796ab7958b2590d32271de8e0a0786cbc824`; APK SHA-256 `5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc`; signer SHA-256 `a3745b48d28baac2a230360f32dcf9671d5abeb9a6ca81f458eb4b8667ecc4e4`, matching Phase 10. Package `dev.mwalab`, versionCode 1, versionName `0.1.0-clockin`, minSdk 23, targetSdk 37. Installed base.apk digest matched exact RC2 on both tested API36 AVDs. Artifact record: `docs/evidence/phase11/03-artifact-verification/signed-rc2-2026-10-05.md`.
 
 ## Runtime acceptance
 
-**NOT RUN on signed RC2:** manual first run, cold dApp-first approve/reject, funded normal Local MWA, FAULT_SIGN_REJECT, Receive QR decode, live Send negative/positive, session-history isolation, normal/injected report-byte exports, log audit, screenshots, demo and deck checks. No RC2 address, transaction signature, report digest, screenshot or final fault state is claimed. The separate debug instrumentation and synthetic unit tests narrow regressions only; Phase 10 acceptance remains predecessor evidence. No faucet or Devnet transaction was invoked in this batch.
+**PASS** signed RC2 clean manual first use; separate clean cold dApp-first LOCAL Approve and Reject; funded normal memo-only Local MWA sign-and-send with independently finalized Devnet signature and persisted success session; ordinary authorization Reject with OBSERVED_PROTOCOL provenance; FAULT_SIGN_REJECT → ERROR_NOT_SIGNED (-3) with INJECTED provenance and return-to-NORMAL after restart/full AVD reboot. **PASS** Receive Test SOL UI *and independently decoded screenshot QR pixels*: 44-byte exact current public address, not an MWA or Solana Pay URI. **PASS** invalid recipient, zero, -1, 10-decimal precision and 1 SOL insufficient-reserve **live** negative-send validations; no review confirmation/submission. **PASS** one minimal one-lamport direct Devnet send to a documented user-controlled Test Wallet, finalized independently with no MWA protocol-history pollution. **PASS** Markdown, JSON, Copy Summary and Android Share Sheet on both real success and injected sessions; four actual report-byte hashes and bounded secret audit. Screenshots: 16 exact-RC2 PNGs with validated checksums. See `docs/evidence/phase11/rc2-runtime-2026-10-05.md`, `docs/evidence/phase11/07-reports/rc2-2026-10-05.md`, `docs/evidence/phase11/09-screenshots/MANIFEST.md`.
 
-## Security
+## Security and privacy
 
-Devnet-only execution, INTERNET, no CAMERA, external operator signing and address-only Receive QR remain static-gated. The unsigned merged manifest was inspected read-only; the installed exact-RC2 manifest, signing and generated report-byte/log audits remain pending. No secret material was placed in evidence.
+Installed release: INTERNET present, CAMERA absent, no unexpected dangerous permission, exported Local MWA association, FileProvider non-exported; no Remote scanner/mainnet/seed-import UI. Four actual report files were inspected and pattern-scanned; no raw credential assignment, PEM key or raw sensitive payload field found in the bounded files. Main/system logcat audits captured **clean first-use/cold authorization** and **funded AVD restart/Copy/negative validation** windows; neither window includes the earlier funded normal signing, injected fault, original report sharing or direct send, so full workflow logging is **not yet cleared**. Dependency verbose `MobileWalletAdapterSession` public-key logging and an auth-repository message warrant review before claiming a broad privacy PASS. `docs/evidence/phase11/08-security-privacy/`.
 
 ## Compatibility
 
-Local MWA: VERIFIED / SHIPPED in Phase 10; **RC2 NOT TESTED**. Remote MWA: BLOCKED / HIDDEN / NOT RELEASED. Remote QR scanner: OMITTED. Production-wallet compatibility: NOT_VERIFIED. Mainnet: UNAVAILABLE. See `docs/evidence/phase11/12-compatibility/final-matrix.md`.
+Internal Demo Client → MWA Lab Local MWA VERIFIED / SHIPPED. Remote MWA BLOCKED / HIDDEN / NOT RELEASED; Remote scanner OMITTED. Production wallets NOT TESTED / NOT_VERIFIED. Mainnet UNAVAILABLE. `docs/evidence/phase11/12-compatibility/final-matrix.md`.
 
-## Known defects
+## Known defects and remaining gates
 
-No P0/P1 repair approved; no production app edits. The disposable debug AVD's launcher/System UI ANRs and unresolved cross-app test must be re-evaluated on a healthy device before assigning product severity. No test was weakened.
+No reproducible P0/P1 app defect or approved repair. Earlier debug/emulator Launcher/System UI ANRs did not prevent signed RC2 acceptance on the healthy disposable API36 device. Remaining **security audit gap**: capture a funded-workflow logcat window covering authorization, signing, fault execution, report export and direct send without needlessly repeating live transfers, or obtain explicit scoped owner risk acceptance. Review dependency verbose logging without convenience dependency upgrades. Synthetic tests retain identity-change/RPC-failure/ambiguous-confirmation/signature-mismatch coverage; those conditions were not forced live.
 
 ## CI and tag provenance
 
-Phase 11 branch is included in Android CI; exact-HEAD CI execution is pending after publishing the checkpoint. No Phase 11 tag or post-tag receipt created.
+Phase 11 branch is wired to CI; this evidence checkpoint's **exact-head GitHub Actions PASS has not yet been established**. No final Phase 11 annotated tag or post-tag receipt exists. Planned October 6 freeze date must not be imputed to October 5 evidence.
 
 ## Phase 12 handoff
 
-First supply the **existing** operator signing environment (without logging credentials), execute `./scripts/phase11_sign_rc2.sh`, verify actual signer/digest and install that exact APK on a stable API 36 acceptance device. Then run clean install, cold dApp-first approval/rejection, safe Devnet funding, normal and injected transactions, Test Wallet and report-byte acceptance, screenshots, runtime security/compatibility review, exact-HEAD CI and owner freeze decision. Use the actual execution date for new evidence; the planned October 6 final freeze date is not an October 5 runtime date. Do not claim a completed hard freeze from local build success alone.
+Preserve immutable signed-RC2 digest and source provenance; resolve or explicitly accept the remaining scoped log/privacy review, verify exact-head CI, then decide final annotated hard-freeze tag in a separate closeout batch. This is a substantially qualified RC2 **candidate**, not a completed Phase 11 freeze; do not reopen Remote MWA or change protected source absent documented P0/P1 necessity.

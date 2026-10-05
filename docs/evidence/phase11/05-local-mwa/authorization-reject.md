@@ -1,3 +1,3 @@
-# User authorization rejection — pending signed RC2
+# Real authorization Reject — signed RC2 (October 5, 2026)
 
-October 5: **NOT RUN**. A real visible Reject action and non-INJECTED provenance must be recorded only on the exact signed RC2 after cold dApp-first setup. No synthetic fault was mistaken for real user rejection.
+**PASS** on exact RC2 SHA-256 `5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc` (source `4b97796ab7958b2590d32271de8e0a0786cbc824`): on NORMAL funded API36 AVD, real Reject returned Demo FAIL before signing, persisted LOCAL session `1ca5a4a1-6a6c-4f58-8736-b6128d9127ae` contained `AUTHORIZE · ERROR_AUTHORIZATION_FAILED (-1) · OBSERVED_PROTOCOL`, **not INJECTED**. Also reproduced separately from fresh cold dApp-first installation on disposable API36 AVD. Screenshots `../09-screenshots/03-local-authorization-upgrade.png` and `03-authorization-rejected-demo.png` are from the funded device; the clean cold consent is `03-cold-local-authorization.png`.
