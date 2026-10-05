@@ -114,8 +114,10 @@ release = read("docs/RELEASE.md")
 require("Remote MWA: `BLOCKED_HIDDEN`" in release and
         "production-wallet compatibility: `NOT_VERIFIED`" in release and
         "Operator-signed RC1: signature and package verified; runtime acceptance pending." in release and
-        re.search(r"APK SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1.md")) and
-        re.search(r"Signer certificate SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1.md")),
+        "Current candidate: `MWA-Lab-v0.1.0-clockin-rc1-r2.apk`" in release and
+        "SUPERSEDED BY LATER PHASE 10 RC1 REVISION" in read("docs/evidence/phase10/02-build/signed-rc1.md") and
+        re.search(r"APK SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1-r2.md")) and
+        re.search(r"Signer certificate SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1-r2.md")),
         "current release status overclaims remote or production-wallet compatibility")
 workflow = read(".github/workflows/android.yml")
 for token in (

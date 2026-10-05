@@ -1,5 +1,10 @@
 # Operator-signed RC1 — 2026-10-04
 
+**SUPERSEDED BY LATER PHASE 10 RC1 REVISION.** This APK and its October 4
+runtime evidence remain historical and truthful; the current signed candidate
+is documented in `signed-rc1-r2.md`. Do not present this hash as representing
+the later UI-source commit.
+
 Built from clean branch `phase10-release-candidate-compatibility-evidence`
 at `cc6c7dfc1e28ae666e7955e88ea8301171cce231` with all four external
 signing environment variables present. `./gradlew :app:assembleRelease`

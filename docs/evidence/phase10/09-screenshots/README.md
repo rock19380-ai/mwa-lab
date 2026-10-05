@@ -1,5 +1,8 @@
 # Signed RC1 screenshots captured October 4, 2026
 
+**Historical, superseded by the later Phase 10 RC1 revision 2 binary.** Do not
+use these images as current revision-2 UI acceptance evidence.
+
 `01`–`05`: clean manual first run, Home, How to Connect, and Receive QR.
 `06`–`07`: real cold dApp-first Local MWA authorization and rejection.
 `08`–`10`: session navigation, approval UI and persisted authorization timeline.
