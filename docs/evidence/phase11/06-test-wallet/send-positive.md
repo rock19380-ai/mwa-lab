@@ -1,0 +1,3 @@
+# Positive direct Test Wallet send — pending signed RC2
+
+October 5: **NOT RUN**. There is no installed signed RC2 public address, balance or artifact digest. `solana config get` showed `https://api.devnet.solana.com` and Devnet WebSocket; no CLI configuration was changed and no transfer was made. A historical Phase 10 controlled Devnet transfer is not a new RC2 send. No recipient was invented, no existing identity was reset, and no funds/faucet were used. After a known safe recipient and adequately funded *current RC2* identity are verified on Devnet, send only once for the smallest practical amount and compare protocol session/event history before and after. Isolation is **not yet established on RC2**.

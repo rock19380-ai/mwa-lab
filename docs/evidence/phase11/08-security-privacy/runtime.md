@@ -1,0 +1,3 @@
+# Runtime security — RC2 not installed
+
+October 5: exact-RC2 installed permission and component audit **NOT RUN**; there is no signed RC2 APK. Read-only unsigned merged-manifest preflight found INTERNET and ACCESS_NETWORK_STATE, no CAMERA, exported Local MWA `solana-wallet` handler and non-exported report FileProvider (`../03-artifact-verification/unsigned-preflight-2026-10-05.md`). Phase 11 source/static guard passes Devnet-only, absent Remote controls, address-only Receive QR and external signing policy. The disposable debug AVD is **not** the installed release candidate. No RC2 authorization/signing/fault/export/send/restart logcat window was captured or searched; no runtime privacy conclusion is claimed.

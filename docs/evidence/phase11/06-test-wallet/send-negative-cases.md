@@ -1,0 +1,3 @@
+# Send negative matrix — synthetic PASS; RC2 runtime pending
+
+October 5: focused `TestSolTransferTest` JVM regressions PASS with fake RPC/signing fixtures. Checked invalid recipient strings/length, zero, negative, scientific notation, >9 decimals and overflow; insufficient balance including fee reserve; identity change after review fails before signing/submission; preparation RPC failure fails before review/signing; nonfinalized confirmation, signature mismatch and ambiguous transport yield `SubmittedUnknown`, not confirmed. The debug-only UI instrumentation also passed its Send Test SOL input/review tests. These tests do **not** prove real RC2 UI interaction, its lack of unexpected signing/submission, or its protocol-history isolation. No live transfer was attempted.
