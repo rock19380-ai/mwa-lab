@@ -1,0 +1,3 @@
+# Hard-freeze change control
+
+`approved-repairs.tsv` starts with only the header. For any protected-source change, record one row per affected file with a real P0/P1 reproduction, minimal patch, tests, runtime gate and already committed repair SHA; use status `accepted`. The gate verifies that SHA is in ancestry, the commit changes the named file, and current drift exactly matches the ledger. A repair cannot be approved merely by adding a row to the same uncommitted patch; commit the repair, then record and validate the ledger in a following commit. A `P2`/`P3` issue stays documented without production edits. No repairs were required for this engineering batch.

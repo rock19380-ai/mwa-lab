@@ -14,6 +14,7 @@ on:
       - phase8-world-class-ux-positioning
       - phase9-first-run-connection-ux
       - phase10-release-candidate-compatibility-evidence
+      - phase11-hard-code-freeze
   pull_request:
 
 permissions:
@@ -46,11 +47,13 @@ jobs:
         run: |
           chmod +x ./gradlew ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh ./scripts/phase9_static.sh
           if [ -f ./scripts/phase10_static.sh ]; then chmod +x ./scripts/phase10_static.sh; fi
+          if [ -f ./scripts/phase11_static.sh ]; then chmod +x ./scripts/phase11_static.sh; fi
 
       - name: Validate shell gate syntax
         run: |
           bash -n ./scripts/phase0_gate.sh ./scripts/phase1_static.sh ./scripts/phase2_static.sh ./scripts/phase3_static.sh ./scripts/phase4_static.sh ./scripts/phase5_static.sh ./scripts/phase6_static.sh ./scripts/phase7_static.sh ./scripts/phase8_static.sh ./scripts/phase9_static.sh
           if [ -f ./scripts/phase10_static.sh ]; then bash -n ./scripts/phase10_static.sh; fi
+          if [ -f ./scripts/phase11_static.sh ]; then bash -n ./scripts/phase11_static.sh; fi
 
       - name: Lint
         run: ./gradlew lint
@@ -117,5 +120,9 @@ jobs:
         run: ./scripts/phase9_static.sh
 
       - name: Phase 10 release identity and safety gate
-        if: ${{ hashFiles('scripts/phase10_static.sh') != '' }}
+        if: ${{ hashFiles('scripts/phase10_static.sh') != '' && hashFiles('scripts/phase11_static.sh') == '' }}
         run: ./scripts/phase10_static.sh
+
+      - name: Phase 11 hard-freeze and predecessor gates
+        if: ${{ hashFiles('scripts/phase11_static.sh') != '' }}
+        run: ./scripts/phase11_static.sh

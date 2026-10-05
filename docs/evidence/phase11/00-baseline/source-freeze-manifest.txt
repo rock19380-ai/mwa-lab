@@ -1,0 +1,207 @@
+Phase 11 protected source manifest (2026-10-05)
+Baseline commit: 945295a3e0124af11a5d75a76c7444f09586339e
+Phase 10 closeout: fa7a909f50ab0702327bd98f28461f60fe7ad082
+Git object IDs below are Git SHA-1 objects (not SHA-256 content checksums).
+
+app/src/main/** tree:          e014bf5a94d2032fc731ce4258a58e15885c9d05
+demo-client/src/main/** tree:  23d6e2c4eb60eb7511b167f4c2a3020d9ae982ee
+app/build.gradle.kts blob:    6f6b6b20318e77a3abc2cad162caecc71ecc5722
+gradle/libs.versions.toml blob: 2a665034a168c15d435c60e8725726fe43e87dfc
+settings.gradle.kts blob:     04c1e45c7a081e9c1f6e67e9bd4d6237cf90b0f7
+gradle.properties blob:       99fc155814191cc379ea11c9bf78f64f70935932
+
+File inventory: 182 tracked files in these six paths. Canonical inventory format:
+  git ls-tree -r --format='%(objectname) %(path)' 945295a3e0124af11a5d75a76c7444f09586339e -- app/src/main demo-client/src/main app/build.gradle.kts gradle/libs.versions.toml settings.gradle.kts gradle.properties
+SHA-256 of that command's UTF-8 output (including final newline):
+  85a7a47d5afcb4055433935a90b5356a34eec2750d0621cc24f90f2fd5a09661
+SHA-256 of four-path core subset (omit settings.gradle.kts and gradle.properties):
+  8f70f037de5c35f13e967ba45f6db956861b998c8c6fc9c100fabd70281b74bf
+
+The Git tree objects provide the exact recursive filename/blob inventory; run the
+command above to inspect every file. Compare with current source:
+  git diff --name-status 945295a3e0124af11a5d75a76c7444f09586339e -- app/src/main demo-client/src/main app/build.gradle.kts gradle/libs.versions.toml settings.gradle.kts gradle.properties
+The Phase 11 gate also checks untracked non-ignored files in these paths.
+
+Canonical tracked file inventory (Git blob SHA-1, then path):
+6f6b6b20318e77a3abc2cad162caecc71ecc5722 app/build.gradle.kts
+eba07ad8857b67127fb664b2437ef37fb963d702 app/src/main/AndroidManifest.xml
+1fe6071f8b9bf0cd1082db3aee119de9577c5e3a app/src/main/java/dev/mwalab/MainActivity.kt
+51545007543fc4e76e0b3463e48be81f0630b486 app/src/main/java/dev/mwalab/app/MwaLabComposition.kt
+1e0d9f7676569fa14a392158bbb8226cfdaedd2b app/src/main/java/dev/mwalab/approval/ApprovalCoordinator.kt
+b8e2adabe6237b1ce7ad17725e279642bb499cac app/src/main/java/dev/mwalab/approval/AuthorizationApprovalCoordinator.kt
+8a3c8cc2a9c4589f204be4e7de37285383aaf3da app/src/main/java/dev/mwalab/approval/AuthorizationApprovalScreen.kt
+aee8f7eea4468bdbe721fc9bd1d1f3aef270834d app/src/main/java/dev/mwalab/approval/SigningApprovalScreen.kt
+33e15e0524bdd872f7e2424d31db6f27f4b91764 app/src/main/java/dev/mwalab/approval/WalletEndpointScreen.kt
+b338191cf604f2df7126f8a89abc822db8b6c412 app/src/main/java/dev/mwalab/capabilities/CapabilitySnapshot.kt
+c2b6d273b3a5098ce298afa9e410a134698e6bf8 app/src/main/java/dev/mwalab/capabilities/CapabilitySnapshotFactory.kt
+3921068a889bc539e4e97a99d4e2d9d5ffce430f app/src/main/java/dev/mwalab/capabilities/CapabilitySnapshotRepository.kt
+941197bffbb3c494feddfbec45bcae8272632251 app/src/main/java/dev/mwalab/capabilities/CapabilitySnapshotSource.kt
+15e363a4351f7da745114656ff2b4240d2ff2e2e app/src/main/java/dev/mwalab/faults/DeterministicFaultEngine.kt
+d1811cb2a7e35caf820617f8a9a6be7f4a6bf4ab app/src/main/java/dev/mwalab/faults/FaultCatalog.kt
+e9374ae8b0e50edfad89e5ddb3d8ad66cca978c6 app/src/main/java/dev/mwalab/faults/FaultDecision.kt
+78c4a9752ea823544dc23faf4e8af0b292358f68 app/src/main/java/dev/mwalab/faults/FaultEvidenceInvariant.kt
+68d5d42e890dc9064331a3dd5317c61146d1bb06 app/src/main/java/dev/mwalab/faults/FaultHook.kt
+02b734c48fef255740ee64f3008373e248cd15ee app/src/main/java/dev/mwalab/faults/FaultId.kt
+3d7ef25e9d8d6c2da618e5220272bf14b359f107 app/src/main/java/dev/mwalab/faults/FaultProfile.kt
+66a50cb420516ae22876cc871be64d4e02c33cf5 app/src/main/java/dev/mwalab/faults/FaultSelectionRepository.kt
+73e667eb05ab6293de139926c84a3b0017fdecb6 app/src/main/java/dev/mwalab/faults/PersistentFaultSelectionRepository.kt
+bd959381a1b0052d072aa8edb64bf35909d07232 app/src/main/java/dev/mwalab/faults/PrivatePreferencesFaultSelectionStore.kt
+f5d4b8d0001d13f6d097c39b1a2fec4e0118664f app/src/main/java/dev/mwalab/identity/AndroidKeystoreIdentityRepository.kt
+91b849249c00eeb5e9532f4416a56f094d2ba2a9 app/src/main/java/dev/mwalab/identity/Ed25519IdentityMaterial.kt
+4cd3228558a55238f463314acd88dd28c27b5473 app/src/main/java/dev/mwalab/identity/IdentityRepository.kt
+f7e53003271de595536ddbbb15c08e3f7f7c5031 app/src/main/java/dev/mwalab/identity/TestEndpointIdentity.kt
+398c7f6084972b30bb02cf88deae0d94f898f614 app/src/main/java/dev/mwalab/mwa/MobileWalletAdapterActivity.kt
+06a360020207aaf1b43b2558dbab5e65b12a3e70 app/src/main/java/dev/mwalab/mwa/MwaSessionHost.kt
+33936ff8e67c5dd4770dbd1713fb536b2441501f app/src/main/java/dev/mwalab/mwa/association/AssociationOpenResult.kt
+f05f13a3b685a17209051b8afc5a0b7812eec9cb app/src/main/java/dev/mwalab/mwa/association/ConnectionPresentation.kt
+9a2194f25dbd4e97d2b9db0cd219ced1581716c1 app/src/main/java/dev/mwalab/mwa/authorization/LabAuthorizationPolicy.kt
+5b7e127b074edca7abc079ff046911d8110da186 app/src/main/java/dev/mwalab/mwa/capabilities/MwaCapabilityProfile.kt
+44ad924272273e39588a3f05357c7bcd58118bbf app/src/main/java/dev/mwalab/mwa/evidence/MwaSessionEvidence.kt
+8641d5157b1b75d947dbdc85ecdf1f7d5e4ea22d app/src/main/java/dev/mwalab/protocol/EventId.kt
+ff45a1112510060db7cff0589c920ccf8eb867ae app/src/main/java/dev/mwalab/protocol/ProtocolEvent.kt
+87bbcfe36f2197b934152eda4e0cb463aef6ec9d app/src/main/java/dev/mwalab/protocol/ProtocolEvidence.kt
+152cfa72bedbc3116beeabd224b50a42d05c2bc5 app/src/main/java/dev/mwalab/protocol/ProtocolFailureSource.kt
+6df00676a812d81220f579dfa107d97f99ad118b app/src/main/java/dev/mwalab/protocol/ProtocolMethod.kt
+59a7931b616c7ed0a6d7d1426ca1bf9c14aba895 app/src/main/java/dev/mwalab/protocol/ProtocolOutcome.kt
+aff854a0d4881a285f7e78c356f8ed17701b26e4 app/src/main/java/dev/mwalab/protocol/recorder/EventClock.kt
+14a24669a9f60e24829b2dbcbcdcf128d951226f app/src/main/java/dev/mwalab/protocol/recorder/PersistentProtocolRecorder.kt
+0adabe38a63ef44237821186e243f83a1d461524 app/src/main/java/dev/mwalab/protocol/recorder/ProtocolEventHandle.kt
+f07368aea04853888f86b50db90d4e2e4c1d3793 app/src/main/java/dev/mwalab/protocol/recorder/ProtocolRecorder.kt
+6e0be98882e833e2f9b0853b9d99572ff3b9fb91 app/src/main/java/dev/mwalab/report/DiagnosticReport.kt
+a5f23f66c77d3bb9f87418354ef4e384772c60dd app/src/main/java/dev/mwalab/report/DiagnosticReportCacheWriter.kt
+be3c17230c1b0f9406a17cddf160412a479725c7 app/src/main/java/dev/mwalab/report/DiagnosticReportExportUseCase.kt
+798ac26fb4920737c646ff3853e69004109d97b6 app/src/main/java/dev/mwalab/report/DiagnosticReportShareIntentFactory.kt
+f59d6a21b70a4a20af66d8014db60e62e0a5b53e app/src/main/java/dev/mwalab/report/DiagnosticReportSnapshotAssembler.kt
+04aa1a30322c4f2280859eaeb6622ca8763154d2 app/src/main/java/dev/mwalab/report/DiagnosticReportSummaryRenderer.kt
+bcce0d77f12d0be0e188e7d4c54a3909c1339e25 app/src/main/java/dev/mwalab/report/JsonDiagnosticReportRenderer.kt
+22bf20fc4c1444c31cdae389f50928abb48a90cf app/src/main/java/dev/mwalab/report/MarkdownDiagnosticReportRenderer.kt
+a64add0e87627df7e60cb5302e16834ab1d65b72 app/src/main/java/dev/mwalab/report/ReportOutputBounds.kt
+9e541810289075e06e0605f516cde7baedf8642e app/src/main/java/dev/mwalab/report/ReportProtocolErrorName.kt
+f464017cba5407482b35b7b25a316e1056052603 app/src/main/java/dev/mwalab/report/ReportSanitizationPolicy.kt
+11b41f6a53f7d1a5216501fc1d7f70a98d1951a5 app/src/main/java/dev/mwalab/rpc/DevnetRpcGateway.kt
+1895b0c706752f04129ee0fc311682d1a4c70ceb app/src/main/java/dev/mwalab/rpc/SignAndSendSubmissionExecutor.kt
+14c30f65cf3fa3f554d4d7eb8fca27fa5f0978b0 app/src/main/java/dev/mwalab/rpc/SimulationRpcSupport.kt
+eef553d48f3ae3ff602f60f92f7fd16b5af2977f app/src/main/java/dev/mwalab/security/DiagnosticSanitizer.kt
+3a9dd74448b6709c44ae9a59a24281a97abe00ff app/src/main/java/dev/mwalab/security/NetworkPolicy.kt
+2ad70c629e8d1110f093e8948abd23b6d6001650 app/src/main/java/dev/mwalab/session/MwaSession.kt
+17ef4cf528f76637c01d5596eba27a849852279c app/src/main/java/dev/mwalab/session/SessionCloseReason.kt
+302c780d0792a912df3c1c68970ad801ab5f9eca app/src/main/java/dev/mwalab/session/SessionId.kt
+4cd6e17cf2337d52a289cb9d431c85223b8b2df2 app/src/main/java/dev/mwalab/session/SessionLifecycleCoordinator.kt
+0d2bc241acd501fb5217b4cd51712e973654dc0e app/src/main/java/dev/mwalab/session/SessionRepository.kt
+b468bbee215689a3589b8406b521cbe3333f2639 app/src/main/java/dev/mwalab/session/SessionSummary.kt
+5ad1235f9050a01952e9798c416a9f3e57fe0318 app/src/main/java/dev/mwalab/signing/LabSigningService.kt
+b7cfca6711e367d31e7e797153af069761750e1b app/src/main/java/dev/mwalab/simulation/SimulationDiagnosticSettlement.kt
+1f4ca7a3c606455e32788a459f50ddc6b89985e5 app/src/main/java/dev/mwalab/simulation/SimulationDomain.kt
+b48844a3ca3ac7aae05838ae998243f45e44686f app/src/main/java/dev/mwalab/simulation/SimulationLimits.kt
+f8c2f41273617c6ab3d43f389f4ca4afdaf64da3 app/src/main/java/dev/mwalab/simulation/SimulationRepository.kt
+8484b5a7a92d39b1066477e46fce2b75d0412f15 app/src/main/java/dev/mwalab/simulation/SimulationResultParser.kt
+03f926faddaec2b6978096d390ab533586572551 app/src/main/java/dev/mwalab/simulation/TransactionSimulationCoordinator.kt
+75a72f3934c813a43e8259eb20090e00007c1e79 app/src/main/java/dev/mwalab/simulation/TransactionSimulationService.kt
+f11d5ac817862ce6ec4eef1922e865d143b9231f app/src/main/java/dev/mwalab/storage/MwaLabDatabase.kt
+dbe639ca51b6a508a06c1e2962618dc0de4cbcaf app/src/main/java/dev/mwalab/storage/RoomCapabilitySnapshotRepository.kt
+c6b9c165c02771645f26b2574ffb9ff5fdfd1823 app/src/main/java/dev/mwalab/storage/RoomSessionRepository.kt
+ffd4ae61302d4cbe816787e3927f22e47769330a app/src/main/java/dev/mwalab/storage/RoomSimulationRepository.kt
+eaa196844f19a0b1c3ddded7a49376968f094c1d app/src/main/java/dev/mwalab/storage/RoomTransactionDiagnosticRepository.kt
+6b08928552d01ed834a466c4f02406f7969c6e5c app/src/main/java/dev/mwalab/storage/SafeSummaryJson.kt
+14a48b3063e4350c3d19f5390c2a1004dbd3ec0a app/src/main/java/dev/mwalab/storage/StorageMappers.kt
+220980142d71c44d279b5f95dbe437a6b7dfb30c app/src/main/java/dev/mwalab/storage/capabilities/CapabilityListJson.kt
+255eb68b89228cf3da68c68b49ec63d82ebc2085 app/src/main/java/dev/mwalab/storage/capabilities/CapabilitySnapshotDao.kt
+64b51bd473f7c69514ef940b6bb6151f6e2ffbc4 app/src/main/java/dev/mwalab/storage/capabilities/CapabilitySnapshotEntity.kt
+9501370743ccd53983fdd9d9da414ac17befe794 app/src/main/java/dev/mwalab/storage/capabilities/CapabilitySnapshotMappers.kt
+4c524428c05a8db9978050a62d0a3c389402e05d app/src/main/java/dev/mwalab/storage/protocol/ProtocolEventDao.kt
+a96f63c922f0f08aa3f480db1c043c4573661c9f app/src/main/java/dev/mwalab/storage/protocol/ProtocolEventEntity.kt
+f4b67df3d4c863f09de60540e1e969202bea1eb4 app/src/main/java/dev/mwalab/storage/session/SessionDao.kt
+775b771a36ed7b2fb3094b83d8e6067d91eba955 app/src/main/java/dev/mwalab/storage/session/SessionEntity.kt
+3c6a2f4329929cda64715f2fb6a0a5c4c93d0f16 app/src/main/java/dev/mwalab/storage/session/SessionWithEventsRecord.kt
+7686862af44b9343ce1f3bb8fdfe67fe7b0c83f4 app/src/main/java/dev/mwalab/storage/simulation/SimulationResultDao.kt
+9cee2d0434eefbfe271f7990e94e5e7a547b3c98 app/src/main/java/dev/mwalab/storage/simulation/SimulationResultEntity.kt
+eb61b450daf862dbf5b3b30c06525204fb6ba42b app/src/main/java/dev/mwalab/storage/simulation/SimulationResultJson.kt
+c90d651962015ee70128f54f726e215d6bc8d897 app/src/main/java/dev/mwalab/storage/simulation/SimulationResultMappers.kt
+928fbb81b23a387a328bd3e9c820f3f93a87911d app/src/main/java/dev/mwalab/storage/transaction/TransactionDiagnosticDao.kt
+6d83fb8105e5bc0c09fc27ebe713d30cbb53e18f app/src/main/java/dev/mwalab/storage/transaction/TransactionDiagnosticEntity.kt
+6b7c81d2ba81743d65d1442e60075c8fc44cf4a9 app/src/main/java/dev/mwalab/storage/transaction/TransactionSummaryJson.kt
+5965c3efd10fa8ed0725f02657a6deeabee25757 app/src/main/java/dev/mwalab/transaction/AccountSummary.kt
+90b3c04aeb98c5b958d414aba583b44fe3c45a68 app/src/main/java/dev/mwalab/transaction/AddressTableLookupSummary.kt
+9563d8179a79587e7f3c237988649be884a712c5 app/src/main/java/dev/mwalab/transaction/DecodedInstruction.kt
+87f4009c8eb6b17a9ef5847d94d98132fc9d28e6 app/src/main/java/dev/mwalab/transaction/InstructionSummary.kt
+0b0935ad0aa0dfa5e6d63ea01ff7e786c3879c76 app/src/main/java/dev/mwalab/transaction/LegacyTransactionCodec.kt
+157666ee19c9a24b3bb8739cb52166e54f46386a app/src/main/java/dev/mwalab/transaction/MemoProgramDecoder.kt
+7d5ecabfd1cda6a75251c9c5df8993da1ca8238d app/src/main/java/dev/mwalab/transaction/PreApprovalTransactionInspection.kt
+a2fb38001396b711af1b742f1dcfbef607db609e app/src/main/java/dev/mwalab/transaction/ProgramDecoder.kt
+097a034e245b98de253c5806a116f09fbb338125 app/src/main/java/dev/mwalab/transaction/ProgramDecoderRegistry.kt
+0ad8146fbbd9343893003c9536e3284d5537d99d app/src/main/java/dev/mwalab/transaction/SolanaTransactionMessageDetector.kt
+1064ded2a0276a15e5319c9bc95dbdca92521f2a app/src/main/java/dev/mwalab/transaction/SolanaWireTransactionParser.kt
+1944294530d13d96198fe98008b72dfa0a24dc96 app/src/main/java/dev/mwalab/transaction/SplTokenProgramDecoder.kt
+82310e89723d46b57b9e5407c9a2eb1697c6fa64 app/src/main/java/dev/mwalab/transaction/SystemProgramDecoder.kt
+6d3acccca3b25c6d5202ac7c5a604aabfe89f40b app/src/main/java/dev/mwalab/transaction/TransactionDiagnosticMetadata.kt
+0d0fcb352699023426d26175f904fa9c0f9da6ad app/src/main/java/dev/mwalab/transaction/TransactionDiagnosticRepository.kt
+f49ca3b3f2d6d1e061a40287cdcb31d78491211d app/src/main/java/dev/mwalab/transaction/TransactionDiagnosticSettlement.kt
+2c8ff5390d846b02d240df57e8a365a475fa77f5 app/src/main/java/dev/mwalab/transaction/TransactionInspection.kt
+a714586da967f87751d310dc37d448187f2b1a1c app/src/main/java/dev/mwalab/transaction/TransactionInspectionStatus.kt
+14c04b9bb98eb7c9c2f041505963418bb4e5adaa app/src/main/java/dev/mwalab/transaction/TransactionInspector.kt
+6cb11a0157d041973f4416397304836543ef7fbb app/src/main/java/dev/mwalab/transaction/TransactionSummary.kt
+f7d4240e7b6d6f560aab1fa48328b2159c766472 app/src/main/java/dev/mwalab/transaction/TransactionVersion.kt
+8d567a7865ee4214838c276d350dba960307a163 app/src/main/java/dev/mwalab/ui/components/LabComponents.kt
+5a9e8836e739bd39f887bc2aa8b4d2cf949f48d5 app/src/main/java/dev/mwalab/ui/faults/FaultLabScreen.kt
+10c886c843b61ad9c2e4edae9b6499f42179ddd2 app/src/main/java/dev/mwalab/ui/identity/LabIdentityScreen.kt
+8b051b6e3602f6f85c2b398f5ff788c1357537bc app/src/main/java/dev/mwalab/ui/navigation/AppDestination.kt
+ae669f2ed3ae35f5a07245ee406ef93ad1ea9284 app/src/main/java/dev/mwalab/ui/navigation/LabNavigationIcon.kt
+960ed02f00b753cd3a26a90bf5b5cb0da3f53b41 app/src/main/java/dev/mwalab/ui/onboarding/OnboardingScreen.kt
+493681fbba51ba029c55e04a2413d3f152dd14cf app/src/main/java/dev/mwalab/ui/sessions/HomeScreen.kt
+25c62fa40094d76c657095a76bfce110c6f55c12 app/src/main/java/dev/mwalab/ui/sessions/HomeViewModel.kt
+ef48769ae8e26e315209c4d0641d324d066c986b app/src/main/java/dev/mwalab/ui/sessions/ReportExportUiState.kt
+7c8764517b7ce962833563744922a0d804f5e421 app/src/main/java/dev/mwalab/ui/sessions/SessionDetailScreen.kt
+194acfdd922015988af366f123e04000f4b3cea2 app/src/main/java/dev/mwalab/ui/sessions/SessionDetailViewModel.kt
+f835ea73046b53709f34964cf55621778c8e5e1e app/src/main/java/dev/mwalab/ui/sessions/SessionHeroPresentation.kt
+83f004cdab5d5d5a2974a94b210182123f937538 app/src/main/java/dev/mwalab/ui/sessions/SessionPresentation.kt
+d36b20d71c7e0d7ae6bd47f1b9480fadd0195bba app/src/main/java/dev/mwalab/ui/sessions/SessionUiState.kt
+5499abf5b84dfff2c587315694e250a70d2ace11 app/src/main/java/dev/mwalab/ui/sessions/SessionsScreen.kt
+5331523caf37c3880fb2a906c8529b5d9bbae356 app/src/main/java/dev/mwalab/ui/sessions/SessionsViewModel.kt
+eadf8d3a270c40599a235f2c925c0a4b4560cf87 app/src/main/java/dev/mwalab/ui/settings/SettingsScreen.kt
+cf961d940d141889d6029b783fbc6d445738dec2 app/src/main/java/dev/mwalab/ui/settings/UiPreferences.kt
+b28d96ecd2f4a579a0233b12b2ad46dfa8933ea9 app/src/main/java/dev/mwalab/ui/simulation/SimulationResultContent.kt
+6cb4ea8710d91e63b29dc36ae2c0abfca64a943a app/src/main/java/dev/mwalab/ui/theme/Color.kt
+e53c66d4a67ca67a290d2928e96fc6edd9fb3fbc app/src/main/java/dev/mwalab/ui/theme/Theme.kt
+c1d1e2a7453ae3eeb49083c260d7e07eb636fc0b app/src/main/java/dev/mwalab/ui/theme/Type.kt
+6e23783b33bdc80510b25815afbb55df999693fc app/src/main/java/dev/mwalab/ui/transaction/TransactionApprovalPresentation.kt
+5286bde68ae566d433c3a3edb2c63990ee90d6da app/src/main/java/dev/mwalab/ui/transaction/TransactionInspectorContent.kt
+60eba99239adf5c0834cfdb30be5b5df44e2af51 app/src/main/java/dev/mwalab/ui/transaction/TransactionPresentation.kt
+5fd691c42852cefa78aafacbb4d7af6f877684e0 app/src/main/java/dev/mwalab/wallet/AddressQrCode.kt
+a3df07e416dbac602817e5bb43949778b7eb95bf app/src/main/java/dev/mwalab/wallet/TestSolTransfer.kt
+b5165fbf1b9d893420719cf8c175a240fdbc7f23 app/src/main/java/dev/mwalab/wallet/TestWalletService.kt
+995968d68aa18486a4f02b5f21db855ba633688f app/src/main/java/dev/mwalab/wallet/TestWalletState.kt
+d7e081a5be2f222428d1c8b018566fe1136adb97 app/src/main/keepRules/rules.keep
+2b068d11462a4b96669193de13a711a3a36220a0 app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+07d5da9cbf141911847041df5d7b87f0dd5ef9d4 app/src/main/res/drawable/ic_launcher_background.xml
+6f3b755bf50c6b03d8714a9c6184705e6a08389f app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+6f3b755bf50c6b03d8714a9c6184705e6a08389f app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+c209e78ecd372343283f4157dcfd918ec5165bb3 app/src/main/res/mipmap-hdpi/ic_launcher.webp
+b2dfe3d1ba5cf3ee31b3ecc1ced89044a1f3b7a9 app/src/main/res/mipmap-hdpi/ic_launcher_round.webp
+4f0f1d64e58ba64d180ce43ee13bf9a17835fbca app/src/main/res/mipmap-mdpi/ic_launcher.webp
+62b611da081676d42f6c3f78a2c91e7bcedddedb app/src/main/res/mipmap-mdpi/ic_launcher_round.webp
+948a3070fe34c611c42c0d3ad3013a0dce358be0 app/src/main/res/mipmap-xhdpi/ic_launcher.webp
+1b9a6956b3acdc11f40ce2bb3f6efbd845cc243f app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp
+28d4b77f9f036a47549d47db79c16788749dca10 app/src/main/res/mipmap-xxhdpi/ic_launcher.webp
+9287f5083623b375139afb391af71cc533a7dd37 app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp
+aa7d6427e6fa1074b79ccd52ef67ac15c5637e85 app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp
+9126ae37cbc3587421d6889eadd1d91fbf1994d4 app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp
+f8c6127d327620c93d2b2d00342a68e97b98a48d app/src/main/res/values/colors.xml
+b79685a183ae447c3fe531f32b04c2593522d5f9 app/src/main/res/values/strings.xml
+691a5109b5ddbc38eb4f252fccdd921001b1914c app/src/main/res/values/themes.xml
+43d8120165a41ba36f22d847964dce2ed55588f3 app/src/main/res/xml/backup_rules.xml
+6068f8af8205e80907821e51b9077331034856b3 app/src/main/res/xml/data_extraction_rules.xml
+ac871c8f0b4ad4f91662eb9f054f0ed36a1da4d1 app/src/main/res/xml/diagnostic_report_paths.xml
+d68974f04851846efc3b8495f11794b15c31dc2e demo-client/src/main/AndroidManifest.xml
+9b96cc60e35efb902ce38951b850b11ff2acfa4d demo-client/src/main/java/dev/mwalab/democlient/DemoClientActivity.kt
+386baea5c846d12d07e63e3b962d6f106342bde9 demo-client/src/main/java/dev/mwalab/democlient/DemoClientRunner.kt
+a5cb5faf30e06da78008cd84e259bfcfbb5a6815 demo-client/src/main/java/dev/mwalab/democlient/DemoDevnetRpc.kt
+8178217916aec51d50989fb439556182c20bf241 demo-client/src/main/java/dev/mwalab/democlient/DemoLegacyTransactionFactory.kt
+cd75b5a379465068287472848ba275e6ead1f665 demo-client/src/main/java/dev/mwalab/democlient/Phase2AcceptanceRunner.kt
+a1fa502d48daaae6503abe3d1c0011cb6a37a9ba demo-client/src/main/java/dev/mwalab/democlient/Phase4AcceptanceRunner.kt
+22522b5faf6ae252b844b37feba21a299126b75d demo-client/src/main/java/dev/mwalab/democlient/Phase4TransactionFactory.kt
+4d5c718962ea289665d578f2617cd14e8c69fd36 demo-client/src/main/java/dev/mwalab/democlient/Phase5AcceptanceRunner.kt
+86794c27cfc81bf033b1a9778013867b43f0bf57 demo-client/src/main/java/dev/mwalab/democlient/Phase5TransactionFactory.kt
+0c0ca116745b80139eb4a33c26b5748c472c4f46 demo-client/src/main/java/dev/mwalab/democlient/Phase6AcceptanceRunner.kt
+99fc155814191cc379ea11c9bf78f64f70935932 gradle.properties
+2a665034a168c15d435c60e8725726fe43e87dfc gradle/libs.versions.toml
+04c1e45c7a081e9c1f6e67e9bd4d6237cf90b0f7 settings.gradle.kts
