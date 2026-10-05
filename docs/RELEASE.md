@@ -13,6 +13,10 @@ Current candidate: `MWA-Lab-v0.1.0-clockin-rc1-r2.apk` from app source commit
 `945295a3e0124af11a5d75a76c7444f09586339e`. The earlier RC1 APK and
 October 4 device screenshots are historical, **superseded by the later Phase 10
 RC1 revision**, not evidence for this binary.
+Current signed-RC first run and cold Local MWA passed on the dedicated API-36
+AVD. Live Devnet acceptance is waiting for user-supplied SOL to the current
+installed RC identity; see
+[`current-rc1-r2-funding-gate.md`](evidence/phase10/05-test-wallet/current-rc1-r2-funding-gate.md).
 
 Remote MWA: `BLOCKED_HIDDEN` (not released); Remote QR scanner: `OMITTED`;
 production-wallet compatibility: `NOT_VERIFIED`. No Phase 10 live Devnet
