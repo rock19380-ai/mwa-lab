@@ -113,7 +113,9 @@ require("ProtocolRecorder" not in send and "recordProtocolEvent" not in send,
 release = read("docs/RELEASE.md")
 require("Remote MWA: `BLOCKED_HIDDEN`" in release and
         "production-wallet compatibility: `NOT_VERIFIED`" in release and
-        "signed RC1: pending operator signing secret" in release,
+        "Operator-signed RC1: signature and package verified; runtime acceptance pending." in release and
+        re.search(r"APK SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1.md")) and
+        re.search(r"Signer certificate SHA-256: `[0-9a-f]{64}`", read("docs/evidence/phase10/02-build/signed-rc1.md")),
         "current release status overclaims remote or production-wallet compatibility")
 workflow = read(".github/workflows/android.yml")
 for token in (

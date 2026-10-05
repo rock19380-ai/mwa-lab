@@ -102,7 +102,7 @@ class DemoDevnetRpc {
         } catch (_: SocketTimeoutException) {
             error("Devnet RPC timed out")
         } catch (io: IOException) {
-            throw IllegalStateException("Devnet RPC I/O failure", io)
+            throw IllegalStateException("Devnet RPC I/O failure (${io::class.java.simpleName})", io)
         } finally {
             connection.disconnect()
         }

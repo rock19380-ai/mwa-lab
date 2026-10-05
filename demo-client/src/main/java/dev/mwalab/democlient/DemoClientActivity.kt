@@ -244,6 +244,10 @@ private fun phase2FailureDetail(failure: Throwable): String {
             "InvalidPayloadsException valid=${cause.validPayloads.joinToString(prefix = "[", postfix = "]")}"
         is JsonRpc20Client.JsonRpc20RemoteException ->
             "JsonRpc20RemoteException code=${cause.code}"
+        is IllegalStateException ->
+            cause.message?.takeIf {
+                it.matches(Regex("""Devnet RPC I/O failure \([A-Za-z]{1,40}Exception\)"""))
+            } ?: "IllegalStateException"
         else -> cause::class.java.simpleName
     }
 }
