@@ -35,7 +35,7 @@ not a production wallet.
 
 **Receive Test SOL QR** contains only the disposable public Devnet address for
 funding. A **Remote MWA QR** would connect a dApp to the protocol. Remote MWA
-and its scanner are not released in the current Phase 10 RC, so the QR types
+and its scanner are not released in the current signed RC2, so the QR types
 must not be interchanged.
 
 ## Phase 2 verified boundary
@@ -178,11 +178,11 @@ protocol boundary.
 ./gradlew test
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
-./scripts/phase10_static.sh
+./scripts/phase11_static.sh
 ```
 
 GitHub Actions runs deterministic non-device gates and routes the current
-Phase 10 checkout through the Phase 10 release/safety gate. Historical phase
+Phase 11 checkout through the Phase 11 hard-freeze gate. Historical phase
 gates remain preserved for their own checkouts. Connected-device and live Devnet
 evidence are recorded separately from CI buildability.
 
@@ -357,13 +357,13 @@ remain in effect.
 Production-wallet compatibility remains **NOT VERIFIED**.
 
 Phase 10 does not add a new product feature. It converts the frozen product into
-an auditable release candidate. The current signed candidate is
+an auditable release candidate. Its historical signed candidate was
 `MWA-Lab-v0.1.0-clockin-rc1-r2.apk` (`dev.mwalab`, versionCode `1`, versionName
 `0.1.0-clockin`) with APK SHA-256
 `0b17ccac5180d0bd6919f3f24c0c8a03efebebf9b42bd07f4909a2894e35bd21`.
 The release keystore remains outside Git.
 
-On a dedicated Android 16 / API 36 AVD, the signed candidate passed manual
+On a dedicated Android 16 / API 36 AVD, that signed candidate passed manual
 first-run, dApp-first cold Local MWA authorization, `SIGN_MESSAGE_APPROVE`, a
 finalized canonical Local `SIGN_AND_SEND_TRANSACTIONS`, deterministic
 `FAULT_SIGN_REJECT` sign-and-send (`ERROR_NOT_SIGNED (-3)` / `INJECTED`, no
@@ -373,7 +373,7 @@ not create MWA protocol history. Actual generated report bytes were inspected
 and retained only sanitized structured evidence. No live airdrop was invoked;
 the user manually funded the exact installed Devnet identity.
 
-Current release truth:
+Phase 10 release scope at that checkpoint:
 
 ```text
 Local MWA                       VERIFIED / SHIPPED
@@ -384,8 +384,25 @@ mainnet / testnet                UNAVAILABLE
 production-wallet compatibility NOT_VERIFIED
 ```
 
-See [Getting Started](docs/GETTING_STARTED.md), [Release](docs/RELEASE.md),
-[Compatibility](docs/COMPATIBILITY.md), [Phase 10 report](PHASE_10_REPORT.md),
-and [Phase 10 evidence](docs/evidence/phase10/). Final freeze authority is the
-exact-head GitHub Actions success plus the annotated Phase 10 tag; those are
-created only after the final candidate commit is immutable.
+Historical Phase 10 acceptance and freeze provenance remain in
+[the Phase 10 report](PHASE_10_REPORT.md) and [evidence](docs/evidence/phase10/).
+
+## Phase 11 — Hard code freeze candidate
+
+The current signed release is **RC2**: `MWA-Lab-v0.1.0-clockin-rc2.apk`
+(`dev.mwalab`, versionCode `1`, versionName `0.1.0-clockin`). Its SHA-256 is
+`5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc`.
+Protected production source is unchanged from Phase 10.
+
+On Android 16/API 36, the exact signed RC2 passed clean first run, cold
+dApp-first Local MWA, funded memo-only signing/submission, deterministic
+`FAULT_SIGN_REJECT` with `ERROR_NOT_SIGNED (-3)` and `INJECTED` provenance,
+Test Wallet Receive/Send, sanitized report export, and a bounded runtime log
+audit. The final fault is NORMAL. The Test Wallet is disposable Devnet testing
+infrastructure; simulation is evidence, not a guarantee. Production-wallet
+compatibility remains **NOT VERIFIED**.
+
+See [Release](docs/RELEASE.md), [Compatibility](docs/COMPATIBILITY.md),
+[Phase 11 report](PHASE_11_REPORT.md), and [Phase 11 evidence](docs/evidence/phase11/).
+Final exact-head CI and the annotated freeze tag are authenticated externally
+after the closeout commit.

@@ -10,7 +10,7 @@ GitHub Actions runs deterministic, non-device gates:
 ./gradlew assembleDebug
 ./gradlew :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ./scripts/phase1_static.sh
-./scripts/phase4_static.sh
+./scripts/phase11_static.sh
 ```
 
 The workflow retains Gradle wrapper validation and verifies both primary and
@@ -421,7 +421,7 @@ allowlist removed that environment block without changing the HTTPS RPC endpoint
 TLS, wallet code, or protocol authority. The prior one-off Demo Client ANR did not
 reproduce on the dedicated RC AVD.
 
-Final Phase 10 freeze still requires the final candidate commit to pass:
+The historical Phase 10 final candidate was gated by:
 
 ```bash
 ./scripts/phase10_static.sh
@@ -429,5 +429,27 @@ Final Phase 10 freeze still requires the final candidate commit to pass:
   :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
 ```
 
-plus clean-checkout verification and GitHub Actions success for the exact final
-HEAD before the annotated Phase 10 tag is created.
+plus clean-checkout verification and exact-head GitHub Actions success before
+the annotated Phase 10 predecessor tag was created.
+
+
+## Phase 11 signed-RC2 and hard-freeze verification
+
+The Phase 11 gate runs the still-applicable Phase 10 gate, six Phase 11 policy
+tests, and the protected-source/release-scope checks. The signed RC2 is an
+external operator artifact; `assembleRelease` in CI verifies unsigned release
+buildability and does not recreate its signature.
+
+```bash
+./scripts/phase11_static.sh
+./gradlew lint test assembleDebug assembleRelease \
+  :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest
+```
+
+Exact RC2 runtime evidence includes clean first run, cold dApp-first Local MWA,
+funded normal memo signing/submission, injected rejection, final NORMAL, Test
+Wallet Receive/Send, report-byte audit, and the final bounded logcat rerun.
+Historical Phase 10 device evidence stays historical. See
+[Phase 11 evidence](evidence/phase11/) for the tested device, artifact digest,
+observed outcomes and limitations. An exact-head local gate and clean remote
+clone verify the closeout candidate separately from the runtime acceptance.

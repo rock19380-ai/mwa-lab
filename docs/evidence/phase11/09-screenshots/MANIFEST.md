@@ -21,4 +21,4 @@ All 16 rows: signed APK SHA-256 `5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998
 | `09-receive-test-sol.png` | F | `0ecdfb1ae60dabc9a61098b2f84fdd6031693459437572ba636a462cfd029171` | Current address QR; pixels independently decoded to public address only |
 | `10-send-test-sol-review.png` | F | `5231b569217ae04d83745e05a8760b3f380d374b758f0bb19baffd0ab7ba42d4` | One-lamport direct-send review, Devnet |
 
-No screenshot implies Remote MWA ships. See `../06-test-wallet/receive.md` for independent QR pixel-decode result and `../08-security-privacy/secret-audit.md` for remaining funded-workflow logcat coverage limits.
+No screenshot implies Remote MWA ships. See `../06-test-wallet/receive.md` for independent QR pixel-decode result and `../08-security-privacy/secret-audit.md` for the historical partial scans, and `../08-security-privacy/final-bounded-logcat-audit-2026-10-06.md` for the final targeted PASS.

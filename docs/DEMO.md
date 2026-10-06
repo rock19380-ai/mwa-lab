@@ -89,3 +89,20 @@ device/emulator. Remote MWA is not part of this demo.
 Release evidence also proves one finalized direct 1-lamport Test Wallet Send did
 not create MWA protocol history. No production-wallet compatibility claim follows
 from the Demo Client.
+
+
+## Phase 11 RC2 competition candidate
+
+Use the exact signed RC2 and the internal Demo Client on one Android device.
+The target is a 90–120 second silent recording with large English captions.
+Show Home, Local MWA authorization, the persisted successful memo-only
+sign-and-send timeline, one `FAULT_SIGN_REJECT` rerun with
+`ERROR_NOT_SIGNED (-3)` / `INJECTED`, a sanitized report share sheet, and a
+brief disposable Test Wallet balance/Receive Test SOL shot. Restore NORMAL.
+End with “Make Mobile Wallet Adapter failures visible, reproducible, and
+fixable.” Remote MWA, mainnet and production-wallet compatibility are not
+presented as shipped or verified. Use existing signed-RC2 transaction evidence;
+no new Devnet transfer is needed for visual drama.
+
+Raw exact-RC2 screen recordings, the selected screenshots, storyboard and
+assembly instructions are under [Phase 11 demo evidence](evidence/phase11/10-demo/).

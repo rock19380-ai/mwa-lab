@@ -215,7 +215,7 @@ Supported deterministic profiles reproduce the pinned walletlib 2.0.7 error fami
 | mainnet | unavailable |
 | production-wallet compatibility | requires independent verification |
 
-## Phase 9/10 current release support matrix
+## Phase 9/10 historical release support matrix
 
 | Capability | Current release state |
 |---|---|
@@ -238,3 +238,8 @@ Phase 10 signed-RC acceptance finalized one Local MWA memo sign-and-send and one
 1-lamport direct Test Wallet transfer on Devnet. `FAULT_SIGN_REJECT` returned
 `ERROR_NOT_SIGNED (-3)` / `INJECTED` without submission and the final persisted
 fault selection was restored to `NORMAL`.
+
+Phase 11 signed RC2 preserved this support matrix and independently reverified
+Local MWA, injected signing rejection, Devnet Test Wallet and sanitized reports.
+See [Phase 11 acceptance](evidence/phase11/rc2-runtime-2026-10-05.md) and
+[compatibility](evidence/phase11/12-compatibility/final-matrix.md).

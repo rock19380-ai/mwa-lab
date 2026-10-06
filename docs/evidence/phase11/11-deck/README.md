@@ -1,3 +1,1 @@
-# Deck
-
-Awaiting claims and artifact alignment review for the Phase 11 candidate.
+# Phase 11 deck\n\nSeven-slide evidence-backed candidate content: `candidate-content.md`. A rendered deck is Phase 12 packaging work.\n

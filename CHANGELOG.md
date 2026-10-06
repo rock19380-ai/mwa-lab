@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Phase 11 — Hard code freeze candidate
+
+- Preserved the Phase 10 protected production source, external release signer,
+  fixed Devnet authority and shipped Local MWA scope; no P0/P1 production
+  repair or feature addition.
+- Verified signed RC2 `MWA-Lab-v0.1.0-clockin-rc2.apk` (SHA-256
+  `5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc`)
+  with clean first run, cold dApp-first and funded Local MWA, deterministic
+  injected rejection, disposable Test Wallet, report-byte audit and bounded
+  runtime logcat audit.
+- Prepared final screenshot, demo, deck, compatibility and clean-clone
+  submission evidence. Exact-head CI/tag provenance is established after the
+  closeout commit and recorded in the external freeze receipt.
+
 ### Phase 10 — Release Candidate + Compatibility Evidence
 
 - Locked release identity to `dev.mwalab` / versionCode `1` / versionName

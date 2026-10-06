@@ -1,3 +1,1 @@
-# Demo
-
-Awaiting a recorded RC2 run-through with explicit Devnet and compatibility limitations.
+# Phase 11 demo\n\nSee `candidate.md` for three exact-RC2 raw MP4 assets and their hashes, `storyboard.md` for the 114-second edit plan, and `recording-checklist.md` for remaining edit/export checks. The architecture diagram and curated public-asset list are in this directory. No finished edited video is claimed.\n

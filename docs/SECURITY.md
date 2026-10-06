@@ -350,7 +350,7 @@ release keystore is external to Git and passwords are environment-only; partial
 signing configuration fails closed. The signed RC verifies with one expected
 certificate, while CI carries no private signing material.
 
-Current RC1-r2 keeps INTERNET, intentionally exported Local MWA association, and
+Phase 10 RC1-r2 kept INTERNET, intentionally exported Local MWA association, and
 a non-exported diagnostic FileProvider with temporary read grants. CAMERA is
 absent, no Remote scanner/control ships, Remote MWA remains blocked/not released,
 and mainnet/testnet remain unavailable.
@@ -366,3 +366,18 @@ The direct Test Wallet send uses preflight and confirmed commitment, never
 auto-retries ambiguous post-submission state as success, and now has focused unit
 coverage proving identity changes after review fail before signing/submission and
 preparation RPC failure never reaches signing/submission.
+
+
+## Phase 11 signed-RC2 security result
+
+Exact signed RC2 SHA-256
+`5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc`
+preserves the Phase 10 protected production source and signer. Four actual
+normal/injected Markdown/JSON report files were inspected and pattern-scanned.
+The October 6 cleared `main`/`system` logcat window additionally covered
+memo signing/submission, `FAULT_SIGN_REJECT`, report share generation and one
+minimal direct Test Wallet send. No raw credential or sensitive payload value
+was found in that bounded review. Walletlib printed received public handshake
+keys and auth-record public metadata at verbose level; these are classified in
+[the bounded audit](evidence/phase11/08-security-privacy/final-bounded-logcat-audit-2026-10-06.md).
+The conclusion is limited to those observed files, buffers, actions and device.
