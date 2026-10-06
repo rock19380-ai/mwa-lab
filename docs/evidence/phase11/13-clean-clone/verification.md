@@ -30,10 +30,32 @@ This verifies a fresh repository checkout/build, **not** fresh-network Gradle
 dependency retrieval or release signing. Existing compiler deprecation and
 prebuilt native-strip warnings were non-blocking.
 
-The public README/current-release pointer corrections and the final
-documentation evidence in this closeout are later **documentation-only**
-changes. This checkpoint establishes remote-clone product-source
-reproducibility. The final exact-head branch clone/update, current docs
-reference check, and gates must be rechecked after the closeout commit; their
-final SHA and result are recorded by the post-commit exact-head gate/receipt,
-not imputed to this earlier checkpoint.
+## Current documentation candidate remote clone
+
+After the documentation/evidence candidate `097a3b0ba02cb9dc06d617b29df201453c1bcfed`
+was pushed, a second fresh clone was made from the same GitHub branch at
+`/tmp/mwa-lab-phase11-final-fast-clone-2026-10-06`. To avoid repeating a slow
+download, `git clone` used the main working tree as an object cache with
+`--reference-if-able` and `--dissociate`; its resulting object store has **no
+alternate** pointer to the main working tree. The clone's `origin` is the
+GitHub repository, `HEAD` and the independently queried remote branch both
+resolved to `097a3b0ba02cb9dc06d617b29df201453c1bcfed`, and the checkout
+was clean with no `local.properties` or build outputs before the run.
+
+| Check at cloned `097a3b0` | Observed result |
+| --- | --- |
+| Phase 11 static gate and Phase 0–11 shell syntax | **PASS** |
+| Current README, changelog, release, demo, compatibility, testing, Phase 11 report, demo candidate and deck candidate relative links | **PASS**: 9 files checked, 0 missing relative links |
+| `./gradlew lint test assembleDebug assembleRelease :app:assembleDebugAndroidTest :demo-client:assembleDebugAndroidTest --console=plain` | **PASS**, `BUILD SUCCESSFUL in 4m 22s`; 254 actionable tasks, **254 executed** |
+| Build outputs | app and Demo Client debug, app unsigned release, and both debug AndroidTest APKs present |
+| Worktree/untracked source | clean after build; `git ls-files --others --exclude-standard` empty |
+| Signed RC2 external check | SHA-256 still `5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc`; `apksigner` verified the expected certificate; `aapt` confirmed `dev.mwalab` 1/`0.1.0-clockin` |
+
+The original remote clone above supplies the on-device Local MWA/report smoke;
+the second clone rechecks the later current-release documentation and clean
+buildability. Both used the existing Android SDK and Gradle dependency cache;
+neither demonstrates fresh-network dependency resolution. The only next
+repository change is this evidence correction. It creates a new candidate
+HEAD, so all mandatory exact-head local gates, remote SHA matching, and CI
+must be repeated for that final SHA before tagging. The CI/tag identifiers
+are intentionally kept in the external post-tag receipt.

@@ -138,10 +138,13 @@ baseline passed. A genuine fresh GitHub clone at starting checkpoint
 `b0b075101c2f06e3e3c48c66e33ef436bc9b3bbb` passed Phase 11 static and
 the full Gradle matrix with **254/254 tasks executed** and a clean worktree.
 The clone-built Demo Client completed a minimal canonical Local MWA PASS and
-a sanitized report Share Sheet against the unchanged signed RC2. No
-untracked source, local server or signing secret was needed. This proves the
-production-source checkpoint; current release documentation is being
-corrected in this closeout commit and must receive exact-head validation.
+a sanitized report Share Sheet against the unchanged signed RC2. A second
+independent GitHub clone at pushed documentation candidate
+`097a3b0ba02cb9dc06d617b29df201453c1bcfed` passed the Phase 11 static
+gate, current-release link checks and the full Gradle matrix (254/254 tasks
+executed); its checkout remained clean. No untracked source, local server or
+signing secret was needed. This final evidence correction follows that clone
+and therefore requires a new exact-head gate/CI run before the tag.
 `docs/evidence/phase11/13-clean-clone/verification.md`.
 
 The final closeout commit must then pass Phase 11 and predecessor static gates,

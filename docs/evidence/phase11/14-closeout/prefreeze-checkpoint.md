@@ -41,8 +41,11 @@ Branch `phase11-hard-code-freeze` entered this batch at
 - Fresh remote clone at `b0b0751` passed Phase 11 static and full
   `lint test assembleDebug assembleRelease` plus both AndroidTest APK
   assemblies (254 executed tasks). Clone-built Demo Client completed a
-  minimal canonical Local MWA/report smoke against signed RC2. No untracked
-  source, signing material or local server was needed.
+  minimal canonical Local MWA/report smoke against signed RC2. A second
+  independent GitHub clone at pushed docs candidate `097a3b0` passed the
+  same full build matrix (254 executed tasks), current-release link checks,
+  and clean-worktree/untracked-source checks. No signing material or local
+  server was needed.
 
 ## Provenance still to establish after this committed checkpoint
 
@@ -50,6 +53,7 @@ Commit this documentation/evidence closeout; run all local gates on that exact
 HEAD; push and compare local/remote SHA; require completed/successful GitHub
 Actions with matching `headSha`; only then create/push the annotated
 `phase11-hard-code-freeze-2026-10-06` tag at that same SHA. Record the final
-run/tag/receipt outside the tagged commit. A final remote-clone update of the
-committed documentation candidate must verify README/current links and no
-untracked source requirement. **Do not tag if known P0 or P1 becomes nonzero.**
+run/tag/receipt outside the tagged commit. The current documentation
+candidate was verified in a second clean GitHub clone. This final evidence
+correction must receive exact-head local gates and CI. **Do not tag if known P0 or P1 becomes
+nonzero.**
