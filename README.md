@@ -168,6 +168,8 @@ This release intentionally does **not** claim:
 - seed phrase import;
 - private-key import.
 
+Production-wallet compatibility remains **NOT VERIFIED**.
+
 The current verified scope is same-device **Local MWA on Solana Devnet** using
 the signed RC2 candidate.
 
@@ -325,6 +327,13 @@ PHASE_11_REPORT.md  hard code freeze
 
 Historical evidence is intentionally preserved rather than rewritten to match
 the final judge-facing narrative.
+
+## Phase 10 — Signed release candidate + compatibility evidence
+
+Historical Phase 10 release-candidate provenance is retained for the frozen
+static/CI chain. The RC1-r2 candidate is superseded by the current RC2 and is
+not the current competition artifact. See `PHASE_10_REPORT.md` and
+`docs/evidence/phase10/` for that historical checkpoint.
 
 ## License
 

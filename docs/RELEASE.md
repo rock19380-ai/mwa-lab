@@ -40,14 +40,14 @@ hard-frozen production source.
 ## Release scope
 
 ```text
-Local MWA                       VERIFIED / SHIPPED
-Remote MWA                      BLOCKED_HIDDEN / NOT RELEASED
-Remote QR scanner               OMITTED
+Local MWA:                       VERIFIED / SHIPPED
+Remote MWA:                      BLOCKED_HIDDEN / NOT RELEASED
+Remote QR scanner:               OMITTED
 CAMERA permission               ABSENT
-Mainnet / testnet               UNAVAILABLE / REJECTED
-Production-wallet compatibility NOT VERIFIED
-Versioned-v0 signing            NOT SUPPORTED
-Identity Reset UI               NOT SHIPPED
+Mainnet/testnet:                  UNAVAILABLE / REJECTED
+Production-wallet compatibility: NOT_VERIFIED
+Versioned-v0 signing:             NOT SUPPORTED
+Identity Reset UI:                NOT SHIPPED
 ```
 
 The Demo Client is deterministic test infrastructure. It does not establish
@@ -122,5 +122,11 @@ file        MWA-Lab-v0.1.0-clockin-rc1-r2.apk
 SHA-256     0b17ccac5180d0bd6919f3f24c0c8a03efebebf9b42bd07f4909a2894e35bd21
 status      historical / superseded
 ```
+
+Current signed RC1 revision 2 runtime acceptance: `PASS`.
+
+Historical Phase 10 acceptance included canonical Local MWA `SIGN_AND_SEND_TRANSACTIONS`: `PASS`
+and direct **Send Test SOL**: `PASS`. These statements describe the superseded
+RC1-r2 checkpoint, not the current RC2 candidate.
 
 Historical Phase 10 evidence remains under `docs/evidence/phase10/`.
