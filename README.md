@@ -2,176 +2,295 @@
 
 **The on-device protocol debugger and deterministic failure simulator for Solana Mobile Wallet Adapter.**
 
-Trace protocol sessions.
-Reproduce wallet failure paths.
-Inspect signing/submission behavior.
-Share sanitized diagnostic reports.
+Trace protocol sessions. Reproduce wallet failure paths. Inspect transaction
+behavior. Export sanitized evidence.
 
-> ⚠️ DEVNET-ONLY LAB TOOL — NEVER USE REAL FUNDS.
+> ⚠️ **DEVNET-ONLY LAB TOOL — NEVER USE REAL FUNDS.**
 
-## What MWA Lab is
+## Why MWA Lab
 
-**Devnet** defines which Solana network a transaction is tested on.
+Solana Devnet tells a developer **where** a transaction runs. It does not explain
+what happened across the **Mobile Wallet Adapter (MWA)** boundary between a dApp
+and a wallet endpoint.
 
-**Mobile Wallet Adapter (MWA)** defines how an Android dApp and wallet endpoint
-discover each other, establish a session, authorize, negotiate capabilities,
-request signing/submission, fail, and return protocol results.
+MWA Lab makes that boundary visible and reproducible:
 
-MWA Lab is a developer-facing MWA endpoint built to make that protocol boundary
-visible and reproducible. It is not a production wallet and is not a replacement
-for Phantom, Solflare, Seed Vault Wallet, or another production wallet.
+```text
+Android dApp
+   ↓
+Local MWA association
+   ↓
+authorize / capabilities / signing / submission
+   ↓
+MWA Lab protocol timeline + transaction diagnostics
+   ↓
+deterministic fault injection
+   ↓
+sanitized report
+```
+
+Use MWA Lab to answer questions such as:
+
+- Did the dApp actually reach a wallet-side MWA session?
+- Which request failed?
+- Was the failure observed or intentionally injected?
+- Did the app handle `ERROR_NOT_SIGNED` correctly?
+- What transaction metadata and simulation evidence were available?
+- Can the failure be reproduced and shared without exporting secrets?
+
+MWA Lab is **not** a production wallet and does not replace Phantom, Solflare,
+Seed Vault Wallet, or another production wallet.
 
 ## Start in 30 seconds
 
-1. Install MWA Lab and an MWA-enabled Android dApp on the same device.
-2. Open the dApp and tap **Connect Wallet**.
-3. Choose **MWA Lab** if Android asks.
-4. Review and approve the Devnet test connection.
-5. Run the dApp action, then open MWA Lab to inspect its protocol trace.
+Same Android device:
 
-The dApp starts the Local MWA association; there is no server to start or
-ordinary website URL to paste. The separate MWA Lab Demo Client is a test dApp,
-not a production wallet.
+1. Install MWA Lab.
+2. Open an MWA-enabled Solana Android dApp.
+3. Tap **Connect Wallet**.
+4. Choose **MWA Lab** if Android asks.
+5. Review and approve the Devnet test connection.
+6. Run the dApp action, then open MWA Lab to inspect the wallet-side protocol trace.
 
-**Receive Test SOL QR** contains only the disposable public Devnet address for
-funding. A **Remote MWA QR** would connect a dApp to the protocol. Remote MWA
-and its scanner are not released in the current signed RC2, so the QR types
-must not be interchanged.
+You do **not** need to open MWA Lab first. The dApp initiates the Local MWA
+association.
 
-## Phase 2 verified boundary
+The included `:demo-client` module is deterministic test infrastructure and is
+labeled **MWA Lab Demo Client — FOR TESTING ONLY**.
 
-Phase 2 extends the frozen Phase 1 association/authorization foundation and is
-verified against pinned `mobile-wallet-adapter-walletlib:2.0.7` /
-`clientlib:2.0.7`.
+## The core workflow
 
-Verified behavior includes:
+### 1. Trace a normal Local MWA session
 
-- real cross-package `solana-wallet://` discovery and local association;
-- persistent protected Devnet Lab identity;
-- first authorization and valid cross-session reauthorization;
-- `get_capabilities`;
-- deauthorization plus rejected revoked authorization/token reuse;
-- explicit user approval for signing;
-- bounded `sign_messages` with Ed25519 signatures;
-- bounded legacy `sign_transactions`;
-- legacy transaction parsing/signature-slot patching with immutable approval binding;
-- fixed Solana Devnet RPC authority;
-- `sign_and_send_transactions` submission and commitment handling;
-- defined rejection/error mappings including `ERROR_NOT_SIGNED`,
-  `ERROR_AUTHORIZATION_FAILED`, invalid payload/too-many-payload responses, and
-  `ERROR_NOT_SUBMITTED`;
-- deterministic hostile RPC/submission/lifecycle tests;
-- sanitized structured protocol evidence.
+Run the same-device dApp flow and inspect the persisted timeline for supported
+MWA requests, timing, outcomes, protocol errors, and sanitized summaries.
 
-The deterministic test client lives in `:demo-client` and is explicitly labeled:
+### 2. Break the same flow intentionally
 
-```text
-MWA Lab Demo Client
-FOR TESTING ONLY
-```
+Open **Fault Lab**, select a deterministic scenario such as
+`FAULT_SIGN_REJECT`, and repeat the same dApp action.
 
-Phase 2 live acceptance exercised both:
+MWA Lab keeps the injected condition separate from the terminal protocol result,
+so an intentional failure cannot be mistaken for an organically observed one.
 
-```text
-dApp
-→ MWA Lab
-→ authorize / reauthorize
-→ approve
-→ sign
-→ Devnet result
-```
+### 3. Inspect transaction evidence
 
-and:
+For supported legacy transactions, inspect bounded structured metadata,
+recognized instructions, signer/account roles, simulation evidence, and
+submission/confirmation behavior.
+
+Simulation is diagnostic evidence only. A simulation PASS is not a submission
+guarantee.
+
+### 4. Export a sanitized report
+
+Session Detail can produce deterministic Markdown, JSON, and clipboard-summary
+views built from persisted structured evidence.
+
+Secrets, raw authorization tokens, raw association tokens, private keys, seeds,
+mnemonics, and raw transaction/message payloads are outside the report contract.
+
+## What ships in `0.1.0-clockin`
 
 ```text
-dApp
-→ MWA Lab
-→ deliberate user rejection
-→ defined MWA error
+Local MWA                       VERIFIED / SHIPPED
+Devnet-only authorization       SHIPPED
+Explicit authorization consent  SHIPPED
+Signing approval                SHIPPED
+Persistent protocol timeline    SHIPPED
+Transaction diagnostics         SHIPPED
+Legacy simulation diagnostics   SHIPPED
+Deterministic Fault Lab         SHIPPED
+Sanitized report export         SHIPPED
+Receive Test SOL                SHIPPED
+Send Test SOL                   SHIPPED
+Request Devnet SOL              SHIPPED
+Remote MWA                      NOT RELEASED
+Remote QR scanner               OMITTED
+CAMERA permission               ABSENT
+Mainnet / testnet               UNAVAILABLE / REJECTED
+Production-wallet compatibility NOT VERIFIED
+Identity Reset UI               NOT SHIPPED
 ```
 
-## Current Phase 2 capability envelope
+The current signed competition candidate is **RC2**:
 
 ```text
-network                         Solana Devnet only
-max signing payloads/request    10
-message signing                 supported with explicit approval
-transaction signing             legacy transactions only
-max transaction wire size       1232 bytes
-sign_and_send                    Devnet only
-RPC endpoint                     https://api.devnet.solana.com
-SIWS                             not advertised
-versioned transactions           rejected in Phase 2
-mainnet / testnet                rejected
+file          MWA-Lab-v0.1.0-clockin-rc2.apk
+applicationId dev.mwalab
+versionCode   1
+versionName   0.1.0-clockin
+APK SHA-256   5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc
+network       Solana Devnet only
 ```
 
-Pinned walletlib 2.0.7 requires `sign_transactions` to be advertised as an
-optional feature for that method to be callable; Phase 2 advertises exactly that
-verified feature and no SIWS feature.
+See [Release](docs/RELEASE.md) and [Compatibility](docs/COMPATIBILITY.md).
 
-## Phase 3 persistent debugger
+## Test Wallet: support infrastructure, not the product
 
-Home, Sessions, and Session Detail read structured Room history through
-repository Flows and ViewModels. Inspect request-start sequence, timestamps,
-duration, outcomes, protocol error numbers/names, failure sources, and bounded
-sanitized request/response summaries. Successful and failed sessions remain
-available after app restart. Open rows mean recorded-open history with unknown
-connection liveness.
+The disposable Test Wallet exists so a developer can exercise protocol and
+transaction QA without importing a production wallet identity.
 
-The persistent recorder covers actual host callbacks for AUTHORIZE, REAUTHORIZE,
-DEAUTHORIZE, SIGN_MESSAGES, SIGN_TRANSACTIONS, and SIGN_AND_SEND_TRANSACTIONS.
-GET_CAPABILITIES is **NOT OBSERVABLE THROUGH PINNED WALLETLIB**; configured
-capabilities never create an event. Compatibility evidence stores remain only
-for predecessor tests.
+It supports:
 
-See [PHASE_3_REPORT.md](PHASE_3_REPORT.md) and
-[Phase 3 evidence](docs/evidence/phase3/) for executed acceptance and freeze
-provenance.
+```text
+COPY ADDRESS
+RECEIVE TEST SOL
+REQUEST DEVNET SOL
+SEND TEST SOL
+```
 
-## Phase 4 capability and transaction diagnostics
+The Receive QR encodes **only the disposable public Devnet address**. It is
+explicitly **not an MWA connection QR**.
 
-Phase 4 adds session-scoped configured capability snapshots and a read-only
-transaction diagnostic layer without changing the frozen signing/authorization
-authorities. `MwaCapabilityProfile` remains the capability source of truth;
-walletlib 2.0.7 still handles `get_capabilities` internally, so MWA Lab does not
-fabricate a `GET_CAPABILITIES` timeline event.
+Direct Test Wallet actions are not fabricated as dApp→MWA protocol events.
+They remain outside the protocol-session history.
 
-For transaction signing requests, MWA Lab now records sanitized structured
-diagnostics including transaction version, fee payer, signer/account privileges,
-recent blockhash, program IDs, bounded instruction metadata, SHA-256 fingerprints,
-and the verified decoder subset. The current decoder scope is System Program
-Transfer, bounded Memo display, and the narrow SPL Token Transfer /
-TransferChecked subset. Unknown semantics remain explicitly unknown.
+Phase 12 final QA independently verified a finalized direct Devnet transfer:
 
-Versioned v0 transactions are detected and represented as partial diagnostics
-when lookup-table addresses are unresolved. This does **not** expand the signing
-contract: `LegacyTransactionCodec` remains legacy-only signing authority and v0
-signing remains rejected. Raw transaction payloads and raw unknown instruction
-bytes are not persisted.
+```text
+amount       0.001 SOL
+fee          0.000005 SOL
+status       finalized
+mainnet path none
+```
 
-Phase 4 device acceptance exercised System Transfer, Unknown Program, and v0
-authoritative rejection through the real cross-package path, then verified all
-four diagnostic tables across force-stop/restart. See
-[PHASE_4_REPORT.md](PHASE_4_REPORT.md) and
-[Phase 4 evidence](docs/evidence/phase4/). At that Phase 4 checkpoint,
-simulation was still Phase 5 work. Fault injection and report export were
-outside that historical Phase 4 checkpoint.
+## Release truthfulness
 
-## Historical Phase 2 exclusions
+This release intentionally does **not** claim:
 
-Phase 2 does **not** include the Phase 3 product recorder/timeline:
+- Remote MWA support;
+- a camera-based Remote MWA scanner;
+- mainnet or testnet operation;
+- production-wallet compatibility;
+- versioned-v0 signing;
+- production custody;
+- seed phrase import;
+- private-key import.
 
-- no Room/SQLite session history;
-- no restart-surviving protocol timeline;
-- no full diagnostic report export bundle;
-- no deterministic fault engine;
-- no production-wallet secret import;
-- no mainnet signing/submission.
+The current verified scope is same-device **Local MWA on Solana Devnet** using
+the signed RC2 candidate.
 
-Those later product layers must extend, not weaken, the verified Phase 2
-protocol boundary.
+## Developer value
 
-## Build and deterministic verification
+MWA Lab is built for a recurring pre-release QA loop:
+
+```text
+connect
+→ observe
+→ inject a failure
+→ reproduce
+→ inspect
+→ export evidence
+→ fix the dApp
+→ rerun
+```
+
+That loop is the product. The disposable Test Wallet, Demo Client, transaction
+inspector, and report exporter exist to support it.
+
+## Architecture
+
+```text
+:app
+├── Android / Jetpack Compose UI
+├── wallet-side MWA host
+├── authorization + signing approval boundaries
+├── protected disposable Devnet identity
+├── fixed Solana Devnet RPC boundary
+├── persistent Room protocol evidence
+├── transaction diagnostics + simulation
+├── deterministic fault engine
+└── sanitized report renderer/export
+
+:demo-client
+└── deterministic cross-package MWA test dApp
+```
+
+Pinned MWA dependencies:
+
+```text
+mobile-wallet-adapter-walletlib  2.0.7
+clientlib                        2.0.7
+```
+
+The production `:app` uses walletlib. Clientlib is used by the demo/test
+boundary, not as application signing authority.
+
+See [Architecture](docs/ARCHITECTURE.md) and
+[Protocol Support](docs/PROTOCOL_SUPPORT.md).
+
+## Security model
+
+MWA Lab must never:
+
+- enable mainnet signing/submission;
+- import production wallet secrets;
+- expose private keys, seeds, mnemonics, raw auth tokens, association tokens,
+  raw transaction/message payloads, or raw signature material in diagnostics;
+- sign without the required authorization and approval boundaries;
+- present synthetic/injected failures as organically observed failures.
+
+The stable release keystore remains outside Git.
+
+See [Security](docs/SECURITY.md).
+
+## Verification
+
+The release is backed by deterministic JVM/static/CI gates plus connected-device
+and live Devnet acceptance evidence.
+
+Current hard-freeze authority:
+
+```text
+tag   phase11-hard-code-freeze-2026-10-06
+HEAD  fabf28f92b1e3c3a46a2d2a5be1fe642395b0c24
+CI    37411435425 — success
+```
+
+Phase 12 final QA additionally verified:
+
+- exact signed RC2 install identity;
+- manual first launch;
+- dApp-first cold Local MWA launch;
+- NORMAL Local MWA success;
+- deterministic `FAULT_SIGN_REJECT` with `ERROR_NOT_SIGNED (-3)`;
+- sanitized report sharing;
+- Receive QR purpose and exact address payload;
+- finalized Devnet `Send Test SOL`;
+- protected production source unchanged from the hard freeze.
+
+See [Testing](docs/TESTING.md), [Phase 11 evidence](docs/evidence/phase11/), and
+the phase reports/evidence directories for detailed provenance.
+
+## Demo
+
+The canonical competition story is intentionally short:
+
+```text
+Devnet tests the chain. MWA Lab tests the wallet protocol.
+
+normal Local MWA flow
+→ persisted trace
+→ FAULT_SIGN_REJECT
+→ ERROR_NOT_SIGNED / INJECTED
+→ sanitized report
+→ brief Test Wallet utility
+```
+
+See [Demo](docs/DEMO.md) for the recording sequence.
+
+## Competition
+
+MWA Lab was built for **CLOCK IN — Solana Mobile Hackathon 2026**.
+
+The competition build stays deliberately narrow: Android, Kotlin, Jetpack
+Compose, Solana Devnet, Local MWA protocol QA, deterministic faults, diagnostics,
+and evidence export.
+
+See [Competition](docs/COMPETITION.md).
+
+## Build
 
 ```bash
 ./gradlew lint
@@ -181,228 +300,32 @@ protocol boundary.
 ./scripts/phase11_static.sh
 ```
 
-GitHub Actions runs deterministic non-device gates and routes the current
-Phase 11 checkout through the Phase 11 hard-freeze gate. Historical phase
-gates remain preserved for their own checkouts. Connected-device and live Devnet
-evidence are recorded separately from CI buildability.
+The signed competition APK is an operator artifact. CI verifies deterministic
+buildability and freeze invariants; connected-device/live-network evidence is
+recorded separately.
 
-## Modules
+## Engineering history
+
+The phase reports remain in the repository as implementation and verification
+provenance:
 
 ```text
-:app          MWA Lab wallet-side protocol endpoint
-:demo-client  deterministic cross-package test client
+PHASE_1_REPORT.md   wallet-side MWA boundary
+PHASE_2_REPORT.md   signing/submission hardening
+PHASE_3_REPORT.md   persistent protocol debugger
+PHASE_4_REPORT.md   capability + transaction diagnostics
+PHASE_5_REPORT.md   simulation diagnostics
+PHASE_6_REPORT.md   deterministic fault engine
+PHASE_7_REPORT.md   sanitized diagnostic reports
+PHASE_8_REPORT.md   UX + positioning
+PHASE_9_REPORT.md   first-run + Test Wallet + Local MWA acceptance
+PHASE_10_REPORT.md  release candidate + compatibility evidence
+PHASE_11_REPORT.md  hard code freeze
 ```
 
-The production `:app` uses walletlib; clientlib is used by the demo/test
-boundary, not as application signing authority.
-
-## Safety invariants
-
-MWA Lab must never:
-
-- enable mainnet signing/submission;
-- import production wallet secrets;
-- expose private keys, seeds, mnemonics, raw auth tokens, association tokens,
-  raw transaction/message payloads, or raw signature material in diagnostics;
-- sign without active authorization plus explicit approval;
-- present synthetic/injected failures as organically observed wallet failures.
-
-## Phase 2 report and evidence
-
-See:
-
-- `PHASE_2_REPORT.md`
-- `docs/PROTOCOL_SUPPORT.md`
-- `docs/ARCHITECTURE.md`
-- `docs/SECURITY.md`
-- `docs/TESTING.md`
-- `docs/evidence/phase2/`
-
-Final freeze commit/tag/remote-CI identity is recorded by the Phase 2 final
-closeout/freeze evidence rather than self-referenced inside this report.
+Historical evidence is intentionally preserved rather than rewritten to match
+the final judge-facing narrative.
 
 ## License
 
 Apache-2.0.
-
-## Phase 5 simulation diagnostics
-
-Phase 5 adds **user-triggered Solana Devnet simulation for supported legacy
-transactions** before signing. The simulator uses the existing fixed Devnet RPC
-boundary with `simulateTransaction`, `encoding=base64`, `sigVerify=false`, and
-`replaceRecentBlockhash=false`. It records bounded structured evidence such as
-PASS/FAIL/UNAVAILABLE, failure source, context slot, compute units, safe error
-classification, and redacted runtime-log structure.
-
-**Simulation is diagnostic evidence only and does not guarantee later submission
-or confirmation.** A simulation PASS never approves or signs a request. A
-simulation FAIL or RPC_UNAVAILABLE result never rejects a parent MWA request or
-disables APPROVE/REJECT. The existing approval, signing, submission, and
-`ProtocolRecorder` paths remain authoritative.
-
-Phase 5 persistence is Room schema 3. Simulation results are child diagnostics
-attached only after the canonical parent protocol event is durable. Raw
-transaction bytes remain transient; raw RPC bodies, signatures, authorization
-tokens, association tokens, private keys, and seed material are not diagnostic
-storage fields. Free-form RPC log content is redacted before public/durable
-results while bounded runtime structure is retained.
-
-Legacy simulation is the P0 scope. Versioned v0 transactions remain detectable
-for diagnostics but are not simulatable/signable in this release. Fault injection
-and report export were outside the historical Phase 5 checkpoint.
-
-Real cross-package Devnet acceptance on Android 16 passed GOOD_PASS_APPROVE,
-BAD_FAIL_APPROVE, and GOOD_PASS_REJECT after the user funded the exact installed
-lab identity. All three sign-only scenarios reported zero submissions. Canonical
-parent/transaction/simulation rows survived force-stop/relaunch unchanged, and
-the persisted UI showed the rejected parent with its independent PASS child.
-See `PHASE_5_REPORT.md` and `docs/evidence/phase5/phase5-live-devnet-acceptance.json`.
-The earlier unfunded attempt remains recorded as historical evidence. Final
-freeze provenance is recorded by the annotated tag only after exact-head CI
-succeeds on the evidence commit.
-
-<!-- PHASE6:SUMMARY:BEGIN -->
-## Phase 6 — Deterministic Fault Engine
-
-MWA Lab now supports deterministic fault profiles for authorization rejection, signing rejection, fixed delay, unsupported chain, invalid payload, payload-limit rejection, stale transaction, RPC unavailability, and submission failure. Fault selection is internal to MWA Lab and visible in Fault Lab. Persisted protocol events keep an applied `injectedFaultId` separate from the terminal `failureSource`, so synthetic conditions cannot be confused with observed failures.
-
-At the Phase 6 freeze, sanitized report export was still pending. MWA Lab remains a Solana Devnet-only protocol debugger/test endpoint, not a production wallet.
-<!-- PHASE6:SUMMARY:END -->
-
-## Phase 7 — Sanitized Diagnostic Reports
-
-Session Detail now builds a typed, read-only report from persisted Room evidence.
-The same sanitized report produces deterministic Markdown, JSON, and a concise
-clipboard summary. Share Markdown and Share JSON use app-private cache files, a
-narrow FileProvider, and the Android Share Sheet. Open or changing sessions are
-marked PARTIAL; injected fault markers remain separate from observed failure
-sources. Simulation is diagnostic evidence only and does not guarantee later
-submission success.
-
-MWA Lab is a Devnet-only protocol debugger and failure simulator. It does not
-import production wallet secrets, export raw payloads or authorization tokens,
-or claim independent production-wallet compatibility. See
-[PHASE_7_REPORT.md](PHASE_7_REPORT.md) and
-[Phase 7 evidence](docs/evidence/phase7/).
-
-
-## Phase 8 — World-class UX and positioning
-
-Home now identifies MWA Lab as a Mobile Wallet Adapter protocol debugger and
-deterministic failure simulator in its first viewport. Typed navigation reaches
-Home, Sessions, Fault Lab, read-only Lab Identity, and safe Settings. Session
-Detail leads with protocol outcome and keeps an applied fault ID independent
-from failure source. The signing surface preserves explicit approval and the
-Devnet/no-real-funds boundary; a final device audit corrected its status-bar
-inset. Identity Reset remains unexposed.
-
-The Phase 8 freeze candidate passed the final local and connected suites plus
-canonical NORMAL and `FAULT_SIGN_REJECT` Devnet live scenarios. Markdown, JSON,
-and Copy Summary were exercised from persisted sessions; real screenshots are
-under [screenshots/phase8/](screenshots/phase8/). Production-wallet
-compatibility remains **NOT VERIFIED IN THIS RELEASE**. Exact-head CI and the
-annotated freeze tag are the final provenance authority; see
-[PHASE_8_REPORT.md](PHASE_8_REPORT.md) and
-[Phase 8 evidence](docs/evidence/phase8/).
-
-## Phase 9 — First-run connection and Test Wallet UX (frozen)
-
-Manual first launch now explains that MWA Lab is a Devnet-only protocol
-debugger with a disposable test identity. An incoming same-device Local MWA
-association still bypasses onboarding and reaches the wallet endpoint directly.
-Normal supported authorization requires an explicit human Approve or Reject
-decision; deterministic injected authorization rejection remains separate and
-does not impersonate a user decision.
-
-Home leads with same-device connection guidance and a visible Test Wallet.
-The Test Wallet reads its public address and exact lamport balance through the
-fixed Solana Devnet RPC boundary, supports explicit refresh, renders an offline
-public-address QR for Receive Test SOL, and offers a conservative 0.5 Devnet SOL
-airdrop request with submitted, confirmation, rate-limit, unavailable, and
-unknown states. These wallet utilities do not create MWA protocol events.
-
-Phase 9 transport-aware diagnostics use Room schema 4. Sessions persist only
-coarse `LOCAL` / `REMOTE` association mode and bounded identity-verification
-state; historical Phase 8 sessions migrate to `LOCAL` + `NOT_AVAILABLE`. Raw
-association URIs, reflector identifiers/tokens, and transport key material are
-not persisted as session metadata or diagnostic report fields.
-
-The Test Wallet also includes **Send Test SOL** for native SOL on the fixed
-Solana Devnet endpoint. It accepts one canonical Solana recipient and one
-positive amount, keeps a conservative fee reserve, shows an explicit Devnet
-review, signs only with the existing protected disposable identity, and treats
-post-submission transport/confirmation ambiguity as **Submitted / confirmation
-unknown** rather than success. Direct Test Wallet sends remain outside the MWA
-protocol timeline.
-
-Remote MWA release controls and a Remote QR scanner were not shipped in the
-frozen Phase 9 checkpoint. Production-wallet compatibility remained **NOT VERIFIED**. See
-[Phase 9 evidence](docs/evidence/phase9/) for the executed gates and current scope.
-
-
-Phase 9 live acceptance passed after user manual Devnet funding of the installed
-disposable Test Wallet. An explicitly opted-in 1-lamport direct Send confirmed
-on Devnet without creating an MWA protocol session. The Demo Client's real
-cross-package Local NORMAL memo sign-and-send required separate authorization
-and signing approval taps, returned a verified signature, and confirmed on
-Devnet. The independent injected `FAULT_SIGN_REJECT` path returned
-`ERROR_NOT_SIGNED (-3)` without a signing tap or submission. Current-run Room
-schema 4 evidence and the final persisted `NORMAL` fault are recorded in the
-[Phase 9 report](PHASE_9_REPORT.md). No airdrop or faucet was used in the funded
-continuation. Remote, scanner, Identity Reset, and production-wallet cuts above
-remain in effect.
-
-## Phase 10 — Signed release candidate + compatibility evidence
-
-Production-wallet compatibility remains **NOT VERIFIED**.
-
-Phase 10 does not add a new product feature. It converts the frozen product into
-an auditable release candidate. Its historical signed candidate was
-`MWA-Lab-v0.1.0-clockin-rc1-r2.apk` (`dev.mwalab`, versionCode `1`, versionName
-`0.1.0-clockin`) with APK SHA-256
-`0b17ccac5180d0bd6919f3f24c0c8a03efebebf9b42bd07f4909a2894e35bd21`.
-The release keystore remains outside Git.
-
-On a dedicated Android 16 / API 36 AVD, that signed candidate passed manual
-first-run, dApp-first cold Local MWA authorization, `SIGN_MESSAGE_APPROVE`, a
-finalized canonical Local `SIGN_AND_SEND_TRANSACTIONS`, deterministic
-`FAULT_SIGN_REJECT` sign-and-send (`ERROR_NOT_SIGNED (-3)` / `INJECTED`, no
-submission), restart persistence, Markdown/JSON/Copy Summary export, one safe
-1-lamport direct **Send Test SOL**, and proof that direct Test Wallet actions do
-not create MWA protocol history. Actual generated report bytes were inspected
-and retained only sanitized structured evidence. No live airdrop was invoked;
-the user manually funded the exact installed Devnet identity.
-
-Phase 10 release scope at that checkpoint:
-
-```text
-Local MWA                       VERIFIED / SHIPPED
-Remote MWA                      BLOCKED / NOT RELEASED
-Remote QR scanner               OMITTED
-CAMERA permission               ABSENT
-mainnet / testnet                UNAVAILABLE
-production-wallet compatibility NOT_VERIFIED
-```
-
-Historical Phase 10 acceptance and freeze provenance remain in
-[the Phase 10 report](PHASE_10_REPORT.md) and [evidence](docs/evidence/phase10/).
-
-## Phase 11 — Hard code freeze candidate
-
-The current signed release is **RC2**: `MWA-Lab-v0.1.0-clockin-rc2.apk`
-(`dev.mwalab`, versionCode `1`, versionName `0.1.0-clockin`). Its SHA-256 is
-`5f167fa59814fe478f0ea35e616a0d08d8fb606402c5998b40cfce5f134ebcbc`.
-Protected production source is unchanged from Phase 10.
-
-On Android 16/API 36, the exact signed RC2 passed clean first run, cold
-dApp-first Local MWA, funded memo-only signing/submission, deterministic
-`FAULT_SIGN_REJECT` with `ERROR_NOT_SIGNED (-3)` and `INJECTED` provenance,
-Test Wallet Receive/Send, sanitized report export, and a bounded runtime log
-audit. The final fault is NORMAL. The Test Wallet is disposable Devnet testing
-infrastructure; simulation is evidence, not a guarantee. Production-wallet
-compatibility remains **NOT VERIFIED**.
-
-See [Release](docs/RELEASE.md), [Compatibility](docs/COMPATIBILITY.md),
-[Phase 11 report](PHASE_11_REPORT.md), and [Phase 11 evidence](docs/evidence/phase11/).
-Final exact-head CI and the annotated freeze tag are authenticated externally
-after the closeout commit.
