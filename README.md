@@ -7,6 +7,10 @@ behavior. Export sanitized evidence.
 
 > ⚠️ **DEVNET-ONLY LAB TOOL — NEVER USE REAL FUNDS.**
 
+<p align="center">
+  <img src="docs/evidence/phase11/09-screenshots/01-home.png" width="320" alt="MWA Lab Home — MWA Protocol Debugger, Devnet only">
+</p>
+
 ## Why MWA Lab
 
 Solana Devnet tells a developer **where** a transaction runs. It does not explain
@@ -89,6 +93,25 @@ views built from persisted structured evidence.
 
 Secrets, raw authorization tokens, raw association tokens, private keys, seeds,
 mnemonics, and raw transaction/message payloads are outside the report contract.
+
+## Screenshots
+
+All screenshots below are exact captures from the signed RC2 candidate.
+
+| Local MWA authorization | Transaction diagnostics |
+| --- | --- |
+| <img src="docs/evidence/phase11/09-screenshots/03-cold-local-authorization.png" width="280" alt="Local MWA authorization"> | <img src="docs/evidence/phase11/09-screenshots/04-normal-transaction-diagnostics.png" width="280" alt="MWA transaction diagnostics"> |
+
+| Injected protocol failure | Sanitized report export |
+| --- | --- |
+| <img src="docs/evidence/phase11/09-screenshots/07-error-not-signed-injected.png" width="280" alt="Injected ERROR_NOT_SIGNED failure"> | <img src="docs/evidence/phase11/09-screenshots/08-report-share.png" width="280" alt="Sanitized diagnostic report share sheet"> |
+
+| Receive Test SOL |
+| --- |
+| <img src="docs/evidence/phase11/09-screenshots/09-receive-test-sol.png" width="280" alt="Receive Test SOL public Devnet address QR"> |
+
+The Receive Test SOL QR contains the disposable **public Devnet address**. It is
+not an MWA connection QR. Remote MWA remains not released.
 
 ## What ships in `0.1.0-clockin`
 
